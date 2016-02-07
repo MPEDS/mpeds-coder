@@ -1,0 +1,101 @@
+{% extends "layout.html" %}
+{% block body %}
+<div class="container">
+  <div class="row">
+    <div class="col-xs-6">
+    	<h4>First pass</h4>
+    	<table class="table table-condensed">
+    		<tr>
+    			<th></th>
+                <th>Past 7 days</th>
+                <th>Total</th>
+                <th>Remaining</th>
+                <th>Last time coded</th>
+    		</tr>
+	    	{% for u in ura %}
+	    	<tr>
+	    		<td>{{ u|capitalize }}</td>
+                <td>{{ coded1[u]['lw'] }}</td>
+                <td>{{ coded1[u]['all'] }}</td>
+                <td>{{ coded1[u]['remaining'] }}</td>
+                <td>{{ coded1[u]['dt']|datetime }}</td>
+	    	</tr>
+	    	{% endfor %}
+            <tr><td colspan="5"><h4>Second pass</h4></td></tr>
+            {% for u in gra %}
+                {% if coded2[u]['all'] or coded2[u]['remaining'] %}
+            <tr>
+                <td>{{ u|capitalize }}</td>
+                <td>{{ coded2[u]['lw'] }}</td>
+                <td>{{ coded2[u]['all'] }}</td>
+                <td>{{ coded2[u]['remaining'] }}</td>
+                <td>{{ coded2[u]['dt']|datetime }}</td>
+            </tr>
+                {% endif %}
+            {% endfor %}        
+	    </table>
+    </div>
+    {% if current_user.authlevel > 2 %}
+    <div class="col-xs-6">
+        {% if pub_total %}
+        <h4>Output report</h4>
+        <table class="table table-condensed">
+            <tr>
+                <th>Publication</th>
+                <th>Yes/Maybe</th>
+                <th>Coded</th>
+                <th>Queued</th>
+                <th>Unassigned</th>
+            </tr>
+            {% for pub, yes_maybe, coded, in_queue, in_db in pub_total %}
+            <tr class="{{ 'active' if pub == 'Total' else '' }}">
+                <td>{{ pub }}</td>
+                <td>{{ yes_maybe }}</td>
+                <td>{{ coded }}</td>
+                <td>{{ in_queue }}</td>
+                <td>{{ in_db }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+        {% endif %}
+        {% if coded_once %}
+        <h4>Articles coded once by coder</h4>
+        <table class="table table-condensed">
+            <tr>
+                <th>Coder</th> 
+                <th>Count</th>
+            </tr>
+            {% for coder, count in coded_once %}
+            <tr class="{{ 'active' if coder == 'total' else '' }}">
+                <td>{{ coder|capitalize }}</td>
+                <td>{{ count }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+        {% endif %}
+        <h4>Recent database activity</h4>
+        <table class="table table-condensed">
+            <tr>
+                <th>Activity</th>
+                <th>Time</th>
+                <th>User</th>   
+            </tr>
+            <tr>
+                <td>First pass</td>
+                <td>{{ last_cfp[0].timestamp|datetime  if last_cfp else '' }}</td>
+                <td>{{ last_cfp[1].username|capitalize if last_cfp else '' }}</td>
+            </tr>        
+            <tr>
+                <td>Second pass</td>
+                <td>{{ last_csp[0].timestamp|datetime  if last_csp else '' }}</td>
+                <td>{{ last_csp[1].username|capitalize if last_csp else '' }}</td>
+            </tr>        
+        </table>
+
+        <h4>Downloads</h4>
+        <p><a href="{{ url_for('generateCoderAudit') }}">Download first pass table for last four weeks</a> (tab-separated format)</p>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

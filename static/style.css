@@ -1,0 +1,279 @@
+.metanav        { text-align: right; font-size: 0.8em; padding: 0.3em;
+                  margin-bottom: 1em; background: #fafafa; }
+.flash          { background: #CEE5F5; padding: 0.5em;
+                  border: 1px solid #AACBE2; }
+.error          { background: #F0D6D6; padding: 0.5em; }
+
+.sticky { width:250px; }
+
+label, select, option, input {
+	font-size: 0.85em;
+}
+
+.marg {
+	padding: 0.5em;
+}
+
+.index {
+	padding-left: 10px;
+}
+
+.article p a {
+	width: 10px;
+	height: 20px;
+	margin-right: 4px;
+	padding-right: 4px;
+	float: left;
+	background: #ddd;
+	cursor: pointer;
+	text-decoration: none;
+}
+
+.article p a:hover {
+	background-color: #2E6EF3;
+}
+
+.article p a.selected {
+	background-color: #008C48;
+}
+
+.hl-1 {
+	# background-color: #FFF2CC;
+	background-color: #CCF5FF;
+}
+
+.hl-2 {
+	# background-color: #FFD966;
+	background-color: #66E0FF;
+}
+
+.hl-3,
+.hl-4,
+.hl-5,
+.hl-6,
+.hl-7,
+.hl-8,
+.hl-9,
+.hl-10,
+.hl-11,
+.hl-12,
+.hl-13,
+.hl-14,
+.hl-15,
+.hl-16,
+.hl-17,
+.hl-18,
+.hl-19,
+.hl-20,
+.hl-21 {
+	## background-color: #BF9000;
+	background-color: #00A3CC;
+}
+
+.options {
+	font-size: 0.9em;
+	color: #777;
+	padding-left: 6px;
+	display: none;
+}
+
+.options label {
+	padding: 0 0 0 2px;
+	margin: 0;
+	font-weight: 500;
+}
+
+textarea {#
+	height:125px;
+	width:90%;
+	font-size:0.9em;
+}
+
+input[type=button] {
+	padding: 4px;
+	margin-top:6px;
+}
+
+textarea {
+	height: 50px;
+}
+
+span#unsaved {
+	display: none;
+	color: #F00;
+	font-size: 0.7em;
+}
+
+.article p {
+	display: block;
+	padding: 2 0px;
+}
+
+p.meta {
+	padding: 0 0 10 10px;
+	color: #666;
+}
+
+.infobox {
+  padding: 6px;
+  border: 1px solid #000;
+  display:block;
+}
+
+.varblock {
+	padding: 4 0px;
+	text-align: right;
+	width: 100%;
+	display: block;
+}
+
+div.vartitle {
+	border-bottom: 1px solid #eee;
+	line-height: 0.8em;
+}
+
+.vartitle span {
+	font-weight: bold;
+	font-size: 0.85em;
+}
+
+.varhide {
+	font-size: 0.8em;
+	color: #777;
+	display: inline;
+	float:left;
+}
+
+.varlist {
+	border-top: 1px solid #eee;	
+}
+
+.varlist p {
+	list-style-type: none;
+	padding: 0;
+	margin: 0;
+	font-size: 0.8em;
+	color: #777;
+}
+
+.varlist label {
+	line-height: 0.8em;
+}
+
+.varblock p:hover {
+	background-color: #eee;
+}
+
+table#haystack td {
+	font-size: 0.9em;
+}
+
+.yes {
+	background-color: #DFF0D8;
+}
+
+.no {
+	background-color: #F0D6D6;
+}
+
+.maybe {
+	background-color: #FCF8E3;
+}
+
+#varselect p {
+	font-size: 0.9em;
+}
+
+#secondpassinfo ul {
+	margin-left: -25px;
+}
+
+#addeventblock .vartitle {
+	text-align: right;
+}
+
+.event-block label,
+.event-block input[type=textbox] {
+	line-height: 0.7em;
+	padding: 0 0 1 0px;
+
+}
+.event-block label a.glyphicon, a.glyphicon:visited {
+	font-size: 0.9em;
+	line-height: 0.8em;
+}
+
+.infolist {
+	font-size: 0.85em;
+}
+
+.infolist li {
+	color: #555;
+}
+
+div#skippingDiv p a {
+	cursor: pointer;
+}
+
+div#skippingDiv p {
+	padding: 4 0 4 10px;
+}
+
+table#code2queue {
+	width: 75%;
+}
+
+table#code2queue tr {
+	border: none;
+	padding: 0px;
+	margin: 0 auto;
+}
+
+table#code2queue th {
+	font-size: 0.85em;
+	border-bottom: 1px solid #DDD;
+	text-align: center;
+}
+
+table#code2queue td {
+	border: none;
+	padding: 0px;
+	font-size: 0.85em;
+	text-align: center;
+}
+
+table#code2queue {
+	border-right: 1px solid #DDD;
+	padding-right: 4px;
+}
+
+table#code2queue tr:hover {
+	background: #EEE;
+}
+
+a.glyphicon, a.glyphicon:visited {
+	font-size: 0.9em;
+	vertical-align: middle;
+	text-align: center;
+	margin-bottom: 5px;
+	cursor: pointer;
+	text-decoration: none;
+}
+
+.varblock p .glyphicon:hover {
+	color: #FF0000;
+	text-decoration: none;
+}
+
+.vartitle a.glyphicon:hover {
+	color: #00FF00;
+	text-decoration: none;
+}
+
+footer { 
+	padding:10px; 
+	margin: 10px; 
+	border-top: 1px solid #CCC;
+	font-size: 0.8em;
+}
+

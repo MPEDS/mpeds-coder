@@ -1,0 +1,11 @@
+{
+  "DEBUG": "True",
+  "SECRET_KEY": "",
+  "USERNAME": "",
+  "PASSWORD": "",
+  "DB_FILE": "/path/to/file.db",
+  "DOC_ROOT": "/path/to/articles/",
+  "LDC_ROOT": "/path/to/ldc_articles/",
+  "SOLR": "False",
+  "SOLR_ADDR": ""
+}

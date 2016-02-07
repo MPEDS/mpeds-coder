@@ -1,0 +1,34 @@
+{% extends "layout.html" %}
+{% block body %}
+<div class="container">
+  <div class="row">
+    <div class="col-xs-12">
+    <div class="error" id="flash-error" style="display:none;"></div>
+    <h3>First pass summary</h3>
+	    <table class="table" id="code2queue">
+        	<tr>
+    			<th>&nbsp;</th>
+                <tH>Publication</th>
+                <th>% yes <a href="{{ url_for('code2queue', sort = 'percent_yes', sort_dir = 'desc') }}" class="glyphicon glyphicon-sort-by-order-alt"></th>
+                <th>% no <a href="{{ url_for('code2queue', sort = 'percent_no', sort_dir = 'desc') }}" class="glyphicon glyphicon-sort-by-order-alt"></th>
+                <th>% maybe <a href="{{ url_for('code2queue', sort = 'percent_maybe', sort_dir = 'desc') }}" class="glyphicon glyphicon-sort-by-order-alt"></th>
+                <th># coders <a href="{{ url_for('code2queue', sort = 'coder_value', sort_dir = 'desc') }}" class="glyphicon glyphicon-sort-by-order-alt"></th>
+                <th>Coded?</th>
+        	</tr>
+	    	{% for article_id in cfp_order %}
+    		<tr>
+    			<td class="article-id"><a href="{{ url_for('code2', aid = article_id) }}" target="_blank">{{ article_id }}</a></td>
+                <td>{{ cfp_dict[article_id]['pub'] }}</td>
+                <td class="{{ 'yes' if cfp_dict[article_id]['percent_yes'] > 0.5 else '' }}">{{ (cfp_dict[article_id]['percent_yes'])|round(2) }}</td>
+                <td class="{{ 'no' if cfp_dict[article_id]['percent_no'] > 0.5 else '' }}">{{ (cfp_dict[article_id]['percent_no'])|round(2) }}</td>
+                <td class="{{ 'maybe' if cfp_dict[article_id]['percent_maybe'] > 0.5 else '' }}">{{ (cfp_dict[article_id]['percent_maybe'])|round(2) }}</td>
+                <td>{{ cfp_dict[article_id]['coder_value']|length }}</td>
+                <td class="{{ 'yes' if spqs[article_id] else '' }}"></td>
+    		</tr>
+	    	{% endfor %}
+	    </table>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

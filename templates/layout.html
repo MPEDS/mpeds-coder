@@ -1,0 +1,51 @@
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>MPEDS Coder</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="Alexander Hanna">
+
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="shortcut icon"  href="{{ url_for('static', filename='favicon.png') }}">
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js" type="text/javascript"></script>
+    <script type="text/javascript">
+    var $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+    </script>
+  </head>
+  <body>
+    <header class="navbar navbar-default" id="top" role="navigation"> 
+      <div class="container-fluid">
+        <div class="navbar-header">
+        <button class="navbar-toggle" type="button" data-toggle="collapse" data-target=".bs-navbar-collapse">
+          <span class="sr-only">Toggle navigation</span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a href="{{ url_for('index') }}" class="navbar-brand">MPEDS Coder</a>
+      </div>
+      <nav class="collapse navbar-collapse bs-navbar-collapse" role="navigation">
+        <ul class="nav navbar-nav navbar-left">
+            <li><a href="{{ url_for('index') }}">Home</a></li>
+        </ul>
+        <ul class="nav navbar-nav navbar-right">
+          {% if current_user.is_authenticated %}
+            <li class="user_info" id="user_{{ current_user.id }}"><a>Logged in as {{ current_user.username|capitalize }}</a></li>
+            <li><a href="{{ url_for('logout') }}">Logout</a></li>
+          {% endif %}
+        </ul>
+      </nav>
+    </header> 
+    {% for message in get_flashed_messages() %}
+      <div class="flash">{{ message }}</div>
+    {% endfor %}
+    {% block body %}{% endblock %}
+    <footer class="footer">
+      <div class="container-fluid">
+        <p class="text-muted">Report any errors with this interface to <a href="mailto:ahanna@ssc.wisc.edu">Alex Hanna</a>.</p>
+      </div>
+    </footer>
+  </body>
+</html>

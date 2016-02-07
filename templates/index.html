@@ -1,0 +1,22 @@
+{% extends "layout.html" %}
+{% block body %}
+<div class="container">
+  <div class="row">
+    <div class="col-xs-8">
+		<h2>Welcome, {{ current_user.username|capitalize }}</h2>
+
+		<div class="index">
+			<h4>First pass</h4>
+			<p><a href="{{ url_for('code1Next') }}">Coding interface</a> | <a href="{{ url_for('userArticleList', pn = 1) }}">List</a></p>
+
+			{% if current_user.authlevel > 1 %}
+				<h4>Second pass</h4>
+				<p><a href="{{ url_for('code2Next') }}">Coding interface</a> | <a href="{{ url_for('userArticleList', pn = 2) }}">List</a> | <a href="{{ url_for('code2queue', sort = 'percent_yes', sort_dir = 'desc') }}">First pass summary</a></p>
+			{% endif %}
+			<p><a href="{{ url_for('coderStats') }}">Coder stats</a></p>
+		</div>
+
+    </div>
+  </div>
+</div>
+{% endblock %}

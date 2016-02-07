@@ -1,0 +1,22 @@
+<div class="event-block" id="eventblock_{{ event_id }}">
+  {% for k,v in v1 %}
+    <input type="radio" name="varevent" id="varevent_{{ k }}" value="{{ k }}" /> <label for="varevent_{{ k }}" id="l_varevent_{{ k }}">{{ v }}</label><br />
+    <div class="options" id="options_{{ k }}">
+    {% for option in opts[k] %}
+      <input type="checkbox" id="dd_{{ k }}_{{ option|hashcode }}" {{ 'checked' if option in curr[k] else '' }}></input> <label for="dd_{{ k }}_{{ option|hashcode }}">{{ option }}</label><br />
+    {% endfor %}
+    </div>
+  {% endfor %}
+  {% for k,v in v2 %}
+    <input type="radio" name="varevent" id="varevent_{{ k }}" value="{{ k }}" /> <label for="varevent_{{ k }}" id="l_varevent_{{ k }}">{{ v }} <a id="add_{{ k }}" class="glyphicon glyphicon-plus"></a></label><br />
+    <div class="options" id="options_{{ k }}">
+    {% for option in opts[k] %}
+      <input type="checkbox" id="dd_{{ k }}_{{ option|hashcode }}" {{ 'checked' if option in curr[k] else '' }}></input> <label for="dd_{{ k }}_{{ option|hashcode }}">{{ option }}</label><br />
+    {% endfor %}
+    </div>
+  {% endfor %}
+  <p>&nbsp;</p>
+  <label for="comments">Comments</label>
+  <textarea id="comments" name="comments">{{ curr["comments"][0] if curr["comments"] else '' }}</textarea>
+  <input type="button" name="submit" id="submit" value="Save" />
+</div>
