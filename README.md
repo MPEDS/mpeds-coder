@@ -32,6 +32,7 @@ This is a product in early alpha stages. Features we hope to have working soon:
 * User management
 * Cross-browser compatibility
 * Visual article queuing
+*
 
 ## Acknowledgments
 
