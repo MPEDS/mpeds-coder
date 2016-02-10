@@ -35,4 +35,4 @@ This is a product in early alpha stages. Features we hope to have working soon:
 
 ## Acknowledgments
 
-This research has been supported by a National Science Foundation Graduate Research Fellowship and National Science Foundation grant SES-1423784. Thanks to Emanuel Ubert and Katie Fallon for working with this system since its inception, and to many undergraduate annotators who have put a lot of time working with and refining this system.
+Development of this interface has been supported by a National Science Foundation Graduate Research Fellowship and National Science Foundation grant [SES-1423784](http://www.nsf.gov/awardsearch/showAward?AWD_ID=1423784). Thanks to Emanuel Ubert and Katie Fallon for working with this system since its inception, and to many undergraduate annotators who have put a lot of time working with and refining this system.
