@@ -1,10 +1,10 @@
 {
   "DEBUG": "True",
-  "SECRET_KEY": "",
+  "SECRET_KEY": "this-is-secret",
   "USERNAME": "",
   "PASSWORD": "",
-  "DB_FILE": "/path/to/file.db",
-  "DOC_ROOT": "/path/to/articles/",
+  "DB_FILE": "mpeds.db",
+  "DOC_ROOT": "example-articles/",
   "LDC_ROOT": "/path/to/ldc_articles/",
   "SOLR": "False",
   "SOLR_ADDR": ""

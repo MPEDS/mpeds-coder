@@ -160,7 +160,6 @@ def prepText(article):
     else:
         return ('Article not found on disk.', 'Article not found on disk.')
 
-    ## ends with txt, most likely from LN
     if jsonConfig['SOLR'] == 'True':
         title, meta, paras = loadSolr(db_id)
         if title == 0:
@@ -169,7 +168,6 @@ def prepText(article):
             title = "Cannot connect to Solr."
         elif title == -2:
             title = "No text. Skip article."
-
     elif re.match(r"^.+txt$", fn):
         i     = 0
         title = ''
@@ -656,8 +654,7 @@ def coderStats():
         last_csp = None
     else:
         ## first pass coders
-        ## TK: change this after we do a migration to include User.is_active
-        ura = ['malachy','iakovos','annie','jesse','taylor']
+        ura = [u.username for u in db_session.query(User).filter(User.authlevel == 1).all()]
 
         ## Add stats for second pass coders
         gra = [u.username for u in db_session.query(User).filter(User.authlevel > 1).all()]
