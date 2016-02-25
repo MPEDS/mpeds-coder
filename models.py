@@ -66,7 +66,7 @@ class Event(Base):
 class ArticleQueue(Base):
     __tablename__ = 'article_queue'
     id         = Column(Integer, primary_key=True)
-    article_id = Column(Integer, ForeignKey('article_metadata.id'), nullable = False) 
+    article_id = Column(Integer, ForeignKey('article_metadata.id'), nullable = False)
     coder_id   = Column(Integer, ForeignKey('user.id'), nullable = False)
     coded1_dt  = Column(DateTime)
     coded2_dt  = Column(DateTime)
@@ -83,7 +83,7 @@ class ArticleQueue(Base):
 class SecondPassQueue(Base):
     __tablename__ = 'second_pass_queue'
     id         = Column(Integer, primary_key=True)
-    article_id = Column(Integer, ForeignKey('article_metadata.id'), nullable = False) 
+    article_id = Column(Integer, ForeignKey('article_metadata.id'), nullable = False)
     coder_id   = Column(Integer, ForeignKey('user.id'), nullable = False)
     coded_dt   = Column(DateTime)
 
@@ -147,13 +147,13 @@ class VarOption(Base):
     __tablename__ = 'var_option'
     id       = Column(Integer, primary_key=True)
     variable = Column(String, nullable = False)
-    option   = Column(String, nullable = False)
+    optional   = Column(String, nullable = False)
     parent   = Column(Integer)
 
     def __init__(self, variable, option, parent = None):
         self.variable = variable
-        self.option   = option
+        self.options   = option
         self.parent   = parent
 
     def __repr__(self):
-        return '<VarOption %r>' % (self.id)	
+        return '<VarOption %r>' % (self.id)

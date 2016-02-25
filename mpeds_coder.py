@@ -52,15 +52,15 @@ central = timezone('US/Central')
 
 ## vars with preset categories
 v1 = [
-    ('form',  'Form/Type'), 
-    ('issue', 'Issues'), 
+    ('form',  'Form/Type'),
+    ('issue', 'Issues'),
     ('target','Target')
 ]
 
 ## open-ended vars
 v2 = [
-    ('loc',    'Location'), 
-    ('time',   'Timing and Duration'), 
+    ('loc',    'Location'),
+    ('time',   'Timing and Duration'),
     ('size',   'Size'),
     ('orgs',   'Organizations')
 ]
@@ -68,7 +68,7 @@ v2 = [
 ## informational vars
 v3 = [
     ('actor',  'Protest actors'),
-    ('police', 'Police/protester interactions'), 
+    ('police', 'Police/protester interactions'),
     ('counter','Counter protests'),
     ('viol',   'Violence')
 ]
@@ -124,7 +124,7 @@ def loadSolr(solr_id):
                 meta.append(doc[k][0].split('T')[0])
             else:
                 meta.append(doc[k])
-    
+
     if 'TITLE' in doc:
         title = doc['TITLE']
     else:
@@ -182,7 +182,7 @@ def prepText(article):
             ## remove colon from first word in the line
             if len(words) > 0:
                 words[0] = words[0].replace(":", '')
-    
+
             if False:
                 pass
             elif line == '':
@@ -204,7 +204,7 @@ def prepText(article):
 
         ## append filename info
         meta.append(filename)
-    elif re.match(r"^.+xml$", fn): 
+    elif re.match(r"^.+xml$", fn):
         ## this format only works for LDC XML files
         tree     = etree.parse(open(path, "r"))
         headline = tree.xpath("/nitf/body[1]/body.head/hedline/hl1")
@@ -212,7 +212,7 @@ def prepText(article):
         lead     = tree.xpath("/nitf/body/body.content/block[@class='lead_paragraph']/p")
         byline   = tree.xpath("/nitf/body/body.head/byline[@class='print_byline']")
         dateline = tree.xpath("/nitf/body/body.head/dateline")
-        
+
         if len(byline):
             meta.append(byline[0].text)
 
@@ -298,7 +298,7 @@ def format_datetime(value):
 
     return 'never coded'
 
-## java string hashcode 
+## java string hashcode
 ## copy-pasta from http://garage.pimentech.net/libcommonPython_src_python_libcommon_javastringhashcode/
 ## make it a Jinja2 filter for template ease
 @app.template_filter('hashcode')
@@ -328,7 +328,7 @@ def login():
     password = request.form['password']
     reg_user = User.query.filter_by(username=username, password=password).first()
     if reg_user is None:
-        flash("Username or password is invalid. Please try again.", "error")        
+        flash("Username or password is invalid. Please try again.", "error")
         return redirect(url_for('login'))
 
     login_user(reg_user)
@@ -367,10 +367,10 @@ def code1Next():
     while article == None:
         ## get next article in this user's queue
         next    = db_session.query(ArticleQueue).filter_by(coder_id = current_user.id, coded1_dt = None).first()
-        
+
         ## out of articles, return null page
         if next is None:
-            return render_template("null.html")            
+            return render_template("null.html")
 
         article = db_session.query(ArticleMetadata).filter_by(id = next.article_id).first()
 
@@ -380,7 +380,7 @@ def code1Next():
             db_session.add(next)
             db_session.commit()
 
-    return redirect(url_for('code1', aid = next.article_id))        
+    return redirect(url_for('code1', aid = next.article_id))
 
 @app.route('/code1/<aid>')
 @login_required
@@ -439,7 +439,7 @@ def code2(aid):
         elif cfp.variable == 'comments':
             comments.append(cfp.value)
         elif cfp.variable == 'ignore':
-            ## assign ignore to protest 
+            ## assign ignore to protest
             if 'ignore' not in cfp_dict['protest']:
                 cfp_dict['protest']['ignore'] = 0
 
@@ -458,9 +458,9 @@ def code2(aid):
     text, html = prepText(article)
 
     return render_template(
-        "code2.html", 
-        vars       = vars, 
-        aid        = aid, 
+        "code2.html",
+        vars       = vars,
+        aid        = aid,
         cfp_dict   = cfp_dict,
         cfp_order  = cfp_order,
         sv_order   = sv_order,
@@ -511,8 +511,8 @@ def code2queue(sort, sort_dir):
             ## not sure why this would be null, but it is
             if not decision:
                 continue
-                 
-            ## filter out articles in which all users said no 
+
+            ## filter out articles in which all users said no
             if decision == "yes" or decision == "maybe":
                 to_del = False
 
@@ -535,9 +535,9 @@ def code2queue(sort, sort_dir):
         cfp_order = [x[0] for x in sorted(cfp_dict.items(), key = lambda x: x[1][sort], reverse = True if sort_dir == 'desc' else False)]
 
     return render_template(
-        "code2queue.html", 
-        cfp_dict  = cfp_dict, 
-        cfp_order = cfp_order, 
+        "code2queue.html",
+        cfp_dict  = cfp_dict,
+        cfp_order = cfp_order,
         spqs = spqs)
 
 #####
@@ -548,7 +548,7 @@ def code2queue(sort, sort_dir):
 def _pubCount():
     """
         Determine yes/maybe, total coded, in for each publication
-        
+
         I hate everything and am just going to do this in pandas
         get all the articles in the database.
         TK: One day, convert this to a pure sqlalchemy solution.
@@ -694,7 +694,7 @@ def coderStats():
         join(User).group_by(User.username).filter(SecondPassQueue.coded_dt == None, User.username.in_(gra)).all():
         coded2[user]['remaining'] = count
 
-    ## get the last time coded 
+    ## get the last time coded
     for timestamp, user in db_session.query(func.max(ArticleQueue.coded1_dt), User.username).\
         join(User).group_by(ArticleQueue.coder_id).filter(ArticleQueue.coded1_dt != None, User.username.in_(ura)).all():
         coded1[user]['dt'] = timestamp
@@ -713,11 +713,11 @@ def coderStats():
         pass
 
     return render_template(
-        "coder_stats.html", 
+        "coder_stats.html",
         coded1     = coded1,
         coded2     = coded2,
         pub_total  = pub_total,
-        last_cfp   = last_cfp, 
+        last_cfp   = last_cfp,
         last_csp   = last_csp,
         ura        = ura,
         gra        = gra,
@@ -758,7 +758,7 @@ def generateCoderAudit():
     cols.append('publication')
     query = db_session.query(CodeFirstPass, ArticleMetadata).join(ArticleMetadata).\
         filter(CodeFirstPass.timestamp > last_month).all()
- 
+
     if len(query) <= 0:
         return
 
@@ -811,7 +811,7 @@ def addCode(pn):
     elif pn == 1:
         model = CodeFirstPass
 
-        ## store highlighted text on first pass 
+        ## store highlighted text on first pass
         if text:
             p = CodeFirstPass(aid, var, val, current_user.id, text)
         else:
@@ -889,14 +889,14 @@ def delCode(pn):
     elif pn == '1':
         a = db_session.query(CodeFirstPass).filter_by(
             article_id = request.args.get('article'),
-            variable   = request.args.get('variable'), 
+            variable   = request.args.get('variable'),
             value      = request.args.get('value'),
             coder_id   = current_user.id
         ).all()
     elif pn == '2':
         a = db_session.query(CodeSecondPass).filter_by(
             article_id = request.args.get('article'),
-            variable   = request.args.get('variable'), 
+            variable   = request.args.get('variable'),
             value      = request.args.get('value'),
             event_id   = request.args.get('event'),
             coder_id   = current_user.id
@@ -931,7 +931,7 @@ def markSPDone():
     db_session.add(spq)
     db_session.commit()
 
-    return jsonify(result={"status": 200})    
+    return jsonify(result={"status": 200})
 
 @app.route('/_add_queue/<pn>')
 @login_required
@@ -948,7 +948,7 @@ def addQueue(pn):
 
         db_session.add(spq)
         db_session.commit()
-    
+
     return jsonify(result={"status": 200})
 
 @app.route('/_get_events')
@@ -1009,7 +1009,7 @@ def getCodes():
                 cd[c.variable].append( [c.value, c.text] )
 
         ## insert row for every time they load the article
-        ## to measure how much time it takes to read the article        
+        ## to measure how much time it takes to read the article
         load = CodeFirstPass(aid, "load", l_i, current_user.id)
         db_session.add(load)
         db_session.commit()
@@ -1050,7 +1050,7 @@ def changeEvents():
 
     ## built-in dropdown options
     for o in db_session.query(VarOption).all():
-        opts[ o.variable ].append(o.option)
+        opts[ o.variable ].append(o.options)
 
     ## None of the above for v1 variables
     for k,v in v1:
@@ -1075,7 +1075,7 @@ def changeEvents():
 @app.route('/_highlight_var')
 @login_required
 def highlightVar():
-    """ 
+    """
     Highlight first-pass coding. Add intensity for text selected multiple times.
 
     Algorithm:
@@ -1100,7 +1100,7 @@ def highlightVar():
 
             add the tag to the existing text
 
-    add edited paragraph to paragraph list    
+    add edited paragraph to paragraph list
 
     """
     if current_user.authlevel < 2:
@@ -1148,7 +1148,7 @@ def highlightVar():
         ## add a list to the index
         ## and the type of bound it is
         if start not in bounds[p]:
-            bounds[p][start] = [] 
+            bounds[p][start] = []
         bounds[p][start].append('start')
 
         ## and vice versa with the end
@@ -1190,9 +1190,9 @@ def highlightVar():
                 en_tag = "</span>"
             else:
                 if has_end:
-                    en_tag = "</span>"                            
+                    en_tag = "</span>"
                 if has_start:
-                    if last_i != 0: 
+                    if last_i != 0:
                         en_tag = "</span>"
                 st_tag = "<span class='hl-%d'>" % state
 
@@ -1203,7 +1203,7 @@ def highlightVar():
 
             ## if this is the last key, add the rest of the paragraph
             if bound_index == keys[-1]:
-                r_para += para[bound_index:]                
+                r_para += para[bound_index:]
 
             last_i = bound_index
 
