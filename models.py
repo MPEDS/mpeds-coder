@@ -147,7 +147,7 @@ class VarOption(Base):
     __tablename__ = 'var_option'
     id       = Column(Integer, primary_key=True)
     variable = Column(String, nullable = False)
-    optional   = Column(String, nullable = False)
+    options   = Column(String, nullable = False)
     parent   = Column(Integer)
 
     def __init__(self, variable, option, parent = None):
