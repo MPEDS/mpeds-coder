@@ -13,7 +13,7 @@
                 <th>% no <a href="{{ url_for('code2queue', sort = 'percent_no', sort_dir = 'desc') }}" class="glyphicon glyphicon-sort-by-order-alt"></th>
                 <th>% maybe <a href="{{ url_for('code2queue', sort = 'percent_maybe', sort_dir = 'desc') }}" class="glyphicon glyphicon-sort-by-order-alt"></th>
                 <th># coders <a href="{{ url_for('code2queue', sort = 'coder_value', sort_dir = 'desc') }}" class="glyphicon glyphicon-sort-by-order-alt"></th>
-                <th>Coded?</th>
+                <th>Coded?</th>1
         	</tr>
 	    	{% for article_id in cfp_order %}
     		<tr>
@@ -26,7 +26,39 @@
                 <td class="{{ 'yes' if spqs[article_id] else '' }}"></td>
     		</tr>
 	    	{% endfor %}
+
 	    </table>
+      {% macro render_pagination(pagination) %}
+              <ul class="pagination">
+                <li>
+                  <a href="{{ url_for_other_page(pagination.page - 1)
+                    }}" aria-label="Previous">
+                    <span aria-hidden="true">&laquo;</span>
+                  </a>
+                </li>
+                {%- for page in pagination.iter_pages() %}
+                  {% if page %}
+                    {% if page != pagination.page %}
+                      <li><a href="{{ url_for_other_page(page=page) }}">{{ page }}</a></li>
+                    {% else %}
+                     <li class="active"><a href="#">{{ page }}<span class="sr-only"></span></a></li>
+                    {% endif %}
+                  {% else %}
+                    <li><span class=ellipsis>…</span></li>
+                  {% endif %}
+                {%- endfor %}
+                {% if pagination.has_next %}
+                <li>
+                  <a href="{{ url_for_other_page(pagination.page + 1)
+                    }}" aria-label="Next">
+                    <span aria-hidden="true">&raquo;</span>
+                  </a>
+                </li>
+                {% endif %}
+            </ul>
+      {% endmacro %}
+
+      <nav>{{ render_pagination(pagination) }}</nav>
     </div>
   </div>
 </div>
