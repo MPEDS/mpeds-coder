@@ -6,6 +6,6 @@
   "DB_FILE": "mpeds.db",
   "DOC_ROOT": "example-articles/",
   "LDC_ROOT": "/path/to/ldc_articles/",
-  "SOLR": "False",
-  "SOLR_ADDR": ""
+  "SOLR": "True",
+  "SOLR_ADDR": "http://localhost:8983/solr/mpeds2"
 }

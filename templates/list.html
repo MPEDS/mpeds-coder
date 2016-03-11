@@ -18,12 +18,43 @@
             			<td>{{ aq.coded1_dt.strftime('%Y-%m-%d %H:%M:%S') }}</td>
                     {% else %}
                         <td><a href="{{ url_for('code2', aid = aq.article_id) }}">{{ aq.article_id }}</a></th>
-                        <td>{{ am.title|safe }}</td>
+                        <td>{{ am.title }}</td>
                         <td>{{ aq.coded_dt.strftime('%Y-%m-%d %H:%M:%S') }}</td>
                     {% endif %}
         		</tr>
         		{% endfor %}
 	        </table>
+          {% macro render_pagination(pagination) %}
+                  <ul class="pagination">
+                    <li>
+                      <a href="{{ url_for_other_page(pagination.page - 1)
+                        }}" aria-label="Previous">
+                        <span aria-hidden="true">&laquo;</span>
+                      </a>
+                    </li>
+                    {%- for page in pagination.iter_pages() %}
+                      {% if page %}
+                        {% if page != pagination.page %}
+                          <li><a href="{{ url_for_other_page(page=page) }}">{{ page }}</a></li>
+                        {% else %}
+                         <li class="active"><a href="#">{{ page }}<span class="sr-only"></span></a></li>
+                        {% endif %}
+                      {% else %}
+                        <li><span class=ellipsis>…</span></li>
+                      {% endif %}
+                    {%- endfor %}
+                    {% if pagination.has_next %}
+                    <li>
+                      <a href="{{ url_for_other_page(pagination.page + 1)
+                        }}" aria-label="Next">
+                        <span aria-hidden="true">&raquo;</span>
+                      </a>
+                    </li>
+                    {% endif %}
+                </ul>
+          {% endmacro %}
+
+          <nav>{{ render_pagination(pagination) }}</nav>
         </div>
       </div>
     </div>

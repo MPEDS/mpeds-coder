@@ -860,24 +860,29 @@ def coderStats():
         coded_once = coded_once
     )
 
+
 @app.route('/userarticlelist/<pn>')
+@app.route('/userarticlelist/<pn>/<int:page>')
 @login_required
-def userArticleList(pn):
+def userArticleList(pn, page = 1):
     pn = int(pn)
     if pn == 1:
-        aqs = db_session.query(ArticleQueue, ArticleMetadata).\
+        pagination = paginate(db_session.query(ArticleQueue, ArticleMetadata).\
         filter(ArticleQueue.coder_id == current_user.id, ArticleQueue.coded1_dt != None).\
         join(ArticleMetadata).\
-        order_by(desc(ArticleQueue.coded1_dt)).all()
+        order_by(desc(ArticleQueue.coded1_dt)), page, 15, True)
+        aqs = pagination.items
     elif pn == 2:
-        aqs = db_session.query(SecondPassQueue, ArticleMetadata).\
+        pagination = paginate(db_session.query(SecondPassQueue, ArticleMetadata).\
         filter(SecondPassQueue.coder_id == current_user.id, SecondPassQueue.coded_dt != None).\
         join(ArticleMetadata).\
-        order_by(desc(SecondPassQueue.coded_dt)).all()
+        order_by(desc(SecondPassQueue.coded_dt)), page, 15, True)
+        aqs = pagination.items
     else:
         return make_response("Invalid page.", 404)
 
-    return render_template("list.html", pn = pn, aqs = aqs)
+    return render_template("list.html", pn = pn, aqs = aqs,
+        pagination = pagination)
 
 ## generate report CSV file
 @app.route('/download_coder_stats')

@@ -3,7 +3,7 @@ from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 
 engine = create_engine('sqlite:///mpeds.db', convert_unicode=True)
-mysql_engine = create_engine('mysql://root:@localhost/mpeds')
+mysql_engine = create_engine('mysql://root:@localhost/mpeds', convert_unicode=True)
 
 db_session = scoped_session(sessionmaker(autocommit=False,
                                          autoflush=False,
