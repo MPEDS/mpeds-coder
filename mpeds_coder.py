@@ -96,6 +96,8 @@ app.config.update(jsonConfig)
 
 ##### load text from Solr database
 def loadSolr(solr_id):
+    SOLR_ADDR = "http://localhost:8983/solr/mpeds2"
+
     url        = '%s/select?q=id:"%s"&wt=json' % (jsonConfig['SOLR_ADDR'], solr_id)
     not_found  = (0, [], [])
     no_connect = (-1, [], [])
@@ -151,20 +153,11 @@ def prepText(article):
 
     filename = str('INTERNAL_ID: %s' % fn)
 
-    ## file-based storage
-    if jsonConfig['SOLR'] == 'True':
-        pass
-    elif os.path.exists(app.config['DOC_ROOT'] + fn):
-        path = app.config['DOC_ROOT'] + fn
-    elif os.path.exists(app.config['LDC_ROOT'] + fn):
-        path = app.config['LDC_ROOT'] + fn
-    else:
-        return ('Article not found on disk.', 'Article not found on disk.')
-
     if jsonConfig['SOLR'] == 'True':
         title, meta, paras = loadSolr(db_id)
         if title == 0:
             title = "Cannot find article in Solr."
+
         elif title == -1:
             title = "Cannot connect to Solr."
         elif title == -2:
@@ -622,7 +615,7 @@ def code2queue(sort, sort_dir, page = 1):
     pagination = paginate(db_session.query(CodeFirstPass, ArticleMetadata)
                             .join(ArticleMetadata)
                             .filter(CodeFirstPass.variable == 'protest'),
-                            page, 130, True)
+                            page, 10000, True)
     for cfp, am in pagination.items:
         pub = ''
         if 'AGW' in am.db_id:
@@ -870,13 +863,13 @@ def userArticleList(pn, page = 1):
         pagination = paginate(db_session.query(ArticleQueue, ArticleMetadata).\
         filter(ArticleQueue.coder_id == current_user.id, ArticleQueue.coded1_dt != None).\
         join(ArticleMetadata).\
-        order_by(desc(ArticleQueue.coded1_dt)), page, 15, True)
+        order_by(desc(ArticleQueue.coded1_dt)), page, 10000, True)
         aqs = pagination.items
     elif pn == 2:
         pagination = paginate(db_session.query(SecondPassQueue, ArticleMetadata).\
         filter(SecondPassQueue.coder_id == current_user.id, SecondPassQueue.coded_dt != None).\
         join(ArticleMetadata).\
-        order_by(desc(SecondPassQueue.coded_dt)), page, 15, True)
+        order_by(desc(SecondPassQueue.coded_dt)), page, 10000, True)
         aqs = pagination.items
     else:
         return make_response("Invalid page.", 404)
@@ -1212,6 +1205,12 @@ def changeEvents():
         opts[k].sort()
 
     return render_template("event-block.html", v1 = v1, v2 = v2, opts = opts, curr = curr, event_id = eid)
+
+@app.route('/dynamic_form')
+@login_required
+def dynamic_form():
+    return render_template("dynamic_form.html")
+
 
 @app.route('/_highlight_var')
 @login_required

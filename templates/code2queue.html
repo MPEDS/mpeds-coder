@@ -1,20 +1,24 @@
 {% extends "layout.html" %}
 {% block body %}
+<link rel="stylesheet" type="text/css" href="//cdn.datatables.net/1.10.11/css/jquery.dataTables.css">
 <div class="container">
   <div class="row">
     <div class="col-xs-12">
     <div class="error" id="flash-error" style="display:none;"></div>
     <h3>First pass summary</h3>
-	    <table class="table" id="code2queue">
+	    <table class="display" id="code2queue">
+        <thead>
         	<tr>
     			<th>&nbsp;</th>
-                <tH>Publication</th>
+                <th>Publication</th>
                 <th>% yes <a href="{{ url_for('code2queue', sort = 'percent_yes', sort_dir = 'desc') }}" class="glyphicon glyphicon-sort-by-order-alt"></th>
                 <th>% no <a href="{{ url_for('code2queue', sort = 'percent_no', sort_dir = 'desc') }}" class="glyphicon glyphicon-sort-by-order-alt"></th>
                 <th>% maybe <a href="{{ url_for('code2queue', sort = 'percent_maybe', sort_dir = 'desc') }}" class="glyphicon glyphicon-sort-by-order-alt"></th>
                 <th># coders <a href="{{ url_for('code2queue', sort = 'coder_value', sort_dir = 'desc') }}" class="glyphicon glyphicon-sort-by-order-alt"></th>
                 <th>Coded?</th>
         	</tr>
+        </thead>
+        <tbody>
 	    	{% for article_id in cfp_order %}
     		<tr>
     			<td class="article-id"><a href="{{ url_for('code2', aid = article_id) }}" target="_blank">{{ article_id }}</a></td>
@@ -26,7 +30,7 @@
                 <td class="{{ 'yes' if spqs[article_id] else '' }}"></td>
     		</tr>
 	    	{% endfor %}
-
+        </tbody>
 	    </table>
       {% macro render_pagination(pagination) %}
               <ul class="pagination">
@@ -58,9 +62,10 @@
             </ul>
       {% endmacro %}
 
-      <nav>{{ render_pagination(pagination) }}</nav>
+      <!-- <nav>{{ render_pagination(pagination) }}</nav> -->
     </div>
   </div>
 </div>
-
+<script type="text/javascript" charset="utf8" src="//cdn.datatables.net/1.10.11/js/jquery.dataTables.js"></script>
+<script src="{{ url_for('static', filename='code2queue.js') }}" type="text/javascript"></script>
 {% endblock %}
