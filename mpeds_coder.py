@@ -1212,6 +1212,12 @@ def dynamic_form():
     return render_template("dynamic_form.html")
 
 
+@app.route('/form_template_management')
+@login_required
+def form_template_management():
+    return render_template("form_template_manager.html")
+
+
 @app.route('/_highlight_var')
 @login_required
 def highlightVar():

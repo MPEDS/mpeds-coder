@@ -381,6 +381,27 @@ jsonform.elementTypes = {
       },1000);
     }
   },
+  
+  'highlightlist': {
+    'template': ' <p style="font-size:0.8em; color:grey">Highlight text and click <a class="fa fa-plus"></a> for the relevant category.\ ' +
+    'Click <a class="fa fa-chevron-up"></a> and <a class="fa fa-chevron-down"></a> to hide/show lists.</p>' +
+    '<div id="block_form" class="varblock"><div class="vartitle"> <span>Form/Type</span>  <a id="collapse-down_form"' +
+    'class="fa fa-chevron-down" style="display:none;"></a>' + 
+    '<a id="collapse-up_form" class="fa fa-chevron-up"></a>' +
+    '<a id="add_form" class="fa fa-plus"></a>' + 
+    '</div> <div id="list_form" class="varlist">' +
+    '<div style="display: block;" id="list_form" class="varlist"><p id="4-132-148">deepening Moscow' +
+    ' <a id="del_form_4-132-148_1460747498856" class="fa fa-remove"></a></p><p id="6-104-337">' +
+    'olic republics cont ... bortion legislation. <a id="del_form_6-104-337_1460747503350"' +
+    ' class="fa fa-remove"></a></p><p id="5-120-138">Kuwaits elections <a id="del_form_5-120-' +
+    '138_1460747509513" class="fa fa-remove"></a></p></div></div></div>',
+    'fieldtemplate': true,
+    'inputfield':true,
+    'onInsert': function(evt, node) {
+      console.log("Hello list")
+    } 
+    
+  },
   'ace':{
     'template':'<div id="<%= id %>" style="position:relative;height:<%= elt.height || "300px" %>;"><div id="<%= id %>__ace" style="width:<%= elt.width || "100%" %>;height:<%= elt.height || "300px" %>;"></div><input type="hidden" name="<%= node.name %>" id="<%= id %>__hidden" value="<%= escape(value) %>"/></div>',
     'fieldtemplate': true,
@@ -1191,7 +1212,7 @@ jsonform.elementTypes = {
           };
         });
       }
-
+      
       var activeChild = null;
       if (data.value) {
         activeChild = _.find(children, function (child) {

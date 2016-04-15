@@ -25,156 +25,50 @@
   <div class="col-md-8 content-top-1">
     <div id="editor">{
   "schema": {
-    "response": {
-      "type": "string",
-      "title": "Search"
-    },
-     "author": {
-      "type": "object",
-      "title": "Author",
-      "properties": {
-        "name": {
-          "type": "string",
-          "title": "Name"
-        },
-        "gender": {
-          "type": "string",
-          "title": "Gender",
-          "enum": [ "male", "female", "alien" ]
-        },
-        "magic": {
-          "type": "integer",
-          "title": "Magic number",
-          "default": 42
-        }
-      }
-    },
-    "shortmood": {
-      "type": "string",
-      "title": "Mood of the day",
-      "description": "",
-      "required": true
-    },
-    "comment": {
-      "type": "string",
-      "title": "Your thoughts"
-    },
-    "menu": {
-      "type": "array",
-      "title": "Options",
-      "items": {
+    "Protest": {
+        "title": "Does this article contain a protest?",
         "type": "string",
-        "title": "Option",
         "enum": [
-          "starter",
-          "maincourse",
-          "cheese",
-          "dessert"
+            "Select One",
+            "Yes",
+            "No"
         ]
-      }
     },
-    "language": {
-      "type": "string",
-      "title": "Best language",
-      "enum": [ "JavaScript", "Python", "PHP", "Java", "C++", "other" ]
+
+    "Multievents": {
+        "title": "Multiple events?",
+        "type": "string",
+        "enum": [
+            "Select one",
+            "Yes",
+            "No"
+        ]
     },
-     "text": {
-      "type": "string",
-      "title": "Text"
+
+    "NonUS": {
+        "title": "Non-US events?",
+        "type": "string",
+        "enum": [
+            "Select one",
+            "Yes",
+            "No"
+        ]
     },
-    "category": {
-      "type": "string",
-      "title": "Category",
-      "enum": [
-        "Geography",
-        "Entertainment",
-        "History",
-        "Arts",
-        "Science",
-        "Sports"
-      ]
+
+    "hlist": {
+        "type": "highlightlist"
+    },
+    "Comments": {
+        "title": "Comments",
+        "type": "textarea"
     }
   },
   "form": [
-    {
-        "key": "author"
-    },
-    "shortmood",
-    {
-      "type": "selectfieldset",
-      "title": "Make a choice",
-      "items": [
-        {
-          "key": "text",
-          "legend": "Search by text"
-        },
-        {
-          "key": "category",
-          "legend": "Search by category"
-        }
-      ]
-    },
-    {
-      "key": "comment",
-      "type": "textarea"
-    },
-    {
-      "key": "menu",
-      "type": "checkboxes",
-      "titleMap": {
-        "starter": "Starter would be great",
-        "maincourse": "No way I'll skip the main course",
-        "cheese": "Cheddar rules!",
-        "dessert": "Thumbs up for a dessert"
-      }
-    },
-      {
-      "key": "language",
-      "type": "radios"
-    },
-    {
-      "type": "questions",
-      "key": "response",
-      "title": "Let's check your mood",
-      "items": [
-        {
-          "type": "question",
-          "title": "Are you happy?",
-          "activeClass": "btn-success",
-          "optionsType": "radiobuttons",
-          "options": [
-            {
-              "title": "Yes",
-              "value": "happy",
-              "next": "q2",
-              "htmlClass": "btn-primary"
-            },
-            {
-              "title": "No",
-              "value": "sad",
-              "submit": true
-            }
-          ]
-        },
-        {
-          "type": "question",
-          "qid": "q2",
-          "title": "Really happy?",
-          "options": [
-            {
-              "title": "Yes",
-              "value": "reallyhappy",
-              "submit": true
-            },
-            {
-              "title": "No",
-              "value": "happy",
-              "submit": true
-            }
-          ]
-        }
-      ]
-    },
+    "Protest",
+    "Multievents",
+    "NonUS",
+    "hlist",
+    "Comments",
     {
       "type": "actions",
       "items": [
@@ -190,7 +84,7 @@
     }
   ]
 }
-    </div>
+</div>
 
   </div>
   <div class="col-md-4">

@@ -2841,3 +2841,48 @@ ul.dropdown-menu.dropdown-menu-right {
     font-size: 1.6em;
 }
 }
+
+div.vartitle {
+	border-bottom: 1px solid #eee;
+	line-height: 0.8em;
+}
+
+.vartitle span {
+	font-weight: bold;
+	font-size: 0.85em;
+}
+
+.varhide {
+	font-size: 0.8em;
+	color: #777;
+	display: inline;
+	float:left;
+}
+
+.varlist {
+	border-top: 1px solid #eee;
+}
+
+.varlist p {
+	list-style-type: none;
+	padding: 0;
+	margin: 0;
+	font-size: 0.8em;
+	color: #777;
+}
+
+.varlist label {
+	line-height: 0.8em;
+}
+
+.varblock {
+	padding: 4 0px;
+	text-align: right;
+	width: 100%;
+	display: block;
+}
+
+.varblock p:hover {
+	background-color: #eee;
+}
+

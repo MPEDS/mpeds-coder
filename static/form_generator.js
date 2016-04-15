@@ -14,11 +14,6 @@ $(document).ready(function () {
     generator.generateForm(editor.getSession().getValue());
     
     function formGeneator() {
-        this.constructor = function() {
-            console.log("generator init");
-        }
-        
-        
         /**
            * Displays the form entered by the user
            * (this function runs whenever once per second whenever the user
