@@ -1209,7 +1209,13 @@ def changeEvents():
 @app.route('/dynamic_form')
 @login_required
 def dynamic_form():
-    return render_template("dynamic_form.html")
+    aid = 23317
+    article = db_session.query(ArticleMetadata).filter_by(id=aid).first()
+    text, html = prepText(article)
+
+    aq = db_session.query(ArticleQueue).filter_by(coder_id=current_user.id, article_id=aid).first()
+
+    return render_template("dynamic_form.html", vars=vars, aid=aid, text=html.decode('utf-8'))
 
 
 @app.route('/form_template_management')

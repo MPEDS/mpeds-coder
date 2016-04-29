@@ -1,10 +1,11 @@
-from sqlalchemy import Boolean, Column, DateTime, Integer, String, Unicode, ForeignKey, UniqueConstraint
+from sqlalchemy import Boolean, Column, DateTime, Integer, String, Unicode, ForeignKey, UniqueConstraint, Text
 from sqlalchemy.orm import relationship, backref
 from flask.ext.login import UserMixin
 from database import Base
 import datetime as dt
 import pytz
 from pytz import timezone
+
 
 central = timezone('US/Central')
 
@@ -117,6 +118,7 @@ class ArticleMetadata(Base):
     def __repr__(self):
         return '<ArticleMetadata %r (%r)>' % (self.title, self.id)
 
+
 ## All these are manually added
 class User(Base, UserMixin):
     __tablename__ = 'user'
@@ -157,3 +159,17 @@ class VarOption(Base):
 
     def __repr__(self):
         return '<VarOption %r>' % (self.id)
+
+class FormTemplate(Base):
+    __tablename__ = 'form_template'
+    id = Column(Integer, primary_key = True, autoincrement=True)
+    template_name = Column(String, nullable = False)
+    template_content = Column(Text, nullable = False)
+    modified_time = Column(DateTime, onupdate=dt.datetime.now)
+
+    def __init__(self, template_name, template_content):
+        self.template_name = template_name
+        self.template_content = template_content
+
+    def __repr__(self):
+        return '<FormTemplaste %r>\nname: %s' % (self.id, self.template_name)

@@ -14,7 +14,9 @@
 <link href="{{ url_for('static', filename='css/font-awesome.css') }}" rel="stylesheet">
 <script src="{{ url_for('static', filename='js/jquery.min.js') }}"> </script>
 <script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"> </script>
-
+<script type="text/javascript">
+    var $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+</script>
 <!-- Mainly scripts -->
 <script src="{{ url_for('static', filename='js/jquery.metisMenu.js') }}"></script>
 <script src="{{ url_for('static', filename='js/jquery.slimscroll.min.js') }}"></script>
