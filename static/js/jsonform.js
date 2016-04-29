@@ -381,7 +381,44 @@ jsonform.elementTypes = {
       },1000);
     }
   },
-  
+  'ignoreButton': {
+    'template': '<button type="button" id="ignore" class="btn btn-warning warning_22">Ignore</button>',
+    'fieldtemplate': true,
+    'inputfield':true,
+    'onInsert': function(evt, node) {
+       // Add listener for ignore button
+       $('#ignore').click(function(e) {
+         var r = confirm("Are you sure you want to ignore this article?");
+         if (r == false) {
+           return
+         }
+
+         req = $.ajax({
+           type: "GET",
+           url:  $SCRIPT_ROOT + '/_add_code/1',
+           data: {
+             article:  aid[1],
+             variable: "ignore",
+             value:    0
+           }
+         });
+
+         req.success(function(e) {
+           $('#flash-error').hide();
+
+           // redirect to next article
+           setTimeout(function() {
+             window.location.href = $('a#nextarticle').attr('href');
+           }, 0);      
+         });
+
+         req.fail(function(e) {
+           $("#flash-error").text("Error ignoring article.");
+           $("#flash-error").show();
+         });
+       });
+    }
+  },
   
   'highlightlist': {
     'template': ' <p style="font-size:0.8em; color:grey">Highlight text and click <a class="fa fa-plus"></a> for the relevant category.\ ' +
