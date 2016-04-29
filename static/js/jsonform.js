@@ -729,7 +729,6 @@ jsonform.elementTypes = {
           var dd = dds[i];
           $('#' + dd).change( generate_dd_listener(dd) );
         }
-      console.log("Hello list")
     } 
     
   },
