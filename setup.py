@@ -7,34 +7,33 @@ import random
 import glob
 import json
 
-jsonConfig = json.load( open("config.json", "r") )
+import config
 
-def resetVariableOptions():	
-	""" Load current dropdowns from file. """
-	db_session.query(VarOption).delete()
+# def resetVariableOptions():	
+# 	""" Load current dropdowns from file. """
+# 	db_session.query(VarOption).delete()
 
-	print("Adding variables...")
-	dds = []
-	with open("dropdowns.csv") as csvfile:
-		reader = csv.reader(csvfile)
-		for row in reader:
-			dds.append( VarOption(variable = row[0], option = row[1]) )
+# 	print("Adding variables...")
+# 	dds = []
+# 	with open("dropdowns.csv") as csvfile:
+# 		reader = csv.reader(csvfile)
+# 		for row in reader:
+# 			dds.append( VarOption(variable = row[0], option = row[1]) )
 
-	db_session.add_all(dds)
-	db_session.commit()
-
+# 	db_session.add_all(dds)
+# 	db_session.commit()
 
 def addArticlesExample(db_name = 'test'):
 	""" Add articles from example directory. """
 
 	print("Adding example articles...")
 	articles = []
-	for f in glob.iglob(jsonConfig['DOC_ROOT'] + "*.txt"):
+	for f in glob.iglob(config.DOC_ROOT + "*.txt"):
 		filename = f.split('/')[-1]
 		lines    = open(f, 'r').read().split("\n")
 		title    = lines[0].replace("TITLE: ", "")
 
-		articles.append( ArticleMetadata(filename = filename, title = unicode(title, "utf-8", errors = "ignore"), db_name = db_name) )
+		articles.append( ArticleMetadata(filename = filename, title = title, db_name = db_name) )
 
 	db_session.add_all(articles)
 	db_session.commit()
@@ -79,7 +78,7 @@ def addQueueExample():
 def main():
 	init_db()
 	addArticlesExample()
-	resetVariableOptions()
+	# resetVariableOptions()
 	addUsersExample()
 	addQueueExample()
 

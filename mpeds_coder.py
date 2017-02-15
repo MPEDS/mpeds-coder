@@ -3,13 +3,20 @@
     MPEDS coder
     ~~~~~~
 
-    Alex Hanna, Fall 2014, Spring 2015
+    Alex Hanna
     @alexhanna
     alex.hanna@gmail.com
 """
 
 ## base
-import csv, json, math, os, re, string, sys, urllib2
+import csv
+import json
+import math
+import os
+import re
+import string
+import sys
+import urllib
 import datetime as dt
 import time
 from math import ceil
@@ -25,7 +32,7 @@ import pytz
 
 ## flask
 from flask import Flask, request, session, g, redirect, url_for, abort, make_response, render_template, flash, jsonify, Response, stream_with_context
-from flask.ext.login import LoginManager, login_user, logout_user, current_user, login_required
+from flask_login import LoginManager, login_user, logout_user, current_user, login_required
 
 ## db
 from sqlalchemy.exc import OperationalError
@@ -40,6 +47,7 @@ from models import ArticleMetadata, ArticleQueue, CodeFirstPass, CodeSecondPass,
 
 # create our application
 app = Flask(__name__)
+app.config.from_pyfile('config.py')
 
 ## login stuff
 lm  = LoginManager()
@@ -84,12 +92,6 @@ sv = ['comments', 'protest', 'multi', 'nous', 'ignore']
 ## metadata for Solr
 meta_solr = ['PUBLICATION', 'SECTION', 'BYLINE', 'DATELINE', 'DATE', 'INTERNAL_ID']
 
-## get config
-jsonConfig = json.load( open("config.json", "r") )
-
-## load config
-app.config.update(jsonConfig)
-
 #####
 ##### Helper functions
 #####
@@ -98,12 +100,12 @@ app.config.update(jsonConfig)
 def loadSolr(solr_id):
     SOLR_ADDR = "http://localhost:8983/solr/mpeds2"
 
-    url        = '%s/select?q=id:"%s"&wt=json' % (jsonConfig['SOLR_ADDR'], solr_id)
+    url        = '%s/select?q=id:"%s"&wt=json' % (app.config['SOLR_ADDR'], solr_id)
     not_found  = (0, [], [])
     no_connect = (-1, [], [])
 
     try:
-        res = urllib2.urlopen(url)
+        res = urllib.request.urlopen(url)
     except:
         return no_connect
     res = json.loads(res.read())
@@ -149,11 +151,11 @@ def prepText(article):
     title = ''
     meta  = []
     paras = []
-    path  = ''
+    path  = app.config['DOC_ROOT'] + fn
 
     filename = str('INTERNAL_ID: %s' % fn)
 
-    if jsonConfig['SOLR'] == 'True':
+    if app.config['SOLR'] == 'True':
         title, meta, paras = loadSolr(db_id)
         if title == 0:
             title = "Cannot find article in Solr."

@@ -1,11 +1,10 @@
 from sqlalchemy import Boolean, Column, DateTime, Integer, String, Unicode, ForeignKey, UniqueConstraint, Text
 from sqlalchemy.orm import relationship, backref
-from flask.ext.login import UserMixin
+from flask_login import UserMixin
 from database import Base
 import datetime as dt
 import pytz
 from pytz import timezone
-
 
 central = timezone('US/Central')
 
@@ -13,9 +12,9 @@ class CodeFirstPass(Base):
     __tablename__ = 'code_first_pass'
     id         = Column(Integer, primary_key=True)
     article_id = Column(Integer, ForeignKey('article_metadata.id'), nullable = False)
-    variable   = Column(String, nullable = False)
-    value      = Column(String, nullable = False)
-    text       = Column(Unicode)
+    variable   = Column(String(100), nullable = False)
+    value      = Column(String(2000), nullable = False)
+    text       = Column(Unicode(2000))
     coder_id   = Column(Integer, ForeignKey('user.id'), nullable = False)
     timestamp  = Column(DateTime)
 
@@ -35,8 +34,8 @@ class CodeSecondPass(Base):
     id         = Column(Integer, primary_key=True)
     article_id = Column(Integer, ForeignKey('article_metadata.id'), nullable = False)
     event_id   = Column(Integer, ForeignKey('event.id'), nullable = False)
-    variable   = Column(String, nullable = False)
-    value      = Column(String, nullable = False)
+    variable   = Column(String(100), nullable = False)
+    value      = Column(String(2000), nullable = False)
     coder_id   = Column(Integer, ForeignKey('user.id'))
     timestamp  = Column(DateTime)
 
@@ -100,10 +99,10 @@ class SecondPassQueue(Base):
 class ArticleMetadata(Base):
     __tablename__ = 'article_metadata'
     id        = Column(Integer, primary_key=True)
-    title     = Column(String)
-    db_name   = Column(String)
-    db_id     = Column(String)
-    filename  = Column(String, nullable = False)
+    title     = Column(String(1024))
+    db_name   = Column(String(64))
+    db_id     = Column(String(64))
+    filename  = Column(String(255), nullable = False)
 
     firsts  = relationship("CodeFirstPass",  backref = backref("article_metadata", order_by = id))
     seconds = relationship("CodeSecondPass", backref = backref("article_metadata", order_by = id))
@@ -123,8 +122,8 @@ class ArticleMetadata(Base):
 class User(Base, UserMixin):
     __tablename__ = 'user'
     id = Column(Integer, primary_key=True)
-    username  = Column(String, nullable = False)
-    password  = Column(String, nullable = False)
+    username  = Column(String(64), nullable = False)
+    password  = Column(String(64), nullable = False)
     authlevel = Column(Integer, nullable = False)
 
     firsts  = relationship("CodeFirstPass",  backref = backref("user", order_by = id))
@@ -148,8 +147,8 @@ class User(Base, UserMixin):
 class VarOption(Base):
     __tablename__ = 'var_option'
     id       = Column(Integer, primary_key=True)
-    variable = Column(String, nullable = False)
-    options   = Column(String, nullable = False)
+    variable = Column(String(100), nullable = False)
+    options   = Column(String(100), nullable = False)
     parent   = Column(Integer)
 
     def __init__(self, variable, option, parent = None):
@@ -163,7 +162,7 @@ class VarOption(Base):
 class FormTemplate(Base):
     __tablename__ = 'form_template'
     id = Column(Integer, primary_key = True, autoincrement=True)
-    template_name = Column(String, nullable = False)
+    template_name = Column(String(10000), nullable = False)
     template_content = Column(Text, nullable = False)
     modified_time = Column(DateTime, onupdate=dt.datetime.now)
 
