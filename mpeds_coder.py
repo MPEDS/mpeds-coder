@@ -82,6 +82,16 @@ v3 = [
     ('viol',   'Violence')
 ]
 
+event_creator_vars = [
+    ('actor',  'Actors'),
+    ('form',  'Actions / forms'),
+    ('issue', 'Issues'),
+    ('target','Target'),
+    ('police', 'Police actions'),
+    ('viol',   'Violence to persons'),
+    ('propdam', 'Property damage')
+]
+
 vars = v1[:]
 vars.extend(v2[:])
 vars.extend(v3[:])
@@ -467,6 +477,39 @@ def code2(aid):
         num_coders = len(coders_protest),
         yes_coders = float(yes_coders),
         text       = html.decode('utf-8'))
+
+
+@app.route('/event_creator')
+@login_required
+def ecNext():
+    nextArticle = db_session.query(ArticleQueue).filter_by(coder_id = current_user.id, coded1_dt = None).first()
+
+    if nextArticle:
+        return redirect(url_for('eventCreator', aid = nextArticle.article_id))
+    else:
+        return render_template("null.html")
+
+
+@app.route('/event_creator/<aid>')
+@login_required
+def eventCreator(aid):
+    aid       = int(aid)
+    comments  = []
+    opts      = {}
+    curr      = {}
+
+    article    = db_session.query(ArticleMetadata).filter_by(id = aid).first()
+    text, html = prepText(article)
+
+    return render_template(
+        "event-creator.html",
+        aid        = aid,
+        comments   = comments,
+        opts       = opts,
+        curr       = curr,
+        vars       = event_creator_vars,
+        text       = html.decode('utf-8'))
+
 
 #####
 ##### Coder 2 queue

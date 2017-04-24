@@ -1,0 +1,127 @@
+{% extends "layout.html" %}
+{% block body %}
+    <script src="{{ url_for('static', filename='shared.js') }}" type="text/javascript"></script>
+    <script src="{{ url_for('static', filename='ec.js') }}" type="text/javascript"></script>
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-xs-8">
+          <div class="error" id="flash-error" style="display:none;"></div>
+          <div class="article" id="article_{{ aid }}">
+            {{ text|safe }}
+          </div>
+        </div>
+        <div class="col-xs-4">
+          <div class="sticky">
+            <div id="secondpassinfo">
+              <div id="addeventblock">
+                <div class="sectiontitle">
+                   <span>Events</span> 
+                </div>
+              </div>
+                <!-- <div id="list-events" class="varlist"> -->
+                <div class="varlist" id="list-events">
+                  <ul>
+                    <li>
+                        Event 1: 1991-01-01 -- Oakland, CA, USA
+                    </li>
+                    <li>
+                        Event 2: 1991-01-01 -- Berkeley, CA, USA
+                    </li>
+                  </ul>
+                </div>
+                <ul class="nav nav-tabs" id="tabselecter">
+                  <li class="tablinks active" id="basicinfo_button">
+                    <a href="#">Basic Info</a>
+                  </li>
+                  <li class="tablinks" id="textselect_button">
+                    <a href="#">Text Selection</a>
+                  </li>
+                </ul>
+                <div class="tab-content">
+                  <div class="tab-pane" id="basicinfo_block">
+<!-- 
+                  <label for="protest">Does this article contain a protest?</label>
+                  <select class="" name="protest" id="protest">
+                    {% for k,v in [('', '-----'), ('yes', 'Yes'), ('no', 'No'), ('maybe', 'Maybe')] %}
+                      <option value="{{ k }}">{{ v }}</option>
+                    {% endfor %}
+                  </select>
+
+ -->               <form>
+                    <div class="form-group">
+                      <label for="desc">Provide a short description of this event.</label>
+                      <textarea class="form-control form-control-sm" name="desc"></textarea>
+
+                      <label for="date">Start date</label>
+                      <input class="form-control" type="date" name="start-date" id="start-date" />
+
+                      <label for="date">End date</label>
+                      <input class="form-control" type="date" name="end-date" id="end-date" />
+
+                      <label for="location">Location (City, State/Province, Country)</label>
+                      <input class="form-control" type="text" name="location" id="location" />
+                    </div>
+
+                    <div class="form-check form-check-inline">
+                      <label class="form-check-label" for="date_est">Is this date exact or approximate?</label><br/>
+                      <input class="form-check-input" type="radio" name="date_est" value="exact">Exact</a>
+                      <input class="form-check-input" type="radio" name="date_est" value="approx">Approximate</a>
+                    </div>
+
+                    <div class="form-check form-check-inline">
+                      <label class="form-check-label" for="duration">Does this event span one day or more than one day?</label>
+                      <input class="form-check-input" type="radio" name="duration" id="duration" value="1">1</a>
+                      <input class="form-check-input" type="radio" name="duration" id="duration" value="2+">2+</a>
+                    </div>
+
+                    <div class="form-group">
+                      <label for="campaign">Part of a larger campaign?</label>
+                      <input type="checkbox" value="campaign"></input>
+                      <br />
+                      <label for="campaign">Ritualized / cyclical?</label>
+                      <input type="checkbox" name="ritualized"></input>
+                      <br />
+                      <label for="subevent">Is this a subevent?</label>
+                      <input type="checkbox" name="subevent"></input>
+                    </div>
+                  </form>
+                  </div>
+                  <div class="tab-pane" id="textselect_block">
+                    <small><b>Highlight text and click <a class="glyphicon glyphicon-plus"></a> for the relevant category.</b></small>
+                      {% for k,v in vars %}
+                        <div id="block_{{ k }}" class="varblock">
+                          <div class="vartitle">
+                            <span>{{ v }}</span> 
+                            <a id="collapse-down_{{ k }}" class="glyphicon glyphicon-chevron-down" style="display:none;"></a>
+                            <a id="collapse-up_{{ k }}" class="glyphicon glyphicon-chevron-up"></a>
+                            <a id="add_{{ k }}" class="glyphicon glyphicon-plus"></a>
+                          </div>
+                          <div id="list_{{ k }}" class="varlist"></div>
+                        </div>
+                      {% endfor %}
+
+  <!--                     <div id="block_named" class="varblock">
+                        <div class="vartitle">
+                          <span>{{ v }}</span> 
+                          <a id="collapse-down_named" class="glyphicon glyphicon-chevron-down" style="display:none;"></a>
+                          <a id="collapse-up_named" class="glyphicon glyphicon-chevron-up"></a>
+                          <a id="add_{{ k }}" class="glyphicon glyphicon-plus"></a>
+                        </div>
+                        <div id="list_{{ k }}" class="varlist"></div> -->
+                        <!-- TK: need to add drop-down for role of individual -->
+                        <!-- Provide text select of their motives, grievances -->
+                        <!-- text input of actions, description of other actions -->
+                   </div> <!-- tab-pane --> 
+                    <button type="submit" class="btn btm-primary" id="add-event-btn">Save and Add New Event <a href="" class="glyphicon glyphicon-plus"></a></button>
+                    <p></p>
+                    <button type="submit" class="btn btm-primary" id="save-mark-done">Save and Go to Next &raquo;</button>
+                    <p></p>
+                    <button type="submit" class="btn btm-primary" id="mark-done">Go to Next &raquo;</button>                    
+                  </div> <!-- tab-content -->
+                </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+{% endblock %}

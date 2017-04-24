@@ -83,7 +83,7 @@ label, select, option, input {
 	font-weight: 500;
 }
 
-textarea {#
+textarea {
 	height:125px;
 	width:90%;
 	font-size:0.9em;
@@ -127,6 +127,21 @@ p.meta {
 	display: block;
 }
 
+div.sectiontitle {
+	border-bottom: 1px solid #ccc;
+	line-height: 0.8em;
+}
+
+div.sectiontitle span {
+	font-weight: bold;
+	font-size: 0.85em;
+}
+
+#addeventblock .sectiontitle,
+.sectiontitle#event_desc {
+	text-align: right;
+}
+
 div.vartitle {
 	border-bottom: 1px solid #eee;
 	line-height: 0.8em;
@@ -148,7 +163,7 @@ div.vartitle {
 	border-top: 1px solid #eee;	
 }
 
-.varlist p {
+.varlist li {
 	list-style-type: none;
 	padding: 0;
 	margin: 0;
@@ -190,6 +205,10 @@ table#haystack td {
 
 #addeventblock .vartitle {
 	text-align: right;
+}
+
+#list-events {
+	border-bottom: 1px solid #ccc;
 }
 
 .event-block label,
@@ -268,6 +287,12 @@ a.glyphicon, a.glyphicon:visited {
 .vartitle a.glyphicon:hover {
 	color: #00FF00;
 	text-decoration: none;
+}
+
+ul#tabselecter {
+	margin-left: 3px;
+	margin-top: 4px;
+	background-color: #f1f1f1;
 }
 
 footer { 

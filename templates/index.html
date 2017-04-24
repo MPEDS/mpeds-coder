@@ -6,8 +6,9 @@
 		<h2>Welcome, {{ current_user.username|capitalize }}</h2>
 
 		<div class="index">
-			<h4>First pass</h4>
-			<p><a href="{{ url_for('code1Next') }}">Coding interface</a> | <a href="{{ url_for('userArticleList', pn = 1) }}">List</a></p>
+
+            <h4>Event creator</h4>
+            <p><a href="{{ url_for('ecNext') }}">Coding interface</a> | <a href="{{ url_for('userArticleList', pn = 3) }}">List</a></p>
 
 			{% if current_user.authlevel > 1 %}
 				<h4>Second pass</h4>
