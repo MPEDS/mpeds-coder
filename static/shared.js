@@ -20,6 +20,7 @@ var createListItem = function(e, v, p_id, text) {
 
   // change color of paragraph link
   var date = new Date();
+  
   // create a datetime hash for the delete ID
   var hash = ["del", v, p_id, date.getTime()].join("_");
 
@@ -30,7 +31,7 @@ var createListItem = function(e, v, p_id, text) {
   $('#list_' + v).append(li);
 
   // create a listener for the delete button
-  $('#' + hash).click(deleteCode1);
+  $('#' + hash).click(deleteCode);
 
   // show the list if it's hidden
   collapseDown(e, v);
@@ -42,6 +43,8 @@ var addSelectedText = function(e, v) {
   var tEnd   = 0;
   var el     = '';
   var aid    = $(".article").attr("id").split("_");
+  var pn     = $('#pass_number').val();
+  var ev_id  = $(e.target).closest('div.event-block').attr('id').split("_")[1];
 
   // the various methods of getting the text object
   if (window.getSelection) {
@@ -80,13 +83,14 @@ var addSelectedText = function(e, v) {
 
   req = $.ajax({
     type: "GET",
-    url:  $SCRIPT_ROOT + '/_add_code/1',
+    url:  $SCRIPT_ROOT + '/_add_code/' + pn,
     data: {
       article:  aid[1],
       variable: v, 
       value:    p_id,
-      text:     text
-    }
+      text:     text,
+      event:    ev_id
+    },
   });
 
   // add element or change tab color on success
@@ -102,23 +106,25 @@ var addSelectedText = function(e, v) {
   });
 }
 
-var deleteCode1 = function(e) {
+var deleteCode = function(e) {
   var r = confirm("Are you sure you want to delete this item?");
   if (r == false) {
     return
   }
 
-  // del_var_value
-  a       = e.target.id.split("_");
+  var a   = e.target.id.split("_");
   var aid = $(".article").attr("id").split("_");
+  var pn  = $('#pass_number').val();
+  var ev  = $(e.target).closest('div.event-block').attr('id').split("_")[1];
 
   req = $.ajax({
     type: "GET",
-    url:  $SCRIPT_ROOT + '/_del_code/1',
+    url:  $SCRIPT_ROOT + '/_del_code/' + pn,
     data: {
       article:  aid[1],
       variable: a[1],
-      value:    a[2]
+      value:    a[2],
+      event:    ev
     }
   });
 
@@ -134,8 +140,62 @@ var deleteCode1 = function(e) {
   });
 }
 
+/* Adds a value for a variable if not available in the current list. */
+var addCode = function(e) {
+  var oText    = '';
+  var aid      = $(".article").attr("id").split("_")[1];
+  var eid      = $(e.target).closest(".event-block").attr("id").split("_")[1];
+  var pn       = $('#pass_number').val();
+  var variable = e.target.parentElement.id.split("_")[2];
 
-function generate_handler( v, type ) {
+  // the various methods of getting the text object
+  if (window.getSelection) {
+      oText = window.getSelection();
+  } else if (document.selection) {
+      oText = document.selection.createRange().text;
+  } else if (document.getSelection) {
+      oText = document.getSelection();
+  }
+
+  text  = oText.toString().trim();
+  // skip when there is nothing selected
+  if (text.length <= 0) {
+    return;
+  }
+
+  req = $.ajax({
+    type: "GET",
+    url:  $SCRIPT_ROOT + '/_add_code/' + pn,
+    data: {
+      article:  aid,
+      variable: variable,
+      value:    text,
+      event:    eid
+    }
+  });
+
+  // add element or change tab color on success
+  req.success(function() {
+    $("#flash-error").hide();
+
+    // create element
+    var li = '<input type="checkbox" id="dd_' + variable + '_' + text + '" checked /> <label for="dd_' + variable + '_' + text + '">' + text + '</label><br />';
+
+    // add to the list
+    $('#options_' + variable).append(li);
+
+    // create a listener for the checkbox
+    $('#dd_' + variable + '_' + text).click(selectCheckbox);
+  });
+
+  // on failure
+  req.fail(function(e) {
+    $("#flash-error").text = "Error adding item.";
+    $("#flash-error").show();
+  });
+}
+
+var generate_handler = function( v, type ) {
   return function(e) { 
     var el = $(e.target);
     
@@ -149,80 +209,132 @@ function generate_handler( v, type ) {
   };
 }
 
-function generate_dd_listener(dd) {
-  var aid  = $(".article").attr("id").split("_");
-  return function(e) {
-    var v = $('#' + dd).val();
-    req = $.ajax({
-      type: "GET",
-      url:  $SCRIPT_ROOT + '/_add_code/1',
-      data: {
-        article:  aid[1],
-        variable: dd,
-        value:    v
-      }
-    });
+/* Adds or deletes values for each variable based on checkboxes. */
+var selectCheckbox = function(e) {
+  var el       = $(e.target);
+  var aid      = $(".article").attr("id").split("_")[1];  
+  var eid      = el.closest(".event-block").attr("id").split("_")[1];
+  var pn       = $('#pass_number').val();
 
-    req.success(function(e) {
-      $('#flash-error').hide();
+  var variable = el.attr("id").split("_")[1];
+  var val      = el.val();
 
-      // show/hide var list for protest
-      if(dd == 'protest') {
-        if (v == 'yes' || v == 'maybe') {
-          $('#varselect').show();
-        } else {
-          $('#varselect').hide();
-        }
-      }
-    });
-
-    req.fail(function(e) {
-      $("#flash-error").text("Error changing " + dd);
-      $("#flash-error").show();
-    });
-  }
-}
-
-
-$(function(){ // document ready
-  // keep sticky coding at the top 
-  if (!!$('.sticky').offset()) { // make sure ".sticky" element exists
-    var stickyTop = $('.sticky').offset().top; // returns number 
-
-    $(window).scroll(function(){ // scroll event
-      var windowTop = $(window).scrollTop(); // returns number 
-      if (stickyTop < windowTop){
-        $('.sticky').css({ position: 'fixed', top: 0 });
-      } else {
-        $('.sticky').css('position','static');
-      }
-    });
+  // for some of the basic info variables, id == val. change to 'yes'
+  if (variable == val) {
+    val = 'yes';
   }
 
-  var vars = []
-  var aid  = $(".article").attr("id").split("_");
-  // Get vars from DOM  
-  $('.varblock').each(function() {
-    var i = $(this).attr("id").split("_")[1];
-    vars.push(i); 
+  var is_checked = el.is(':checked');
+  var action = ''
+
+  // add this checkbox item
+  if (is_checked == true) {
+    action = 'add';
+  } else { // delete it
+    action = 'del';
+  }
+
+  req = $.ajax({
+    type: "GET",
+    url:  $SCRIPT_ROOT + '/_' + action + '_code/' + pn,
+    data: {
+      article:  aid,
+      variable: variable,
+      value:    val,
+      event:    eid
+    }
   });
 
+  req.success(function(e) {
+    $('#flash-error').hide();
+  });
+
+  req.fail(function(e) {
+    $("#flash-error").text("Error changing checkbox.");
+    $("#flash-error").show();
+  });
+}
+
+/* Adds or deletes values for each variable based on radio buttons selected. */
+var selectRadio = function(e) {
+  var el       = $(e.target);
+  var aid      = $(".article").attr("id").split("_")[1];  
+  var eid      = el.closest(".event-block").attr("id").split("_")[1];
+  var pn       = $('#pass_number').val();
+
+  var variable = el.attr("id").split("_")[1];
+  var val      = el.val();
+
+  // change code
+  req = $.ajax({
+    type: "GET",
+    url:  $SCRIPT_ROOT + '/_change_code/' + pn,
+    data: {
+      article:  aid,
+      variable: variable,
+      value:    val,
+      event:    eid
+    }
+  });
+
+  req.success(function(e) {
+    $('#flash-error').hide();
+  });
+
+  req.fail(function(e) {
+    $("#flash-error").text("Error changing radio button.");
+    $("#flash-error").show();
+  });
+}
+
+/* Adds or deletes values for each variable based on radio buttons selected. */
+var storeText = function(e) {
+  var el       = $(e.target);
+  var aid      = $(".article").attr("id").split("_")[1];  
+  var eid      = el.closest(".event-block").attr("id").split("_")[1];
+  var pn       = $('#pass_number').val();
+
+  var variable = el.attr("id").split("_")[1];
+  var val      = el.val();
+
+  // change code
+  req = $.ajax({
+    type: "GET",
+    url:  $SCRIPT_ROOT + '/_change_code/' + pn,
+    data: {
+      article:  aid,
+      variable: variable,
+      value:    val,
+      event:    eid
+    }
+  });
+
+  req.success(function(e) {
+    $('#flash-error').hide();
+  });
+
+  req.fail(function(e) {
+    $("#flash-error").text("Error changing radio button.");
+    $("#flash-error").show();
+  });
+}
+
+var getCodes = function(ev) {
   // prepopulate existing fields
+  var aid = $(".article").attr("id").split("_")[1];    
+  var pn  = $("#pass_number").val();
+
   req = $.ajax({
       type: "GET",
       url:  $SCRIPT_ROOT + '/_get_codes',
       data: {
-        article: aid[1]
+        article: aid[1],
+        event: ev,
+        pn: pn
       }
   });
 
   req.success(function(cd) {
-    // turn the ignore text into re-add if this exists
-    if(cd['ignore']) {
-      $('p#readdDiv').show();
-      $('p#ignoreDiv').hide();
-    }
-
     // add existing variable text
     for(i = 0; i < vars.length; i++) {
       v = vars[i];
@@ -239,16 +351,22 @@ $(function(){ // document ready
     $("#flash-error").text("Error loading stored data.");
     $("#flash-error").show();
   });
+}
 
-  // generate add and collapse listeners
-  for (i = 0; i < vars.length; i++) {
-    var v       = vars[i];
-    var actions = ['add', 'collapse-down', 'collapse-up'];
 
-    for (j = 0; j < actions.length; j++) {
-      var type = actions[j];
-      $('#' + type + '_' + v).click( generate_handler( v, type ) );
-    }
+$(function(){ // document ready
+  // keep sticky coding at the top 
+  if (!!$('.sticky').offset()) { // make sure [".sticky" element exists
+    var stickyTop = $('.sticky').offset().top; // returns number 
+
+    $(window).scroll(function(){ // scroll event
+      var windowTop = $(window).scrollTop(); // returns number 
+      if (stickyTop < windowTop){
+        $('.sticky').css({ position: 'fixed', top: 0 });
+      } else {
+        $('.sticky').css('position','static');
+      }
+    });
   }
 
     // create listeners for drop-downs

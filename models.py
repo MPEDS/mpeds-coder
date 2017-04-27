@@ -29,6 +29,7 @@ class CodeFirstPass(Base):
     def __repr__(self):
         return '<CodeFirstPass %r>' % (self.id)
 
+
 class CodeSecondPass(Base):
     __tablename__ = 'coder_second_pass'
     id         = Column(Integer, primary_key=True)
@@ -50,6 +51,31 @@ class CodeSecondPass(Base):
     def __repr__(self):
         return '<CodeSecondPass %r>' % (self.id)
 
+
+class CodeEventCreator(Base):
+    __tablename__ = 'coder_event_creator'
+    id         = Column(Integer, primary_key=True)
+    article_id = Column(Integer, ForeignKey('article_metadata.id'), nullable = False)
+    event_id   = Column(Integer, ForeignKey('event.id'), nullable = False)
+    variable   = Column(String(100), nullable = False)
+    value      = Column(String(2000), nullable = False)
+    text       = Column(Unicode(2000))
+    coder_id   = Column(Integer, ForeignKey('user.id'))
+    timestamp  = Column(DateTime)
+
+    def __init__(self, article_id, event_id, variable, value, coder_id, text = None):
+        self.article_id = article_id
+        self.event_id   = event_id
+        self.variable   = variable
+        self.value      = value
+        self.text       = text
+        self.coder_id   = coder_id
+        self.timestamp  = dt.datetime.now(tz = central).replace(tzinfo = None)
+
+    def __repr__(self):
+        return '<CodeEventCreator %r>' % (self.id)
+
+
 class Event(Base):
     __tablename__ = 'event'
     id         = Column(Integer, primary_key=True)
@@ -62,6 +88,7 @@ class Event(Base):
 
     def __repr__(self):
         return '<Event %r>' % (self.id)
+
 
 class ArticleQueue(Base):
     __tablename__ = 'article_queue'
@@ -80,6 +107,7 @@ class ArticleQueue(Base):
     def __repr__(self):
         return '<ArticleQueue %r>' % (self.article_id)
 
+
 class SecondPassQueue(Base):
     __tablename__ = 'second_pass_queue'
     id         = Column(Integer, primary_key=True)
@@ -95,6 +123,24 @@ class SecondPassQueue(Base):
 
     def __repr__(self):
         return '<SecondPassQueue %r>' % (self.article_id)
+
+
+class EventCreatorQueue(Base):
+    __tablename__ = 'event_creator_queue'
+    id         = Column(Integer, primary_key=True)
+    article_id = Column(Integer, ForeignKey('article_metadata.id'), nullable = False)
+    coder_id   = Column(Integer, ForeignKey('user.id'), nullable = False)
+    coded_dt   = Column(DateTime)
+
+    UniqueConstraint('article_id', 'coder_id', name = 'unique1')
+
+    def __init__(self, article_id, coder_id):
+        self.article_id = article_id
+        self.coder_id   = coder_id
+
+    def __repr__(self):
+        return '<EventCreatorQueue %r>' % (self.article_id)
+
 
 class ArticleMetadata(Base):
     __tablename__ = 'article_metadata'
@@ -144,11 +190,12 @@ class User(Base, UserMixin):
     def __repr__(self):
         return '<Coder %r>' % (self.id)
 
+
 class VarOption(Base):
     __tablename__ = 'var_option'
     id       = Column(Integer, primary_key=True)
     variable = Column(String(100), nullable = False)
-    options   = Column(String(100), nullable = False)
+    options  = Column(String(100), nullable = False)
     parent   = Column(Integer)
 
     def __init__(self, variable, option, parent = None):
@@ -158,6 +205,7 @@ class VarOption(Base):
 
     def __repr__(self):
         return '<VarOption %r>' % (self.id)
+
 
 class FormTemplate(Base):
     __tablename__ = 'form_template'

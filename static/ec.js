@@ -1,24 +1,37 @@
 /* Add or edit an event. Controls the event list. */
 var modifyEvent = function(e) {
-  var aid = $(".article").attr("id").split("_")[1];
-  var eid = e.target.parentElement.id.split("_")[1];
+  var aid  = $(".article").attr("id").split("_")[1];
+  var eid  = e.target.parentElement.id.split("_")[1];
+  var pn   = $('#pass_number').val();
+  var vars = [];
+
+  // Load the block for creating event information.
   req = $.ajax({
       type: "GET",
       url:  $SCRIPT_ROOT + '/_load_event_block',
       data: {
         'article_id': aid,
-        'event_id': eid
+        'event_id': eid,
+        'pn': pn
       }
   });
 
-  req.success(function(ev) {
+  req.success(function() {
     $("#flash-error").hide();
 
     // add the event block to the HTML
     $("#event-blocks").append(req.responseText);
 
+    // add tab listeners
+    $(".tablinks").each(function(){
+      $(this).click(changeTab);
+    });
+
+    // show basic info first
+    $("#basicinfo_block").show();
+
     // add listeners for options
-    $(".event-block :radio").each(function() {
+    $("#preset_block :radio").each(function() {
       $(this).change(function(e) {
         var variable = $(e.target).attr("id").split("_")[1];
 
@@ -28,56 +41,81 @@ var modifyEvent = function(e) {
         // except options for currently selected variable
         $("#options_" + variable).show();
       });
-
-      // set eid here for adding new events
-      eid = $(".event-block").attr("id").split("_")[1];
     });
+
+    // show 'form' options upon default
+    $('#varevent_form').prop("checked", true);
+    $("#options_form").show(); 
+
+    // listeners for info radio buttons
+    $('#basicinfo_block :radio').change(selectRadio);
+
+    // listeners for text fields
+    // $('#basicinfo_block :date').blur(storeText); // doesn't work in Firefox :(
+
+    $('#basicinfo_block :text').blur(storeText);
+    $('#basicinfo_block textarea').blur(storeText);
 
     // listeners for adding or deleting checkboxes
     $(':checkbox').change(selectCheckbox);
 
-    // listener to add code
-    $('.event-block label a').click(addCode);
+    // Get text select vars from DOM  
+    $('.varblock').each(function() {
+      var i = $(this).attr("id").split("_")[1];
+      vars.push(i); 
+    });
+
+    req = $.ajax({
+      type: "GET",
+      url:  $SCRIPT_ROOT + '/_get_codes',
+      data: {
+        'article': aid,
+        'event': eid,
+        'pn': pn
+      }
+    });
+
+    req.success(function(cd) {
+      $("#flash-error").hide();
+
+      // listeners for text select add, collapse-up/down
+      for (i = 0; i < vars.length; i++) {
+        var v       = vars[i];
+        var actions = ['add', 'collapse-down', 'collapse-up'];
+
+        for (j = 0; j < actions.length; j++) {
+          var type = actions[j];
+          $('#' + type + '_' + v).click( generate_handler( v, type ) );
+        }
+
+        // add text select variable text
+        if(cd[v]) {
+          for(j = 0; j < cd[v].length; j++) {
+            o = cd[v][j];
+            createListItem('', v, o[0], o[1]);
+          }
+        }      
+      }
+    });
 
     // listener for submit and save
     $("#add-event-block").click(function(e) {
-      var event_id = $(e.target).parent().attr("id").split("_")[1];
+        var event_id = $(e.target).parent().attr("id").split("_")[1];
 
-      // save comments
-      var comments = $('#eventblock_' + event_id + ' #comments').val();
-      req = $.ajax({
-        type: "GET",
-        url:  $SCRIPT_ROOT + '/_add_code/2',
-        data: {
-          article:  aid,
-          variable: "comments",
-          value:    comments,
-          event:    event_id
-        }
-      });
+        // remove all the event blocks
+        $(".event-block").each(function() {
+          $(this).remove();
+        });
 
-      req.success(function(e) {
-        $('#flash-error').hide();
-      });
-
-      req.fail(function(e) {
-        $("#flash-error").text("Error adding comments.");
-        $("#flash-error").show();
-      });
-
-      // remove all the event blocks
-      $(".event-block").each(function() {
-        $(this).remove();
-      });
-
-      getEvents(aid);
+        getEvents(aid);
     });
   });
 
   req.fail(function(e) {
     $("#flash-error").text("Error loading event block.");
     $("#flash-error").show();
-  }); 
+  });
+
 }
 
 /* Deletes an event on clicking the remove button. */
@@ -94,7 +132,8 @@ var deleteEvent = function(e) {
     type: "GET",
     url:  $SCRIPT_ROOT + '/_del_event',
     data: {
-      event: eid
+      event: eid,
+      pn: $('#pass_number').val()
     }
   });
 
@@ -103,7 +142,7 @@ var deleteEvent = function(e) {
   req.success(function() {
       $('#flash-error').hide();
       $(e.target).parent().remove();
-      $("#eventblock_" + eid).remove();
+      $("#event-creator-block_" + eid).remove();
   });
 
   req.fail(function() {
@@ -112,13 +151,15 @@ var deleteEvent = function(e) {
   });
 }
 
-/* Loads the list of events upload page load and adding a new event. */
+/* Loads the list of events and adds edit / delete listeners */
 var getEvents = function(aid) {
+  var pn  = $('#pass_number').val();
   var req = $.ajax({
       type: "GET",
       url:  $SCRIPT_ROOT + '/_get_events',
       data: {
-        article_id: aid
+        article_id: aid,
+        pn: pn
       }
   });
 
@@ -158,60 +199,6 @@ var getEvents = function(aid) {
   });
 }
 
-/* Adds a value for a variable if not available in the current list. */
-var addCode = function(e) {
-  var oText    = '';
-  var aid      = $(".article").attr("id").split("_")[1];
-  var eid      = $(e.target).closest(".event-block").attr("id").split("_")[1];
-  var variable = e.target.parentElement.id.split("_")[2];
-
-  // the various methods of getting the text object
-  if (window.getSelection) {
-      oText = window.getSelection();
-  } else if (document.selection) {
-      oText = document.selection.createRange().text;
-  } else if (document.getSelection) {
-      oText = document.getSelection();
-  }
-
-  text  = oText.toString().trim();
-  // skip when there is nothing selected
-  if (text.length <= 0) {
-    return;
-  }
-
-  req = $.ajax({
-    type: "GET",
-    url:  $SCRIPT_ROOT + '/_add_code/2',
-    data: {
-      article:  aid,
-      variable: variable,
-      value:    text,
-      event:    eid
-    }
-  });
-
-  // add element or change tab color on success
-  req.success(function() {
-    $("#flash-error").hide();
-
-    // create element
-    var li = '<input type="checkbox" id="dd_' + variable + '_' + text + '" checked /> <label for="dd_' + variable + '_' + text + '">' + text + '</label><br />';
-
-    // add to the list
-    $('#options_' + variable).append(li);
-
-    // create a listener for the checkbox
-    $('#dd_' + variable + '_' + text).click(selectCheckbox);
-  });
-
-  // on failure
-  req.fail(function(e) {
-    $("#flash-error").text = "Error adding item.";
-    $("#flash-error").show();
-  });
-}
-
 var changeTab = function(e) {
     var eid = $(e.target).parent().attr("id").split("_")[0];
 
@@ -230,29 +217,22 @@ var changeTab = function(e) {
     $('#' + eid + "_block").show();
 }
 
+
 // MAIN -- document ready 
 $(function(){ 
   var aid = $(".article").attr("id").split("_")[1];
 
-  // add tab listeners
-  $(".tablinks").each(function(){
-    $(this).click(changeTab);
-  });
-
-  // show basic info first
-  $("#basicinfo_block").show();
-
   getEvents(aid);
 
   // add event listener
-  $('#add-event-btm').click(modifyEvent);
+  $('#add-event').click(modifyEvent);
 
-  // mark done
+  // mark done handler
   $('#mark-done').each(function() {
     $(this).click(function() {
       var req = $.ajax({
           type: "GET",
-          url:  $SCRIPT_ROOT + '/_mark_sp_done',
+          url:  $SCRIPT_ROOT + '/_mark_ec_done',
           data: {
             article_id: aid
           }

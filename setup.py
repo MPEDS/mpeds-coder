@@ -1,5 +1,6 @@
 from database import db_session, init_db
-from models import User, ArticleMetadata, CodeFirstPass, CodeSecondPass, ArticleQueue, VarOption, Event
+from models import User, ArticleMetadata, CodeFirstPass, CodeSecondPass, CodeEventCreator, \
+	ArticleQueue, SecondPassQueue, EventCreatorQueue, VarOption, Event
 from sqlalchemy import func
 
 import csv
@@ -9,19 +10,19 @@ import json
 
 import config
 
-# def resetVariableOptions():	
-# 	""" Load current dropdowns from file. """
-# 	db_session.query(VarOption).delete()
+def resetVariableOptions():	
+	""" Load current dropdowns from file. """
+	db_session.query(VarOption).delete()
 
-# 	print("Adding variables...")
-# 	dds = []
-# 	with open("dropdowns.csv") as csvfile:
-# 		reader = csv.reader(csvfile)
-# 		for row in reader:
-# 			dds.append( VarOption(variable = row[0], option = row[1]) )
+	print("Adding variables...")
+	dds = []
+	with open("dropdowns.csv") as csvfile:
+		reader = csv.reader(csvfile)
+		for row in reader:
+			dds.append( VarOption(variable = row[0], option = row[1]) )
 
-# 	db_session.add_all(dds)
-# 	db_session.commit()
+	db_session.add_all(dds)
+	db_session.commit()
 
 def addArticlesExample(db_name = 'test'):
 	""" Add articles from example directory. """
@@ -56,7 +57,6 @@ def addUsersExample():
 
 	db_session.commit()
 
-
 def addQueueExample():
 	print("Adding example queues...")
 
@@ -76,12 +76,11 @@ def addQueueExample():
 
 
 def main():
-	init_db()
-	addArticlesExample()
-	# resetVariableOptions()
-	addUsersExample()
-	addQueueExample()
-
+	# init_db()
+	# addArticlesExample()
+	resetVariableOptions()
+	# addUsersExample()
+	# addQueueExample()
 
 if __name__ == '__main__':
 	main()
