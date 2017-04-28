@@ -76,11 +76,11 @@ def addQueueExample():
 
 
 def main():
-	# init_db()
-	# addArticlesExample()
+	init_db()
+	addArticlesExample()
 	resetVariableOptions()
-	# addUsersExample()
-	# addQueueExample()
+	addUsersExample()
+	addQueueExample()
 
 if __name__ == '__main__':
 	main()
