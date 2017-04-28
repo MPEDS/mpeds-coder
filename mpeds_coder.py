@@ -1266,20 +1266,25 @@ def getEvents():
     model = None
     if pn == '2':
         model = CodeSecondPass
-        rvar = ['form', 'issue', 'loc']
     elif pn == 'ec':
         model = CodeEventCreator
-        rvar = ['location', 'start_date', 'form-text']
     else:
         return make_response("Not a valid model.", 404)
 
     ## get a summary of the existing events for this article
     for event in db_session.query(Event).filter(Event.article_id == aid).all():
+
+        if pn == '2':
+            rvar = {'loc': [], 'form': []}
+        elif pn == 'ec':
+            rvar = {'location': [], 'form': []}
+
         ev   = {}
-        repr = []
         ev['id'] = event.id
 
-        codes = db_session.query(model).filter_by(event_id = event.id, coder_id = current_user.id).order_by(model.variable).all()
+        codes = db_session.query(model).\
+            filter_by(event_id = event.id, coder_id = current_user.id).\
+            order_by(model.variable).all()
 
         if len(codes) == 0:
             continue
@@ -1287,15 +1292,18 @@ def getEvents():
         ## look at all the codes in the list
         for code in codes:
             ## if its form and in pass EC, use a text select
-            if pn == 'ec' and code.variable == 'form-text':
-                repr.append(code.text)
-            elif code.variable in rvar:
+            if code.variable in rvar.keys():
                 ## otherwise, just use the value
-                repr.append(code.value)
+                rvar[code.variable].append(code.value)
 
         ## join these all together in the form
-        ## blah ... this is some detail
-        ev['repr'] = "-".join(repr)
+        ## location1, location2...form1, form2
+        
+        if pn == '2':
+            ev['repr'] = ", ".join(rvar['loc']) + '-' + ', '.join(rvar['form'])
+        elif pn =='ec':
+            ev['repr'] = ", ".join(rvar['location']) + '-' + ', '.join(rvar['form'])
+
         if len(ev['repr']) > 30:
             ev['repr'] = ev['repr'][0:15] + " ... " + ev['repr'][-15:]
 
@@ -1321,7 +1329,7 @@ def getCodes():
         model = CodeEventCreator
 
     ## load current values
-    curr = db_session.query(model).filter_by(coder_id = current_user.id, article_id = aid).all()
+    curr = db_session.query(model).filter_by(coder_id = current_user.id, event_id = ev, article_id = aid).all()
     cd   = {}
 
     for c in curr:

@@ -19,6 +19,11 @@ var modifyEvent = function(e) {
   req.success(function() {
     $("#flash-error").hide();
 
+    // remove all the event blocks
+    $(".event-block").each(function() {
+      $(this).remove();
+    });
+
     // add the event block to the HTML
     $("#event-blocks").append(req.responseText);
 
@@ -65,6 +70,8 @@ var modifyEvent = function(e) {
       vars.push(i); 
     });
 
+    // load text selects with this
+    // doing it like this because this function adds additional listeners
     req = $.ajax({
       type: "GET",
       url:  $SCRIPT_ROOT + '/_get_codes',
@@ -99,7 +106,7 @@ var modifyEvent = function(e) {
     });
 
     // listener for submit and save
-    $("#add-event-block").click(function(e) {
+    $("#save").click(function(e) {
         var event_id = $(e.target).parent().attr("id").split("_")[1];
 
         // remove all the event blocks
@@ -168,7 +175,7 @@ var getEvents = function(aid) {
     events = ev['events'];
 
     // empty list
-    //$('#list-events').empty();
+    $('#list-events').empty();
 
     // add existing events
     for(i = 0; i < events.length; i++) {
