@@ -1,0 +1,121 @@
+<div class="event-block" id="event-block_{{ event_id }}">
+  <ul class="nav nav-tabs" id="tabselecter">
+  <li class="tablinks active" id="basicinfo_button">
+    <a href="#">Basic Info</a>
+  </li>
+  <li class="tablinks" id="textselect_button">
+    <a href="#">Text Select</a>
+  </li>
+  <li class="tablinks" id="preset_button">
+    <a href="#">Preset</a>
+  </li>
+  <!-- 
+  /* To Be Implemented: search of past events and related events in Solr DB. */
+  <li class="tablinks" id="relatedevents_button">
+    <a href="#">Related</a>
+  </li>
+  -->
+  </ul>
+  <div class="tab-content">
+  <div class="tab-pane" id="basicinfo_block">
+  <form> 
+    <div class="form-group">
+      <label for="desc">Provide a short description of this event.</label>
+      <textarea class="form-control form-control-sm" name="desc" id="info_desc" rows="3">{{ curr['desc']|safe }}</textarea>
+
+      <label for="start-date">Start date</label>
+      <input class="form-control" type="text" name="start-date" id="info_start-date" value="{{ curr['start-date'] }}" />
+
+      <label for="end-date">End date</label>
+      <input class="form-control" type="text" name="end-date" id="info_end-date" value="{{ curr['end-date'] }}" />
+
+      <label for="location">Location (City, State/Province, Country)</label>
+      <input class="form-control" type="text" name="location" id="info_location" value="{{ curr['location'] }}" />
+    </div>
+
+    <div class="form-group">
+      <label>Is the start date exact or approximate?</label>
+      <div class="form-check">
+        <label class="form-check-label">
+          <input class="form-check-input basic-info" type="radio" name="date-est" id="info_date-est" value="exact" {{ 'checked' if curr['date-est'] == 'exact' else '' }}> Exact
+        </label>
+      </div>
+
+      <div class="form-check">
+        <label class="form-check-label">
+          <input class="form-check-input basic-info" type="radio" name="date-est" id="info_date-est" value="approximate" {{ 'checked' if curr['date-est'] == 'approximate' else '' }}> Approximate
+        </label>
+      </div>
+      <p></p>
+      <label>Does this event span one day or more than one day?</label>
+      <div class="form-check">
+        <label class="form-check-label">
+          <input class="form-check-input basic-info" type="radio" name="duration" id="info_duration" value="one" {{ 'checked' if curr['duration'] == 'one' else '' }}> One
+        </label>              
+      </div>
+      <div class="form-check">
+        <label class="form-check-label">
+          <input class="form-check-input basic-info" type="radio" name="duration" id="info_duration" value="more-than-one" {{ 'checked' if curr['duration'] == 'more-than-one' else '' }}> More than one
+        </label>                      
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Is this event: </label>
+
+      {% for k, v in info_vars %}
+      <div class="form-check">
+        <label class="form-check-label" id="l_info_{{ k }}">
+          <input type="checkbox" id="info_{{ k }}" value="{{ k }}" {{ 'checked' if curr[k] == 'yes' else '' }}> {{ v|safe }}
+        </label>
+      </div>
+      {% endfor %}
+    </div>
+  </form>
+  </div>
+  <div class="tab-pane" id="textselect_block">
+    <span class="instructions">Highlight text and click <a class="glyphicon glyphicon-plus"></a> for the relevant category.</span>
+    {% for k,v in vars %}
+      <div id="block_{{ k }}" class="varblock">
+        <div class="vartitle">
+          <span>{{ v }}</span> 
+          <a id="collapse-down_{{ k }}" class="glyphicon glyphicon-chevron-down" style="display:none;"></a>
+          <a id="collapse-up_{{ k }}" class="glyphicon glyphicon-chevron-up"></a>
+          <a id="add_{{ k }}" class="glyphicon glyphicon-plus"></a>
+        </div>
+        <div id="list_{{ k }}" class="varlist"></div>
+        </div>
+      {% endfor %}
+
+      <span class="instructions">Select named individuals and organizations.</span>
+      {% for k,v in named_vars %}
+      <div id="block_{{ k }}" class="varblock">
+        <div class="vartitle">
+          <span>{{ v }}</span> 
+          <a id="collapse-down_{{ k }}" class="glyphicon glyphicon-chevron-down" style="display:none;"></a>
+          <a id="collapse-up_{{ k }}" class="glyphicon glyphicon-chevron-up"></a>
+          <a id="add_{{ k }}" class="glyphicon glyphicon-plus"></a>
+        </div>
+        <div id="list_{{ k }}" class="varlist"></div>
+      </div>
+      {% endfor %}
+   </div> <!-- tab-pane --> 
+   <div class="tab-pane" id="preset_block">
+     <div class="form">
+     {% for k,v in v1 %}
+       <input type="radio" name="varevent" id="varevent_{{ k }}" value="{{ k }}" /> <label for="varevent_{{ k }}" id="l_varevent_{{ k }}">{{ v }}</label><br />
+       <div class="options" id="options_{{ k }}">
+       {% for option in opts[k] %}
+         <div class="form-check">
+           <label class="form-check-label">
+             <input class="form-check-input" type="checkbox" id="dd_{{ k }}_{{ option|hashcode }}" {{ 'checked' if option in curr[k] else '' }} value="{{ option }}"> {{ option }}
+           </label>
+         </div>
+       {% endfor %}
+       </div>      
+     {% endfor %}
+     </div>
+   </div>
+  </div> <!-- tab-content -->
+  <button type="submit" class="btn btm-primary" id="save">Save</button>
+</div>
