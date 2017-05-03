@@ -3,13 +3,20 @@
     MPEDS coder
     ~~~~~~
 
-    Alex Hanna, Fall 2014, Spring 2015
+    Alex Hanna
     @alexhanna
     alex.hanna@gmail.com
 """
 
 ## base
-import csv, json, math, os, re, string, sys, urllib2
+import csv
+import json
+import math
+import os
+import re
+import string
+import sys
+import urllib
 import datetime as dt
 import time
 from math import ceil
@@ -25,7 +32,7 @@ import pytz
 
 ## flask
 from flask import Flask, request, session, g, redirect, url_for, abort, make_response, render_template, flash, jsonify, Response, stream_with_context
-from flask.ext.login import LoginManager, login_user, logout_user, current_user, login_required
+from flask_login import LoginManager, login_user, logout_user, current_user, login_required
 
 ## db
 from sqlalchemy.exc import OperationalError
@@ -36,10 +43,12 @@ from sqlite3 import dbapi2 as sqlite3
 
 ## app-specific
 from database import db_session
-from models import ArticleMetadata, ArticleQueue, CodeFirstPass, CodeSecondPass, Event, SecondPassQueue, User, VarOption
+from models import ArticleMetadata, ArticleQueue, CodeFirstPass, CodeSecondPass, CodeEventCreator, \
+    Event, EventCreatorQueue, SecondPassQueue, User, VarOption
 
 # create our application
 app = Flask(__name__)
+app.config.from_pyfile('config.py')
 
 ## login stuff
 lm  = LoginManager()
@@ -74,6 +83,33 @@ v3 = [
     ('viol',   'Violence')
 ]
 
+event_creator_vars = [
+    ('form-text',  'Actions / forms'),
+    ('issue-text', 'Issues'),
+    ('target-text','Target'),
+    ('size-text', 'Size'),
+    ('police-text', 'Police actions'),
+    ('viol-text',   'Violence to persons'),
+    ('propdam-text', 'Property damage')
+]
+
+named_event_creator_vars = [
+    ('actor-named-text',  'Actors'),
+    ('bystander-named-text', 'Bystanders'),
+    ('target-named-text', 'Target'),
+    ('politician-named-text', 'Politicians'),
+    ('police-named-text', 'Police'),
+    ('org-named-text', 'Movement organizations')
+]
+
+## multiple variable keys
+multi_vars_keys = v1[:] 
+multi_vars_keys.extend(event_creator_vars[:])
+multi_vars_keys.extend(named_event_creator_vars[:])
+
+multi_vars_keys = [x[0] for x in multi_vars_keys]
+
+## pass one variables
 vars = v1[:]
 vars.extend(v2[:])
 vars.extend(v3[:])
@@ -81,14 +117,12 @@ vars.extend(v3[:])
 ## single value variables
 sv = ['comments', 'protest', 'multi', 'nous', 'ignore']
 
+ec_sv = ['desc', 'start-date', 'end-date', 
+    'location', 'duration', 'date-est',
+    'campaign', 'ritual', 'subevent']
+
 ## metadata for Solr
 meta_solr = ['PUBLICATION', 'SECTION', 'BYLINE', 'DATELINE', 'DATE', 'INTERNAL_ID']
-
-## get config
-jsonConfig = json.load( open("config.json", "r") )
-
-## load config
-app.config.update(jsonConfig)
 
 #####
 ##### Helper functions
@@ -98,12 +132,12 @@ app.config.update(jsonConfig)
 def loadSolr(solr_id):
     SOLR_ADDR = "http://localhost:8983/solr/mpeds2"
 
-    url        = '%s/select?q=id:"%s"&wt=json' % (jsonConfig['SOLR_ADDR'], solr_id)
+    url        = '%s/select?q=id:"%s"&wt=json' % (app.config['SOLR_ADDR'], solr_id)
     not_found  = (0, [], [])
     no_connect = (-1, [], [])
 
     try:
-        res = urllib2.urlopen(url)
+        res = urllib.request.urlopen(url)
     except:
         return no_connect
     res = json.loads(res.read())
@@ -149,11 +183,11 @@ def prepText(article):
     title = ''
     meta  = []
     paras = []
-    path  = ''
+    path  = app.config['DOC_ROOT'] + fn
 
     filename = str('INTERNAL_ID: %s' % fn)
 
-    if jsonConfig['SOLR'] == 'True':
+    if app.config['SOLR'] == 'True':
         title, meta, paras = loadSolr(db_id)
         if title == 0:
             title = "Cannot find article in Solr."
@@ -465,6 +499,57 @@ def code2(aid):
         num_coders = len(coders_protest),
         yes_coders = float(yes_coders),
         text       = html.decode('utf-8'))
+
+
+@app.route('/event_creator')
+@login_required
+def ecNext():
+    nextArticle = db_session.query(ArticleQueue).filter_by(coder_id = current_user.id, coded1_dt = None).first()
+
+    if nextArticle:
+        return redirect(url_for('eventCreator', aid = nextArticle.article_id))
+    else:
+        return render_template("null.html")
+
+
+@app.route('/event_creator/<aid>')
+@login_required
+def eventCreator(aid):
+    aid       = int(aid)
+    # comments  = []
+    # opts      = {}
+    # curr      = {}
+
+    # ## initialize opts
+    # opts = {v[0]: [] for v in vars}
+
+    # ## built-in dropdown options
+    # for o in db_session.query(VarOption).all():
+    #     opts[ o.variable ].append(o.options)
+
+    # ## None of the above for v1 variables
+    # for k,v in v1:
+    #     opts[ k ].append("_None of the above")
+
+    # ## filter out repeated items and sort
+    # for k,v in opts.items():
+    #     opts[k] = list( set( map(lambda x: x.strip(" .,"), opts[k]) ) )
+    #     opts[k].sort()
+
+    article    = db_session.query(ArticleMetadata).filter_by(id = aid).first()
+    text, html = prepText(article)
+
+    return render_template(
+        "event-creator.html",
+        aid        = aid,
+        # comments   = comments,
+        # opts       = opts,
+        # curr       = curr,
+        # vars       = event_creator_vars,
+        # named_vars = named_event_creator_vars,
+        # v1         = v1,
+        text       = html.decode('utf-8'))
+
 
 #####
 ##### Coder 2 queue
@@ -877,6 +962,7 @@ def userArticleList(pn, page = 1):
     return render_template("list.html", pn = pn, aqs = aqs,
         pagination = pagination)
 
+
 ## generate report CSV file
 @app.route('/download_coder_stats')
 @login_required
@@ -936,13 +1022,10 @@ def addCode(pn):
     val  = request.args.get('value')
     ev   = request.args.get('event')
     text = request.args.get('text')
-    pn   = int(pn)
     aqs  = []
     now  = dt.datetime.now(tz = central).replace(tzinfo = None)
 
-    if False:
-        pass
-    elif pn == 1:
+    if pn == '1':
         model = CodeFirstPass
 
         ## store highlighted text on first pass
@@ -955,11 +1038,18 @@ def addCode(pn):
         aq = db_session.query(ArticleQueue).filter_by(article_id = aid, coder_id = current_user.id).first()
         aq.coded1_dt = now
         aqs.append(aq)
-    elif pn == 2:
+    elif pn == '2':
         model = CodeSecondPass
         p     = CodeSecondPass(aid, ev, var, val, current_user.id)
 
         for aq in db_session.query(SecondPassQueue).filter_by(article_id = aid, coder_id = current_user.id).all():
+            aq.coded_dt = now
+            aqs.append(aq)
+    elif pn == 'ec':
+        model = CodeEventCreator
+        p     = CodeEventCreator(aid, ev, var, val, current_user.id, text)
+
+        for aq in db_session.query(EventCreatorQueue).filter_by(article_id = aid, coder_id = current_user.id).all():
             aq.coded_dt = now
             aqs.append(aq)
     else:
@@ -967,14 +1057,14 @@ def addCode(pn):
 
     ## variables which only have one value per article
     if var in sv:
-        if pn == 1:
+        if pn == '1':
             a = db_session.query(model).filter_by(
                 article_id = aid,
                 variable   = var,
                 coder_id   = current_user.id
             ).all()
         else:
-            ## for second pass, filter for distinct event
+            ## for second pass and event coder, filter for distinct event
             a = db_session.query(model).filter_by(
                 article_id = aid,
                 variable   = var,
@@ -990,49 +1080,74 @@ def addCode(pn):
             db_session.commit()
 
     ## if this is a 2nd comment pass comment and it is null, skip it
-    if var == 'comments' and pn == 2 and val == '':
+    if var == 'comments' and pn == '2' and val == '':
         return jsonify(result={"status": 200})
 
     # try:
     db_session.add(p)
     db_session.add_all(aqs)
     db_session.commit()
-    return jsonify(result={"status": 200})
+    return make_response("", 200)
+
 
 @app.route('/_del_event')
 @login_required
 def delEvent():
     """ Delete an event. """
-    if current_user.authlevel < 2:
-        return redirect(url_for('index'))
+    # if current_user.authlevel < 2:
+    #     return redirect(url_for('index'))
 
     eid = int(request.args.get('event'))
-    db_session.query(CodeSecondPass).filter_by(event_id = eid).delete()
+    pn  = request.args.get('pn');
+
+    model = None
+    if pn == '2':
+        model = CodeSecondPass
+    elif pn == 'ec':
+        model = CodeEventCreator
+    else:
+        return make_response("Invalid model.", 404)
+
+    db_session.query(model).filter_by(event_id = eid).delete()
     db_session.query(Event).filter_by(id = eid).delete()
 
     db_session.commit()
 
     return make_response("Delete succeeded.", 200)
 
+
 @app.route('/_del_code/<pn>')
 @login_required
 def delCode(pn):
-    """ Deletes a record from first or second pass codings. """
+    """ Deletes a record from coding tables. """
+    article  = request.args.get('article')
+    variable = request.args.get('variable')
+    value    = request.args.get('value')
+    event    = request.args.get('event')
+
     if False:
         pass
     elif pn == '1':
         a = db_session.query(CodeFirstPass).filter_by(
-            article_id = request.args.get('article'),
-            variable   = request.args.get('variable'),
-            value      = request.args.get('value'),
+            article_id = article,
+            variable   = variable,
+            value      = value,
             coder_id   = current_user.id
         ).all()
     elif pn == '2':
         a = db_session.query(CodeSecondPass).filter_by(
-            article_id = request.args.get('article'),
-            variable   = request.args.get('variable'),
-            value      = request.args.get('value'),
-            event_id   = request.args.get('event'),
+            article_id = article,
+            variable   = variable,
+            value      = value,
+            event_id   = event,
+            coder_id   = current_user.id
+        ).all()
+    elif pn == 'ec':
+        a = db_session.query(CodeEventCreator).filter_by(
+            article_id = article,
+            variable   = variable,
+            value      = value,
+            event_id   = event,
             coder_id   = current_user.id
         ).all()
     else:
@@ -1047,6 +1162,60 @@ def delCode(pn):
         return jsonify(result={"status": 200})
     else:
         return make_response("", 404)
+
+
+@app.route('/_change_code/<pn>')
+@login_required
+def changeCode(pn):
+    """ 
+        Changes a radio button by removing all prior values, adds one new one. 
+        Only implemented for event creator right now.
+    """
+    article  = request.args.get('article')
+    variable = request.args.get('variable')
+    value    = request.args.get('value')
+    event    = request.args.get('event')
+
+    ## delete all prior values
+    a = db_session.query(CodeEventCreator).filter_by(
+        article_id = article,
+        variable   = variable,
+        event_id   = event,
+        coder_id   = current_user.id
+    ).all()
+
+    for o in a:
+        db_session.delete(o)
+    db_session.commit()
+
+    ## add new value
+    ec = CodeEventCreator(article, event, variable, value, current_user.id) 
+
+    db_session.add(ec)
+    db_session.commit()
+
+    return jsonify(result={"status": 200})
+
+
+@app.route('/_mark_ec_done')
+@login_required
+def markECDone():
+    if current_user.authlevel < 2:
+        return redirect(url_for('index'))
+
+    article_id = request.args.get('article_id')
+    coder_id   = current_user.id
+    now        = dt.datetime.now(tz = central).replace(tzinfo = None)
+
+    ## update time, commit
+    ecq = db_session.query(EventCreatorQueue).filter_by(article_id = article_id, coder_id = coder_id).first()
+    ecq.coded_dt = now
+
+    db_session.add(ecq)
+    db_session.commit()
+
+    return jsonify(result={"status": 200})
+
 
 @app.route('/_mark_sp_done')
 @login_required
@@ -1065,7 +1234,8 @@ def markSPDone():
     db_session.add(spq)
     db_session.commit()
 
-    return jsonify(result={"status": 200})
+    return make_response("", 200)
+
 
 @app.route('/_add_queue/<pn>')
 @login_required
@@ -1085,30 +1255,55 @@ def addQueue(pn):
 
     return jsonify(result={"status": 200})
 
+
 @app.route('/_get_events')
 @login_required
 def getEvents():
     aid  = int(request.args.get('article_id'))
+    pn   = request.args.get('pn')
     evs  = []
-    rvar = ['form', 'issue', 'loc']
+
+    model = None
+    if pn == '2':
+        model = CodeSecondPass
+    elif pn == 'ec':
+        model = CodeEventCreator
+    else:
+        return make_response("Not a valid model.", 404)
 
     ## get a summary of the existing events for this article
     for event in db_session.query(Event).filter(Event.article_id == aid).all():
+
+        if pn == '2':
+            rvar = {'loc': [], 'form': []}
+        elif pn == 'ec':
+            rvar = {'location': [], 'form': []}
+
         ev   = {}
-        repr = []
         ev['id'] = event.id
 
-        csps = db_session.query(CodeSecondPass).filter_by(event_id = event.id, coder_id = current_user.id).order_by(CodeSecondPass.variable).all()
+        codes = db_session.query(model).\
+            filter_by(event_id = event.id, coder_id = current_user.id).\
+            order_by(model.variable).all()
 
-        ## if this event doesn't belong to this user, skip it
-        if len(csps) == 0:
+        if len(codes) == 0:
             continue
 
-        for csp in csps:
-            if csp.variable in rvar:
-                repr.append(csp.value)
+        ## look at all the codes in the list
+        for code in codes:
+            ## if its form and in pass EC, use a text select
+            if code.variable in rvar.keys():
+                ## otherwise, just use the value
+                rvar[code.variable].append(code.value)
 
-        ev['repr'] = "-".join(repr)
+        ## join these all together in the form
+        ## location1, location2...form1, form2
+        
+        if pn == '2':
+            ev['repr'] = ", ".join(rvar['loc']) + '-' + ', '.join(rvar['form'])
+        elif pn =='ec':
+            ev['repr'] = ", ".join(rvar['location']) + '-' + ', '.join(rvar['form'])
+
         if len(ev['repr']) > 30:
             ev['repr'] = ev['repr'][0:15] + " ... " + ev['repr'][-15:]
 
@@ -1116,64 +1311,97 @@ def getEvents():
 
     return jsonify({'events': evs})
 
+
 @app.route('/_get_codes')
 @login_required
 def getCodes():
-    aid  = int(request.args.get('article'))
-    l_i  = 0
+    aid   = int(request.args.get('article'))
+    pn    = request.args.get('pn')
+    ev    = request.args.get('event')
+    l_i   = 0
 
-    try:
-        ## load current values
-        curr = db_session.query(CodeFirstPass).filter_by(coder_id = current_user.id, article_id = aid).all()
-        cd   = {}
+    model = None
+    if pn == '1':
+        model = CodeFirstPass
+    elif pn == '2':
+        model = CodeSecondPass
+    elif pn == 'ec':
+        model = CodeEventCreator
 
-        for c in curr:
-            ## these will occur only once
-            if c.variable in sv:
-                cd[c.variable] = c.value
-            else:
-                ## if they've seen this article before, note which pass it is
-                if c.variable == 'load':
-                    l_i = int(c.value) + 1
+    ## load current values
+    curr = db_session.query(model).filter_by(coder_id = current_user.id, event_id = ev, article_id = aid).all()
+    cd   = {}
 
+    for c in curr:
+        ## these will occur only once
+        if c.variable in sv:
+            cd[c.variable] = c.value
+        else:
+            ## if they've seen this article before, note which pass it is
+            if c.variable == 'load':
+                l_i = int(c.value) + 1
+
+            if c.variable in multi_vars_keys:
                 ## stash in array
                 if c.variable not in cd:
                     cd[c.variable] = []
 
-                cd[c.variable].append( [c.value, c.text] )
+                cd[c.variable].append( (c.value, c.text) )
 
-        ## insert row for every time they load the article
-        ## to measure how much time it takes to read the article
+    ## insert row for every time they load the article
+    ## to measure how much time it takes to read the article
+    if pn == '1':
         load = CodeFirstPass(aid, "load", l_i, current_user.id)
         db_session.add(load)
-        db_session.commit()
+        db_session.commit() 
 
-        return jsonify(cd)
-    except:
-        return make_response("", 404)
+    return jsonify(cd)
+
 
 @app.route('/_load_event_block')
 @login_required
-def changeEvents():
-    if current_user.authlevel < 2:
-        return redirect(url_for('index'))
+def modifyEvents():
+    # if current_user.authlevel < 2:
+    #     return redirect(url_for('index'))
 
     eid  = request.args.get('event_id')
     aid  = int(request.args.get('article_id'))
+    pn   = request.args.get('pn')
     opts = {}
     curr = {}
+    info_vars = [('campaign', 'part of a larger campaign?'), 
+        ('ritual', 'ritualized or cyclical?'),
+        ('subevent', 'a subevent of a larger event mentioned here?')]
 
-    ## initialize opts
+    model = None
+    if pn == '2':
+        model = CodeSecondPass
+        template = 'event-block.html'
+    elif pn == 'ec':
+        model = CodeEventCreator
+        template = 'event-creator-block.html'
+    else:
+        return make_response("Not a valid model.", 404)
+
+    ## initialize drop-down options
     opts = {v[0]: [] for v in vars}
 
     if eid:
         eid = int(eid)
         ## get the current values
-        for csp in db_session.query(CodeSecondPass).filter_by(event_id = eid, coder_id = current_user.id).all():
-            if csp.variable not in curr:
-                curr[ csp.variable ] = []
+        for code in db_session.query(model).filter_by(event_id = eid, coder_id = current_user.id).all():
+            if code.variable in sv or code.variable in ec_sv:
+                curr[code.variable] = code.value
+            else:
+                ## stash in array
+                if code.variable not in curr:
+                    curr[code.variable] = []
 
-            curr[ csp.variable ].append(csp.value)
+                ## loads the items which do not have text, which means
+                ## everything but text selects
+                if code.text is None:
+                    curr[code.variable].append(code.value)
+
     else:
         ## add a new event
         ev  = Event(aid)
@@ -1190,21 +1418,31 @@ def changeEvents():
     for k,v in v1:
         opts[ k ].append("_None of the above")
 
-    for k,v in v2:
-        ## coder 1-generated dropdown options
-        for o in db_session.query(CodeFirstPass).filter_by(variable = k, article_id = aid).all():
-            opts[ o.variable ].append(o.text)
+    if pn in ['1', '2']:
+        for k,v in v2:
+            ## coder 1-generated dropdown options
+            for o in db_session.query(CodeFirstPass).filter_by(variable = k, article_id = aid).all():
+                opts[ o.variable ].append(o.text)
 
-        ## coder 2-generated dropdown options
-        for o in db_session.query(CodeSecondPass).filter_by(variable = k, article_id = aid, coder_id = current_user.id).all():
-            opts[ o.variable ].append(o.value)
+            ## coder 2-generated dropdown options
+            for o in db_session.query(CodeSecondPass).filter_by(variable = k, article_id = aid, coder_id = current_user.id).all():
+                opts[ o.variable ].append(o.value)
 
     ## filter out repeated items and sort
     for k,v in opts.items():
         opts[k] = list( set( map(lambda x: x.strip(" .,"), opts[k]) ) )
         opts[k].sort()
 
-    return render_template("event-block.html", v1 = v1, v2 = v2, opts = opts, curr = curr, event_id = eid)
+    return render_template(template, 
+            v1 = v1, 
+            v2 = v2,
+            vars = event_creator_vars,
+            named_vars = named_event_creator_vars,
+            info_vars = info_vars,
+            opts = opts, 
+            curr = curr, 
+            event_id = eid)
+
 
 @app.route('/dynamic_form')
 @login_required
@@ -1228,7 +1466,8 @@ def form_template_management():
 @login_required
 def highlightVar():
     """
-    Highlight first-pass coding. Add intensity for text selected multiple times.
+    Highlights first-pass coding. 
+    Adds intensity for text selected multiple times.
 
     Algorithm:
     For each first-pass entry

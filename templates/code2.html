@@ -12,6 +12,7 @@
         </div>
         <div class="col-xs-3">
           <div class="sticky">
+          <input type="hidden" name="pass_number" id="pass_number" value="2" />
             <div id="secondpassinfo">
               {% for variable in cfp_order %}
                 <div class="vartitle"><span>{{ variable|capitalize }} {{ '(# coders: ' ~ num_coders|int ~ ')' if variable == 'protest' else '' }}</span></div>

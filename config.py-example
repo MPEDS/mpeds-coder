@@ -1,0 +1,29 @@
+
+## debugging for the templating system 
+DEBUG = True
+
+## secret key for Flask app
+SECRET_KEY = ""
+
+## site title which will appear on the interface front
+SITE_TITLE = ""
+
+## credentials for the Flask app
+USERNAME = ""
+PASSWORD = ""
+
+## credentials for MySQL
+MYSQL_USER = ""
+MYSQL_PASS = ""
+MYSQL_DB = ""
+
+## working directory
+WD = ""
+
+## directory for articles
+DOC_ROOT = ""
+
+## whether or not to use Solr, and the location of that server
+SOLR = False
+SOLR_ADDR = ""
+

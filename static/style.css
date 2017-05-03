@@ -71,19 +71,14 @@ label, select, option, input {
 }
 
 .options {
-	font-size: 0.9em;
+	#font-size: 0.9em;
 	color: #777;
 	padding-left: 6px;
 	display: none;
+	margin-bottom: 3px;
 }
 
-.options label {
-	padding: 0 0 0 2px;
-	margin: 0;
-	font-weight: 500;
-}
-
-textarea {#
+textarea {
 	height:125px;
 	width:90%;
 	font-size:0.9em;
@@ -127,6 +122,22 @@ p.meta {
 	display: block;
 }
 
+div.sectiontitle {
+	border-bottom: 1px solid #ccc;
+	line-height: 0.8em;
+}
+
+div.sectiontitle span,
+span.instructions {
+	font-weight: bold;
+	font-size: 0.85em;
+}
+
+#addeventblock .sectiontitle,
+.sectiontitle#event_desc {
+	text-align: right;
+}
+
 div.vartitle {
 	border-bottom: 1px solid #eee;
 	line-height: 0.8em;
@@ -148,6 +159,7 @@ div.vartitle {
 	border-top: 1px solid #eee;	
 }
 
+.varlist li,
 .varlist p {
 	list-style-type: none;
 	padding: 0;
@@ -156,10 +168,16 @@ div.vartitle {
 	color: #777;
 }
 
-.varlist label {
-	line-height: 0.8em;
+label.form-check-label {
+	color: #777;
+	font-weight: normal;
+	margin: 0px;
 }
 
+/*.varlist label {
+	line-height: 0.8em;
+}
+*/
 .varblock p:hover {
 	background-color: #eee;
 }
@@ -192,13 +210,18 @@ table#haystack td {
 	text-align: right;
 }
 
-.event-block label,
-.event-block input[type=textbox] {
+#list-events {
+	border-bottom: 1px solid #ccc;
+}
+
+.code2-event label,
+.code2-event input[type=textbox] {
 	line-height: 0.7em;
 	padding: 0 0 1 0px;
 
 }
-.event-block label a.glyphicon, a.glyphicon:visited {
+.event-block label a.glyphicon, 
+a.glyphicon:visited {
 	font-size: 0.9em;
 	line-height: 0.8em;
 }
@@ -268,6 +291,20 @@ a.glyphicon, a.glyphicon:visited {
 .vartitle a.glyphicon:hover {
 	color: #00FF00;
 	text-decoration: none;
+}
+
+.tab-pane {
+	margin-top: 3px;
+}
+
+ul#tabselecter {
+	margin-left: 3px;
+	margin-top: 4px;
+	background-color: #f1f1f1;
+}
+
+ul#tabselecter li a {
+	padding: 6px;
 }
 
 footer { 
