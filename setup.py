@@ -10,6 +10,7 @@ import json
 
 import config
 
+
 def resetVariableOptions():	
 	""" Load current dropdowns from file. """
 	db_session.query(VarOption).delete()

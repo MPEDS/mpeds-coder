@@ -164,6 +164,7 @@ class ArticleMetadata(Base):
         return '<ArticleMetadata %r (%r)>' % (self.title, self.id)
 
 
+
 ## All these are manually added
 class User(Base, UserMixin):
     __tablename__ = 'user'
