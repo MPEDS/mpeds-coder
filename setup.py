@@ -30,6 +30,7 @@ def addArticlesExample(db_name = 'test'):
 	print("Adding example articles...")
 	articles = []
 	for f in glob.iglob(config.DOC_ROOT + "*.txt"):
+		print(f)
 		filename = f.split('/')[-1]
 		lines    = open(f, 'r').read().split("\n")
 		title    = lines[0].replace("TITLE: ", "")
@@ -65,20 +66,23 @@ def addQueueExample():
 
 	users = db_session.query(User).filter(User.authlevel == 1).all()
 
-	aq = []
+	aq  = []
+	ecq = []
 	## assign articles randomly to core team members for funsies
 	for a in articles:
 		for u in users:
 			aq.append( ArticleQueue(article_id = a.id, coder_id = u.id) )
+			ecq.append( EventCreatorQueue(article_id = a.id, coder_id = u.id) ) 
 
 	db_session.add_all(aq)
+	db_session.add_all(ecq)
 	db_session.commit()
 
 
 def main():
-	init_db()
+	#init_db()
 	addArticlesExample()
-	resetVariableOptions()
+	#resetVariableOptions()
 	addUsersExample()
 	addQueueExample()
 
