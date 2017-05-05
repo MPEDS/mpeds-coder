@@ -84,28 +84,23 @@ v3 = [
 ]
 
 event_creator_vars = [
+    ('actor-text',  'Actors'),
     ('form-text',  'Actions / forms'),
+    ('bystander-text', 'Bystanders'),
     ('issue-text', 'Issues'),
-    ('target-text','Target'),
-    ('size-text', 'Size'),
-    ('police-text', 'Police actions'),
-    ('viol-text',   'Violence to persons'),
-    ('propdam-text', 'Property damage')
-]
-
-named_event_creator_vars = [
-    ('actor-named-text',  'Actors'),
-    ('bystander-named-text', 'Bystanders'),
-    ('target-named-text', 'Target'),
+    ('mvmt-org-text', 'Movement organizations'),
+    ('police-text', 'Police'),
+    ('police-actions-text', 'Police actions'),
     ('politician-named-text', 'Politicians'),
-    ('police-named-text', 'Police'),
-    ('org-named-text', 'Movement organizations')
+    ('propdam-text', 'Property damage'),
+    ('size-text', 'Size'),
+    ('target-text', 'Target'),
+    ('viol-text',   'Violence to persons')
 ]
 
 ## multiple variable keys
 multi_vars_keys = v1[:] 
 multi_vars_keys.extend(event_creator_vars[:])
-multi_vars_keys.extend(named_event_creator_vars[:])
 
 multi_vars_keys = [x[0] for x in multi_vars_keys]
 
@@ -119,7 +114,7 @@ sv = ['comments', 'protest', 'multi', 'nous', 'ignore']
 
 ec_sv = ['desc', 'start-date', 'end-date', 
     'location', 'duration', 'date-est',
-    'campaign', 'ritual', 'subevent']
+    'campaign', 'ritual', 'master-event', 'subevent']
 
 ## metadata for Solr
 meta_solr = ['PUBLICATION', 'SECTION', 'BYLINE', 'DATELINE', 'DATE', 'INTERNAL_ID']
@@ -546,7 +541,6 @@ def eventCreator(aid):
         # opts       = opts,
         # curr       = curr,
         # vars       = event_creator_vars,
-        # named_vars = named_event_creator_vars,
         # v1         = v1,
         text       = html.decode('utf-8'))
 
@@ -1371,7 +1365,8 @@ def modifyEvents():
     curr = {}
     info_vars = [('campaign', 'part of a larger campaign?'), 
         ('ritual', 'ritualized or cyclical?'),
-        ('subevent', 'a subevent of a larger event mentioned here?')]
+        ('master-event', 'a larger event which contains subevents?'),
+        ('subevent', 'a subevent of a larger event?')]
 
     model = None
     if pn == '2':
@@ -1437,7 +1432,6 @@ def modifyEvents():
             v1 = v1, 
             v2 = v2,
             vars = event_creator_vars,
-            named_vars = named_event_creator_vars,
             info_vars = info_vars,
             opts = opts, 
             curr = curr, 

@@ -86,19 +86,6 @@
         <div id="list_{{ k }}" class="varlist"></div>
         </div>
       {% endfor %}
-
-      <span class="instructions">Select named individuals and organizations.</span>
-      {% for k,v in named_vars %}
-      <div id="block_{{ k }}" class="varblock">
-        <div class="vartitle">
-          <span>{{ v }}</span> 
-          <a id="collapse-down_{{ k }}" class="glyphicon glyphicon-chevron-down" style="display:none;"></a>
-          <a id="collapse-up_{{ k }}" class="glyphicon glyphicon-chevron-up"></a>
-          <a id="add_{{ k }}" class="glyphicon glyphicon-plus"></a>
-        </div>
-        <div id="list_{{ k }}" class="varlist"></div>
-      </div>
-      {% endfor %}
    </div> <!-- tab-pane --> 
    <div class="tab-pane" id="preset_block">
      <div class="form">
