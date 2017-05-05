@@ -21,7 +21,7 @@ class CodeFirstPass(Base):
     def __init__(self, article_id, variable, value, coder_id, text = None):
         self.article_id = article_id
         self.variable   = variable
-        self.value	    = value
+        self.value      = value
         self.text       = text
         self.coder_id   = coder_id
         self.timestamp  = dt.datetime.now(tz = central).replace(tzinfo = None)
@@ -44,7 +44,7 @@ class CodeSecondPass(Base):
         self.article_id = article_id
         self.event_id   = event_id
         self.variable   = variable
-        self.value	    = value
+        self.value      = value
         self.coder_id   = coder_id
         self.timestamp  = dt.datetime.now(tz = central).replace(tzinfo = None)
 
@@ -147,7 +147,7 @@ class ArticleMetadata(Base):
     id        = Column(Integer, primary_key=True)
     title     = Column(String(1024))
     db_name   = Column(String(64))
-    db_id     = Column(String(64))
+    db_id     = Column(String(255))
     filename  = Column(String(255), nullable = False)
 
     firsts  = relationship("CodeFirstPass",  backref = backref("article_metadata", order_by = id))
