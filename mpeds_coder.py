@@ -1366,7 +1366,9 @@ def modifyEvents():
     info_vars = [('campaign', 'part of a larger campaign?'), 
         ('ritual', 'ritualized or cyclical?'),
         ('master-event', 'a larger event which contains subevents?'),
-        ('subevent', 'a subevent of a larger event?')]
+        ('subevent', 'a subevent of a larger event?'),
+        ('historical', 'a historical (> 1 year) event?'),
+        ('non-us', 'occurring outside of the US?')]
 
     model = None
     if pn == '2':
