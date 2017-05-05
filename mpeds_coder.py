@@ -125,14 +125,17 @@ meta_solr = ['PUBLICATION', 'SECTION', 'BYLINE', 'DATELINE', 'DATE', 'INTERNAL_I
 
 ##### load text from Solr database
 def loadSolr(solr_id):
-    SOLR_ADDR = "http://localhost:8983/solr/mpeds2"
-
+    import urllib2
     url        = '%s/select?q=id:"%s"&wt=json' % (app.config['SOLR_ADDR'], solr_id)
     not_found  = (0, [], [])
     no_connect = (-1, [], [])
 
     try:
-        res = urllib.request.urlopen(url)
+        req = urllib2.Request(url)
+        res = urllib2.urlopen(req)
+
+        ## Python 3, to be upgraded
+        #res = urllib.request.urlopen(url)
     except:
         return no_connect
     res = json.loads(res.read())
@@ -182,11 +185,10 @@ def prepText(article):
 
     filename = str('INTERNAL_ID: %s' % fn)
 
-    if app.config['SOLR'] == 'True':
+    if app.config['SOLR'] == True:
         title, meta, paras = loadSolr(db_id)
         if title == 0:
             title = "Cannot find article in Solr."
-
         elif title == -1:
             title = "Cannot connect to Solr."
         elif title == -2:
