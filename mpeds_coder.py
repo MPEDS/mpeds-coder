@@ -391,7 +391,7 @@ def code1Next():
 
     while article == None:
         ## get next article in this user's queue
-        next    = db_session.query(ArticleQueue).filter_by(coder_id = current_user.id, coded1_dt = None).first()
+        next    = db_session.query(ArticleQueue).filter_by(coder_id = current_user.id, coded_dt = None).first()
 
         ## out of articles, return null page
         if next is None:
@@ -401,11 +401,12 @@ def code1Next():
 
         ## this is a weird error and shouldn't happen but here we are.
         if article is None:
-            next.coded1_dt = now
+            next.coded_dt = now
             db_session.add(next)
             db_session.commit()
 
     return redirect(url_for('code1', aid = next.article_id))
+
 
 @app.route('/code1/<aid>')
 @login_required
@@ -416,6 +417,7 @@ def code1(aid):
     aq = db_session.query(ArticleQueue).filter_by(coder_id = current_user.id, article_id = aid).first()
 
     return render_template("code1.html", vars = vars, aid = aid, text = html.decode('utf-8'))
+
 
 @app.route('/code2')
 @login_required
@@ -429,6 +431,7 @@ def code2Next():
         return redirect(url_for('code2', aid = nextArticle.article_id))
     else:
         return render_template("null.html")
+
 
 @app.route('/code2/<aid>')
 @login_required
@@ -501,7 +504,7 @@ def code2(aid):
 @app.route('/event_creator')
 @login_required
 def ecNext():
-    nextArticle = db_session.query(ArticleQueue).filter_by(coder_id = current_user.id, coded1_dt = None).first()
+    nextArticle = db_session.query(EventCreatorQueue).filter_by(coder_id = current_user.id, coded_dt = None).first()
 
     if nextArticle:
         return redirect(url_for('eventCreator', aid = nextArticle.article_id))
@@ -546,10 +549,6 @@ def eventCreator(aid):
         # v1         = v1,
         text       = html.decode('utf-8'))
 
-
-#####
-##### Coder 2 queue
-#####
 
 class Pagination(object):
     """
@@ -639,7 +638,7 @@ class Pagination(object):
             {% endmacro %}
         """
         last = 0
-        for num in xrange(1, self.pages + 1):
+        for num in range(1, self.pages + 1):
             if num <= left_edge or \
                (num > self.page - left_current - 1 and \
                 num < self.page + right_current) or \
@@ -769,8 +768,8 @@ def _pubCount():
     df_am = df_am.set_index('article_id')
 
     ## get all the articles in the queue
-    df_aq = pd.DataFrame([(x.article_id, x.coded1_dt) for x in db_session.query(ArticleQueue).all()],\
-        columns = ['article_id', 'coded1_dt'])
+    df_aq = pd.DataFrame([(x.article_id, x.coded_dt) for x in db_session.query(ArticleQueue).all()],\
+        columns = ['article_id', 'coded_dt'])
 
     ## note that they're in the queue
     df_aq['in_queue'] = 1
@@ -809,8 +808,8 @@ def _pubCount():
             group = group[(group.db_name != 'DoCA') & (group.db_name != 'LDC')]
 
         yes_maybe = group[(group.protest_value == 'yes') | (group.protest_value == 'maybe')].db_id.nunique()
-        coded     = group[group.coded1_dt == group.coded1_dt].db_id.nunique()
-        in_queue  = group[(group.in_queue == 1) & (group.coded1_dt != group.coded1_dt)].db_id.nunique()
+        coded     = group[group.coded_dt == group.coded_dt].db_id.nunique()
+        in_queue  = group[(group.in_queue == 1) & (group.coded_dt != group.coded_dt)].db_id.nunique()
         in_db     = group[group.in_queue != 1].db_id.nunique()
 
         pub_total.append( (publication, yes_maybe, coded, in_queue, in_db ) )
@@ -830,7 +829,7 @@ def _codedOnce():
 
     ## get all coded articles
     df_cq = pd.DataFrame([(x[0].article_id, x[1].username) \
-        for x in db_session.query(ArticleQueue, User).join(User).filter(ArticleQueue.coded1_dt != None).all()],\
+        for x in db_session.query(ArticleQueue, User).join(User).filter(ArticleQueue.coded_dt != None).all()],\
         columns = ['article_id', 'coder_id'])
 
     ## count number of times article has been coded
@@ -847,6 +846,27 @@ def _codedOnce():
 
     return coded_once
 
+
+@app.route('/admin')
+@login_required
+def admin():
+    if current_user.authlevel < 3:
+        return redirect(url_for('index'))
+
+    ura   = [u.username for u in db_session.query(User).filter(User.authlevel == 1).all()]
+    coded = {user: {} for user in ura[:]}
+
+    for count, user in db_session.query(func.count(EventCreatorQueue.id), User.username).\
+        join(User).group_by(User.username).filter(EventCreatorQueue.coded_dt == None, User.username.in_(ura)).all():
+        coded[user]['remaining'] = count
+
+    return render_template(
+        "admin.html",
+        coded     = coded,
+        ura       = ura
+    )    
+
+
 @app.route('/coderstats')
 @login_required
 def coderStats():
@@ -855,6 +875,9 @@ def coderStats():
     pub_total  = []
     coded_once = None
     pub_total  = None
+    passes     = ['1', '2', 'ec']
+    stats      = ['all', 'lw', 'remaining', 'dt']
+    models     = [ArticleQueue, SecondPassQueue, EventCreatorQueue]
     if current_user.authlevel < 3:
         ## show own stats if not an admin
         ura = [current_user.username]
@@ -862,6 +885,7 @@ def coderStats():
 
         last_cfp = None
         last_csp = None
+        last_cec = None
     else:
         ## first pass coders
         ura = [u.username for u in db_session.query(User).filter(User.authlevel == 1).all()]
@@ -872,46 +896,33 @@ def coderStats():
         ## get most recent DB updates
         last_cfp = db_session.query(CodeFirstPass, User).join(User).order_by(desc(CodeFirstPass.timestamp)).first()
         last_csp = db_session.query(CodeSecondPass, User).join(User).order_by(desc(CodeSecondPass.timestamp)).first()
+        last_cec = db_session.query(CodeEventCreator, User).join(User).order_by(desc(CodeEventCreator.timestamp)).first()
 
     ## initialize user list
-    coded1 = {user: {} for user in ura[:] + gra[:]}
-    coded2 = {user: {} for user in gra[:]}
+    coded = {user: {s: {p: None for p in passes} for s in stats} for user in ura[:] + gra[:]}
 
     ## get total articles coded
-    for count, user in db_session.query(func.count(ArticleQueue.id), User.username).\
-        join(User).group_by(User.username).filter(ArticleQueue.coded1_dt != None, User.username.in_(ura)).all():
-        coded1[user]['all'] = count
+    for i in range(len(passes)):
+        pn = passes[i]
+        for count, user in db_session.query(func.count(models[i].id), User.username).\
+            join(User).group_by(User.username).filter(models[i].coded_dt != None, User.username.in_(ura)).all():
+            coded[user]['all'][pn] = count
 
-    for count, user in db_session.query(func.count(SecondPassQueue.id), User.username).\
-        join(User).group_by(User.username).filter(SecondPassQueue.coded_dt != None, User.username.in_(gra)).all():
-        coded2[user]['all'] = count
+        for count, user in db_session.query(func.count(models[i].id), User.username).\
+            join(User).group_by(User.username).filter(models[i].coded_dt > last_week, User.username.in_(ura)).all():
+            coded[user]['lw'][pn] = count
 
-    ## get last week coded
-    for count, user in db_session.query(func.count(ArticleQueue.id), User.username).\
-        join(User).group_by(User.username).filter(ArticleQueue.coded1_dt > last_week, User.username.in_(ura)).all():
-        coded1[user]['lw'] = count
+        ## remaining articles in queue
+        for count, user in db_session.query(func.count(models[i].id), User.username).\
+            join(User).group_by(User.username).filter(models[i].coded_dt == None, User.username.in_(ura)).all():
+            coded[user]['remaining'][pn] = count
 
-    for count, user in db_session.query(func.count(SecondPassQueue.id), User.username).\
-        join(User).group_by(User.username).filter(SecondPassQueue.coded_dt > last_week, User.username.in_(gra)).all():
-        coded2[user]['lw'] = count
+        ## get the last time coded
+        for timestamp, user in db_session.query(func.max(models[i].coded_dt), User.username).\
+            join(User).group_by(models[i].coder_id).filter(models[i].coded_dt != None, User.username.in_(ura)).all():
+            coded[user]['dt'][pn] = timestamp
 
-    ## remaining articles in queue
-    for count, user in db_session.query(func.count(ArticleQueue.id), User.username).\
-        join(User).group_by(User.username).filter(ArticleQueue.coded1_dt == None, User.username.in_(ura)).all():
-        coded1[user]['remaining'] = count
-
-    for count, user in db_session.query(func.count(SecondPassQueue.id), User.username).\
-        join(User).group_by(User.username).filter(SecondPassQueue.coded_dt == None, User.username.in_(gra)).all():
-        coded2[user]['remaining'] = count
-
-    ## get the last time coded
-    for timestamp, user in db_session.query(func.max(ArticleQueue.coded1_dt), User.username).\
-        join(User).group_by(ArticleQueue.coder_id).filter(ArticleQueue.coded1_dt != None, User.username.in_(ura)).all():
-        coded1[user]['dt'] = timestamp
-
-    for timestamp, user in db_session.query(func.max(SecondPassQueue.coded_dt), User.username).\
-        join(User).group_by(SecondPassQueue.coder_id).filter(SecondPassQueue.coded_dt != None, User.username.in_(gra)).all():
-        coded2[user]['dt'] = timestamp
+    print(coded)
 
     ## comment this out to save on a lot of load time for this page.
     if current_user.authlevel > 2:
@@ -924,11 +935,12 @@ def coderStats():
 
     return render_template(
         "coder_stats.html",
-        coded1     = coded1,
-        coded2     = coded2,
+        coded      = coded,
         pub_total  = pub_total,
         last_cfp   = last_cfp,
         last_csp   = last_csp,
+        pn         = 'ec',
+        pass_title = 'Event Creator Status',
         ura        = ura,
         gra        = gra,
         coded_once = coded_once
@@ -939,23 +951,30 @@ def coderStats():
 @app.route('/userarticlelist/<pn>/<int:page>')
 @login_required
 def userArticleList(pn, page = 1):
-    pn = int(pn)
-    if pn == 1:
+    if pn == '1':
         pagination = paginate(db_session.query(ArticleQueue, ArticleMetadata).\
-        filter(ArticleQueue.coder_id == current_user.id, ArticleQueue.coded1_dt != None).\
+        filter(ArticleQueue.coder_id == current_user.id, ArticleQueue.coded_dt != None).\
         join(ArticleMetadata).\
-        order_by(desc(ArticleQueue.coded1_dt)), page, 10000, True)
+        order_by(desc(ArticleQueue.coded_dt)), page, 10000, True)
         aqs = pagination.items
-    elif pn == 2:
+    elif pn == '2':
         pagination = paginate(db_session.query(SecondPassQueue, ArticleMetadata).\
         filter(SecondPassQueue.coder_id == current_user.id, SecondPassQueue.coded_dt != None).\
         join(ArticleMetadata).\
         order_by(desc(SecondPassQueue.coded_dt)), page, 10000, True)
         aqs = pagination.items
+    elif pn == 'ec':
+        pagination = paginate(db_session.query(EventCreatorQueue, ArticleMetadata).\
+        filter(EventCreatorQueue.coder_id == current_user.id, EventCreatorQueue.coded_dt != None).\
+        join(ArticleMetadata).\
+        order_by(desc(EventCreatorQueue.coded_dt)), page, 10000, True)
+        aqs = pagination.items
     else:
         return make_response("Invalid page.", 404)
 
-    return render_template("list.html", pn = pn, aqs = aqs,
+    return render_template("list.html", 
+        pn = pn,
+        aqs = aqs,
         pagination = pagination)
 
 
@@ -1032,7 +1051,7 @@ def addCode(pn):
 
         ## update datetime on every edit
         aq = db_session.query(ArticleQueue).filter_by(article_id = aid, coder_id = current_user.id).first()
-        aq.coded1_dt = now
+        aq.coded_dt = now
         aqs.append(aq)
     elif pn == '2':
         model = CodeSecondPass
@@ -1196,9 +1215,6 @@ def changeCode(pn):
 @app.route('/_mark_ec_done')
 @login_required
 def markECDone():
-    if current_user.authlevel < 2:
-        return redirect(url_for('index'))
-
     article_id = request.args.get('article_id')
     coder_id   = current_user.id
     now        = dt.datetime.now(tz = central).replace(tzinfo = None)

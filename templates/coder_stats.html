@@ -3,7 +3,7 @@
 <div class="container">
   <div class="row">
     <div class="col-xs-6">
-    	<h4>First pass</h4>
+    	<h4>{{ pass_title }}</h4>
     	<table class="table table-condensed">
     		<tr>
     			<th></th>
@@ -15,25 +15,25 @@
 	    	{% for u in ura %}
 	    	<tr>
 	    		<td>{{ u|capitalize }}</td>
-                <td>{{ coded1[u]['lw'] }}</td>
-                <td>{{ coded1[u]['all'] }}</td>
-                <td>{{ coded1[u]['remaining'] }}</td>
-                <td>{{ coded1[u]['dt']|datetime }}</td>
+                <td>{{ coded[u]['lw'][pn] }}</td>
+                <td>{{ coded[u]['all'][pn] }}</td>
+                <td>{{ coded[u]['remaining'][pn] }}</td>
+                <td>{{ coded[u]['dt'][pn]|datetime }}</td>
 	    	</tr>
 	    	{% endfor %}
-            <tr><td colspan="5"><h4>Second pass</h4></td></tr>
+<!--             <tr><td colspan="5"><h4>Second pass</h4></td></tr>
             {% for u in gra %}
-                {% if coded2[u]['all'] or coded2[u]['remaining'] %}
+                {% if coded[u]['all'] or coded[u]['remaining'] %}
             <tr>
                 <td>{{ u|capitalize }}</td>
-                <td>{{ coded2[u]['lw'] }}</td>
-                <td>{{ coded2[u]['all'] }}</td>
-                <td>{{ coded2[u]['remaining'] }}</td>
-                <td>{{ coded2[u]['dt']|datetime }}</td>
+                <td>{{ coded[u]['lw'][pn] }}</td>
+                <td>{{ coded[u]['all'][pn] }}</td>
+                <td>{{ coded[u]['remaining'][pn] }}</td>
+                <td>{{ coded[u]['dt'][pn]|datetime }}</td>
             </tr>
                 {% endif %}
-            {% endfor %}        
-	    </table>
+            {% endfor %} -->        
+        </table>
     </div>
     {% if current_user.authlevel > 2 %}
     <div class="col-xs-6">

@@ -24,6 +24,7 @@ def resetVariableOptions():
 	db_session.add_all(dds)
 	db_session.commit()
 
+
 def addArticlesExample(db_name = 'test'):
 	""" Add articles from example directory. """
 
@@ -72,6 +73,7 @@ def addUsersExample():
 	db_session.add(User(username = 'coder2p_2', password = 'default', authlevel = 2))
 
 	db_session.commit()
+
 
 def addQueueExample():
 	print("Adding example queues...")

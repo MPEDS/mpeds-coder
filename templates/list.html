@@ -16,15 +16,15 @@
             <tbody>
           		{% for aq, am in aqs %}
           		<tr>
-                      {% if pn == 1 %}
-              			<td><a href="{{ url_for('code1', aid = aq.article_id) }}">{{ aq.article_id }}</a></th>
-              			<td>{{ am.title|safe }}</td>
-              			<td>{{ aq.coded1_dt.strftime('%Y-%m-%d %H:%M:%S') }}</td>
-                      {% else %}
-                          <td><a href="{{ url_for('code2', aid = aq.article_id) }}">{{ aq.article_id }}</a></th>
-                          <td>{{ am.title }}</td>
-                          <td>{{ aq.coded_dt.strftime('%Y-%m-%d %H:%M:%S') }}</td>
-                      {% endif %}
+                    {% if pn == '1' %}
+              			<td><a href="{{ url_for('code1', aid = aq.article_id) }}" target="_blank">{{ aq.article_id }}</a></th>
+                    {% elif pn == '2' %}
+                    <td><a href="{{ url_for('code2', aid = aq.article_id) }}" target="_blank">{{ aq.article_id }}</a></th>
+                    {% elif pn == 'ec' %}
+                    <td><a href="{{ url_for('eventCreator', aid = aq.article_id) }}" target="_blank">{{ aq.article_id }}</a></th>
+                    {% endif %}
+                    <td>{{ am.title }}</td>
+                    <td>{{ aq.coded_dt.strftime('%Y-%m-%d %H:%M:%S') }}</td>
           		</tr>
           		{% endfor %}
             </tbody>

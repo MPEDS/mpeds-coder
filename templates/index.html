@@ -8,11 +8,13 @@
 		<div class="index">
 
             <h4>Event creator</h4>
-            <p><a href="{{ url_for('ecNext') }}">Coding interface</a> | <a href="{{ url_for('userArticleList', pn = 3) }}">List</a></p>
+            <p><a href="{{ url_for('ecNext') }}">Coding interface</a> | <a href="{{ url_for('userArticleList', pn = 'ec') }}">List</a></p>
 
-			{% if current_user.authlevel > 1 %}
-				<h4>Second pass</h4>
-				<p><a href="{{ url_for('code2Next') }}">Coding interface</a> | <a href="{{ url_for('userArticleList', pn = 2) }}">List</a> | <a href="{{ url_for('code2queue', sort = 'percent_yes', sort_dir = 'desc') }}">First pass summary</a></p>
+			{% if current_user.authlevel > 2 %}
+<!-- 				<h4>Second pass</h4>
+				<p><a href="{{ url_for('code2Next') }}">Coding interface</a> | <a href="{{ url_for('userArticleList', pn = 2) }}">List</a> | <a href="{{ url_for('code2queue', sort = 'percent_yes', sort_dir = 'desc') }}">First pass summary</a></p> -->
+				<p><a href="{{ url_for('admin') }}">Admin</a></p>
+
 			{% endif %}
 			<p><a href="{{ url_for('coderStats') }}">Coder stats</a></p>
 		</div>

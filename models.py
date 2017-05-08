@@ -9,7 +9,7 @@ from pytz import timezone
 central = timezone('US/Central')
 
 class CodeFirstPass(Base):
-    __tablename__ = 'code_first_pass'
+    __tablename__ = 'coder_first_pass'
     id         = Column(Integer, primary_key=True)
     article_id = Column(Integer, ForeignKey('article_metadata.id'), nullable = False)
     variable   = Column(String(100), nullable = False)
@@ -95,8 +95,7 @@ class ArticleQueue(Base):
     id         = Column(Integer, primary_key=True)
     article_id = Column(Integer, ForeignKey('article_metadata.id'), nullable = False)
     coder_id   = Column(Integer, ForeignKey('user.id'), nullable = False)
-    coded1_dt  = Column(DateTime)
-    coded2_dt  = Column(DateTime)
+    coded_dt  = Column(DateTime)
 
     UniqueConstraint('article_id', 'coder_id', name = 'unique1')
 
