@@ -922,8 +922,6 @@ def coderStats():
             join(User).group_by(models[i].coder_id).filter(models[i].coded_dt != None, User.username.in_(ura)).all():
             coded[user]['dt'][pn] = timestamp
 
-    print(coded)
-
     ## comment this out to save on a lot of load time for this page.
     if current_user.authlevel > 2:
         ## generate the publication statistics
