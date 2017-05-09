@@ -1383,6 +1383,7 @@ def modifyEvents():
         ('ritual', 'ritualized or cyclical?'),
         ('master-event', 'a larger event which contains subevents?'),
         ('subevent', 'a subevent of a larger event?'),
+        ('counterprotest', 'a counter-protest?'),
         ('historical', 'a historical (> 1 year) event?'),
         ('non-us', 'occurring outside of the US?')]
 

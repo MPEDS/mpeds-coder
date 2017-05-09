@@ -23,10 +23,10 @@
       <label for="desc">Provide a short description of this event.</label>
       <textarea class="form-control form-control-sm" name="desc" id="info_desc" rows="3">{{ curr['desc']|safe }}</textarea>
 
-      <label for="start-date">Start date</label>
+      <label for="start-date">Start date (YYYY-MM-DD)</label>
       <input class="form-control" type="text" name="start-date" id="info_start-date" value="{{ curr['start-date'] }}" />
 
-      <label for="end-date">End date</label>
+      <label for="end-date">End date (YYYY-MM-DD)</label>
       <input class="form-control" type="text" name="end-date" id="info_end-date" value="{{ curr['end-date'] }}" />
 
       <label for="location">Location (City, State/Province, Country)</label>
