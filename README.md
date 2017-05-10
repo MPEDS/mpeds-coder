@@ -22,17 +22,15 @@ Then run the Flask test server with the following.
 
 ## Development plan
 
-This is a product in early alpha stages. Features we hope to have working soon:
+This is a product in early alpha stages. Features we hope to have working eventually:
 
-* Robust admin dashboard
 * Template system for variables
 * Ability to specify multiple article sources
 * Generalizing an n-pass structure and control flow
 * Ability for multiple database integration
-* User management
 * Cross-browser compatibility
-* Visual article queuing
-*
+
+If you're a movement or event data scholar and have a specific project for which you think this would be a good tool, shoot Alex Hanna (alex.hanna@gmail.com) a message.
 
 ## Acknowledgments
 
