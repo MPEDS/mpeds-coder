@@ -20,6 +20,7 @@ import urllib
 import datetime as dt
 import time
 from math import ceil
+from random import sample, choice
 
 ## pandas
 import pandas as pd
@@ -33,6 +34,9 @@ import pytz
 ## flask
 from flask import Flask, request, session, g, redirect, url_for, abort, make_response, render_template, flash, jsonify, Response, stream_with_context
 from flask_login import LoginManager, login_user, logout_user, current_user, login_required
+
+## article assignment library
+import assign_lib
 
 ## db
 from sqlalchemy.exc import OperationalError
@@ -855,15 +859,27 @@ def admin():
 
     ura   = [u.username for u in db_session.query(User).filter(User.authlevel == 1).all()]
     coded = {user: {} for user in ura[:]}
+    dbs   = [x[0] for x in db_session.query(ArticleMetadata.db_name).distinct()]
 
+    ## get user stats for EC
     for count, user in db_session.query(func.count(EventCreatorQueue.id), User.username).\
         join(User).group_by(User.username).filter(EventCreatorQueue.coded_dt == None, User.username.in_(ura)).all():
         coded[user]['remaining'] = count
 
+    for count, user in db_session.query(func.count(EventCreatorQueue.id), User.username).\
+        join(User).group_by(User.username).filter(EventCreatorQueue.coded_dt != None, User.username.in_(ura)).all():
+        coded[user]['completed'] = count
+
+    ## get number of unassigned articles
+    unassigned = len( set([x.id for x in db_session.query(ArticleMetadata).all()]) - \
+        set([x[0] for x in db_session.query(distinct(EventCreatorQueue.article_id)).all()]) )
+
     return render_template(
         "admin.html",
-        coded     = coded,
-        ura       = ura
+        coded      = coded,
+        ura        = ura,
+        dbs        = dbs,
+        unassigned = unassigned
     )    
 
 
@@ -876,7 +892,7 @@ def coderStats():
     coded_once = None
     pub_total  = None
     passes     = ['1', '2', 'ec']
-    stats      = ['all', 'lw', 'remaining', 'dt']
+    stats      = ['completed', 'lw', 'remaining', 'dt']
     models     = [ArticleQueue, SecondPassQueue, EventCreatorQueue]
     if current_user.authlevel < 3:
         ## show own stats if not an admin
@@ -906,7 +922,7 @@ def coderStats():
         pn = passes[i]
         for count, user in db_session.query(func.count(models[i].id), User.username).\
             join(User).group_by(User.username).filter(models[i].coded_dt != None, User.username.in_(ura)).all():
-            coded[user]['all'][pn] = count
+            coded[user]['completed'][pn] = count
 
         for count, user in db_session.query(func.count(models[i].id), User.username).\
             join(User).group_by(User.username).filter(models[i].coded_dt > last_week, User.username.in_(ura)).all():
@@ -1620,6 +1636,90 @@ def highlightVar():
         r_body += "<p id='%s'>%s</p>\n" % (p_key, r_paras[p_key])
 
     return jsonify(result={"status": 200, "meta": r_paras['meta'], "body": r_body})
+
+
+#####
+##### ADMIN TOOLS
+#####
+
+@app.route('/_add_user')
+@login_required
+def addUser():
+    if current_user.authlevel < 3:
+        return redirect(url_for('index'))
+
+    username = request.args.get('username')
+
+    ## validate
+    if not re.match(r'[A-Za-z0-9_]+', username):
+        return make_response('Invalid username. Use only letters, numbers, and underscores.', 500)
+
+    exists = db_session.query(User).filter_by(username = username).first()
+    if exists:
+        return make_response('Username exists. Choose another.', 500)
+
+    ## generate password
+    chars    = string.ascii_letters + string.digits
+    length   = 8
+    password = ''.join([choice(chars) for i in range(length)])
+
+    db_session.add(User(username = username, password = password, authlevel = 1))
+    db_session.commit()
+
+    ## TK: Send email to admin to have notice of new account
+
+    return jsonify(result={"status": 200, "password": password})
+
+
+@app.route('/_assign_articles')
+@login_required
+def assignArticles():
+    if current_user.authlevel < 3:
+        return redirect(url_for('index'))
+
+    num     = request.args.get('num')
+    db_name = request.args.get('db')
+    users   = request.args.get('users')
+    same    = request.args.get('same')
+
+    try:
+        num = int(num)
+    except:
+        return make_response('Please enter a valid number.', 500)
+
+
+    if db_name == '':
+        return make_response('Please select a valid database.', 500)
+
+    ## get number of unassigned articles
+    unassigned = len( set([x.id for x in db_session.query(ArticleMetadata).filter_by(db_name = db_name).all()]) - \
+        set([x[0] for x in db_session.query(distinct(EventCreatorQueue.article_id)).all()]) )
+
+    if num > unassigned:
+        return make_response('Select a number less than or equal to number of unassigned articles.', 500)
+
+    users = users.split(',')
+
+    ## make a user dictionary
+    user_dict = {user.username: user.id for user in db_session.query(User).all()}
+
+    ## users in list
+    user_ids = []
+    for u in users:
+        user_ids.append(user_dict[u])
+
+    ## make assignment
+    if same == 'same':
+        ## assign all the same articles
+        articles = assign_lib.generateSample(num, db_name, 'ec')
+        assign_lib.assignmentToCoders(articles, user_ids, 'ec')
+    elif same == 'different':
+        for u in users:
+            articles = assign_lib.generateSample(num, db_name, 'ec')
+            assign_lib.assignmentToCoders(articles, [user_dict[u]], 'ec')
+
+    return make_response('%d articles assigned successfully.' % num, 200)
+
 
 if __name__ == '__main__':
     app.run()

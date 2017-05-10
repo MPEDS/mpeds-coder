@@ -4,7 +4,7 @@
   <div class="row">
     <div class="col-xs-6">
     	<h4>{{ pass_title }}</h4>
-    	<table class="table table-condensed">
+    	<table class="table table-condensed coder-stats">
     		<tr>
     			<th></th>
                 <th>Past 7 days</th>
@@ -16,18 +16,18 @@
 	    	<tr>
 	    		<td>{{ u|capitalize }}</td>
                 <td>{{ coded[u]['lw'][pn] }}</td>
-                <td>{{ coded[u]['all'][pn] }}</td>
+                <td>{{ coded[u]['completed'][pn] }}</td>
                 <td>{{ coded[u]['remaining'][pn] }}</td>
                 <td>{{ coded[u]['dt'][pn]|datetime }}</td>
 	    	</tr>
 	    	{% endfor %}
 <!--             <tr><td colspan="5"><h4>Second pass</h4></td></tr>
             {% for u in gra %}
-                {% if coded[u]['all'] or coded[u]['remaining'] %}
+                {% if coded[u]['completed'] or coded[u]['remaining'] %}
             <tr>
                 <td>{{ u|capitalize }}</td>
                 <td>{{ coded[u]['lw'][pn] }}</td>
-                <td>{{ coded[u]['all'][pn] }}</td>
+                <td>{{ coded[u]['completed'][pn] }}</td>
                 <td>{{ coded[u]['remaining'][pn] }}</td>
                 <td>{{ coded[u]['dt'][pn]|datetime }}</td>
             </tr>

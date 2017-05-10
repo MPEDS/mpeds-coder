@@ -186,6 +186,10 @@ table#haystack td {
 	font-size: 0.9em;
 }
 
+table.coder-stats {
+	font-size: 0.85em;
+}
+
 .yes {
 	background-color: #DFF0D8;
 }
@@ -295,6 +299,10 @@ a.glyphicon, a.glyphicon:visited {
 
 .tab-pane {
 	margin-top: 3px;
+}
+
+#admin-actions {
+	padding: 10 16px;
 }
 
 ul#tabselecter {
