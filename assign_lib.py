@@ -100,19 +100,21 @@ def getUnpairedSecondPass():
 	return list(vc[vc == 1].index)
 
 
-def assignmentToBin(article_ids, coder_bins, pass_number = 1):
+def assignmentToBin(article_ids, coder_bins, pass_number = '1'):
 	"""Given a list of bins, assign one article to each coder in the bin"""
 	i   = 0
 	for article_id in article_ids:
-		bin = coder_bins[i]
+		my_bin = coder_bins[i]
 
-		for coder_id in bin:
+		for coder_id in my_bin:
 			## add to coder queue
 			assignmentToCoders([article_id], [coder_id], pass_number)
 		if i == len(coder_bins) - 1:
 			i = 0
 		else:
 			i += 1
+
+	return i
 
 
 def assignDoubleCheck(coder_id1, coder_id2, n, pass_number = 1):
@@ -165,27 +167,28 @@ def assignmentToCoders(article_ids, coder_ids, pass_number = '1'):
 	db_session.add_all(to_add)
 	db_session.commit()
 
+	return len(to_add)
 
-def transferCoderToCoder(coder1, coder2, pass_number = 1, n_to_assign = 0):
+def transferCoderToCoder(coder1, coder2, pass_number = '1', n_to_assign = 0):
 	""" Transfer articles from coder1 to coder2 """
-	if type(coder1) in [int, long]:
-		coder1 = [coder1]
-	if type(coder2) in [int, long]:
-		coder2 = [coder2]
+	if type(coder1) != list and type(coder2) != list:
+		print('coder1 and coder2 must be list types')
+		return -1
 
-	model = ArticleQueue if pass_number == 1 else SecondPassQueue
+	if pass_number == '1':
+		model  = ArticleQueue 
+	elif pass_number == '2':
+		model  = SecondPassQueue
+	elif pass_number == 'ec':
+		model = EventCreatorQueue
 
-	if pass_number == 1:
-		src_aq = db_session.query(model).filter(model.coded_dt == None, model.coder_id.in_(coder1)).all()
-	elif pass_number == 2:
-		src_aq = db_session.query(model).filter(model.coded_dt == None, model.coder_id.in_(coder1)).all()
-
+	src_aq = db_session.query(model).filter(model.coded_dt == None, model.coder_id.in_(coder1)).all()
 	dst_aq = [x.article_id for x in db_session.query(model).filter(model.coder_id.in_(coder2)).all()]
-	
+
 	## shuffle so if we're transferring from many to one we don't just get one coder
 	random.shuffle(src_aq)
 
-	i = 0
+	n_transferred = 0
 	for aq in src_aq:
 		if aq.article_id in dst_aq:
 			## skip if the article is in the destination queue
@@ -193,70 +196,66 @@ def transferCoderToCoder(coder1, coder2, pass_number = 1, n_to_assign = 0):
 			continue
 		else:
 			for c in coder2:
-				if pass_number == 1:
+				if pass_number == '1':
 					new_aq = ArticleQueue( article_id = aq.article_id, coder_id = c )
-				else:
+				elif pass_number == '2':
 					new_aq = SecondPassQueue( article_id = aq.article_id, coder_id = c )
+				elif pass_number == 'ec':
+					new_aq = EventCreatorQueue( article_id = aq.article_id, coder_id = c )
+
 			db_session.add(new_aq)
 			db_session.delete(aq)
 			dst_aq.append(aq.article_id)
-			i += 1
+			n_transferred += 1
 
-		if i >= n_to_assign:
+		if n_transferred >= n_to_assign:
 			break
 
-	## assert that dupes have not been entered
-	dupes = db_session.query(model).filter(model.coder_id.in_(coder2)).\
-		group_by(model.article_id, model.coder_id).having(func.count(model.id) > 1).all()
+	## TK: This query is kind of buggy for some reason.
 
-	## rollback if this there are dupes
-	if len(dupes) != 0:
-		db_session.rollback()
-		print("%d duplicates have been detected. Rolling back." % len(dupes))
-		return
+	## assert that dupes have not been entered
+	# dupes = db_session.query(model).filter(model.coder_id.in_(coder2)).\
+	# 	group_by(model.article_id, model.coder_id).having(func.count(model.id) > 1).all()
+
+	# ## rollback if this there are dupes
+	# if len(dupes) != 0:
+	# 	db_session.rollback()
+	# 	print("%d duplicates have been detected. Rolling back." % len(dupes))
+	# 	return -1
 
 	db_session.commit()
+	return n_transferred
 
 
 def createBins(coders, n):
 	"""Create bins of users given a list and a bin size"""
 	## create bins
-	bins = list(combinations([x.id for x in coders], n))
+	bins = list(combinations(coders, n))
 
 	## shuffle the bins so the first few users don't get more articles
 	random.shuffle(bins)
 
 	return bins
 
+
 def generateSampleNumberForBins(num_per_coder, n, k):
-	"""generate the number of articles necessary to assign each coder x number
-	of articles, given the bin size.
-	Formula is: (n - 1)! / (k - 1)! (n - 1)!
+	"""
+		Generate the number of articles necessary to assign each coder * number
+		of articles, given the bin size.
+		Formula is: (n - 1)! / (k - 1)! (n - 1)!
 	"""
 
 	a = factorial(n - 1) / ( factorial( k - 1 ) * factorial(n - k) )
 
-	# if num_coders == 8:
-	# 	if bin_size == 1: ## dumb case
-	# 		a = 1
-	# 	elif bin_size == 2:
-	# 		a = 7
-	# 	elif bin_size == 3:
-	# 		a = 21
-	# 	else:
-	# 		raise NotImplementedError
-	# else:
-	# 	raise NotImplementedError
-
-	## if the number per coder doesn't divide evenly into the number of appearances
-	## error
-	if num_per_coder % a != 0:
-		raise Exception("%d doesn't divide evenly into %d. Choose different num_per_coder." % (num_per_coder, a) )
+	## the number per coder doesn't divide evenly into the number of appearances
+	## subtract the remainder
+	remainder = num_per_coder % a
+	num_per_coder -= remainder
 
 	## get number of bins
 	num_bins = len(list(combinations(range(0,n), k)))
 
-	return num_bins * num_per_coder / a
+	return int(num_bins * num_per_coder / a)
 
 #####
 ### DUPE HANDLING

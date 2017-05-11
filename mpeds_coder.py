@@ -871,8 +871,10 @@ def admin():
         coded[user]['completed'] = count
 
     ## get number of unassigned articles
-    unassigned = len( set([x.id for x in db_session.query(ArticleMetadata).all()]) - \
-        set([x[0] for x in db_session.query(distinct(EventCreatorQueue.article_id)).all()]) )
+    unassigned = []
+    for db in dbs:
+        unassigned.append( (db, len( set([x.id for x in db_session.query(ArticleMetadata).filter_by(db_name = db).all()]) - \
+        set([x[0] for x in db_session.query(distinct(EventCreatorQueue.article_id)).all()]))) )
 
     return render_template(
         "admin.html",
@@ -1671,9 +1673,9 @@ def addUser():
     return jsonify(result={"status": 200, "password": password})
 
 
-@app.route('/_assign_articles')
+@app.route('/_assign_articles_individual')
 @login_required
-def assignArticles():
+def assignArticlesIndividual():
     if current_user.authlevel < 3:
         return redirect(url_for('index'))
 
@@ -1687,6 +1689,63 @@ def assignArticles():
     except:
         return make_response('Please enter a valid number.', 500)
 
+    if db_name == '':
+        return make_response('Please select a valid database.', 500)
+
+    if same is None:
+        return make_response('Please select a "same" or "different" option.', 500)
+
+    ## get number of unassigned articles
+    unassigned = len( set([x.id for x in db_session.query(ArticleMetadata).filter_by(db_name = db_name).all()]) - \
+        set([x[0] for x in db_session.query(distinct(EventCreatorQueue.article_id)).all()]) )
+
+    if num > unassigned:
+        return make_response('Select a number less than or equal to number of unassigned articles.', 500)
+
+    users = users.split(',')
+
+    ## make a user dictionary
+    user_dict = {user.username: user.id for user in db_session.query(User).all()}
+
+    ## users in list
+    user_ids = []
+    for u in users:
+        user_ids.append(user_dict[u])
+
+    n_added = 0
+    ## make assignment
+    if same == 'same':
+        ## assign all the same articles
+        articles = assign_lib.generateSample(num, db_name, 'ec')
+        n_added  = assign_lib.assignmentToCoders(articles, user_ids, 'ec')
+    elif same == 'different':
+        for u in users:
+            articles = assign_lib.generateSample(num, db_name, 'ec')
+            n_added  = assign_lib.assignmentToCoders(articles, [user_dict[u]], 'ec')
+
+    return make_response('%d articles assigned successfully.' % n_added, 200)
+
+
+@app.route('/_assign_articles_group')
+@login_required
+def assignArticlesGroup():
+    if current_user.authlevel < 3:
+        return redirect(url_for('index'))
+
+    num     = request.args.get('num')
+    db_name = request.args.get('db')
+    users   = request.args.get('users')
+    group_size = request.args.get('group_size')
+
+    try:
+        num = int(num)
+    except:
+        return make_response('Please enter a valid number of articles.', 500)
+
+    try:
+        group_size = int(group_size)
+    except:
+        return make_response('Please enter a valid group size.', 500)
 
     if db_name == '':
         return make_response('Please select a valid database.', 500)
@@ -1707,18 +1766,50 @@ def assignArticles():
     user_ids = []
     for u in users:
         user_ids.append(user_dict[u])
+    
+    bins       = assign_lib.createBins(user_ids, group_size)
+    print(bins)
+    num_sample = assign_lib.generateSampleNumberForBins(num, len(user_ids), group_size)
+    print(num_sample)
+    articles   = assign_lib.generateSample(num_sample, db_name, pass_number = 'ec')
+    print(articles)
+    assign_lib.assignmentToBin(articles, bins, pass_number = 'ec')
 
-    ## make assignment
-    if same == 'same':
-        ## assign all the same articles
-        articles = assign_lib.generateSample(num, db_name, 'ec')
-        assign_lib.assignmentToCoders(articles, user_ids, 'ec')
-    elif same == 'different':
-        for u in users:
-            articles = assign_lib.generateSample(num, db_name, 'ec')
-            assign_lib.assignmentToCoders(articles, [user_dict[u]], 'ec')
+    return make_response('%d articles assigned successfully.' % num_sample, 200)
 
-    return make_response('%d articles assigned successfully.' % num, 200)
+
+@app.route('/_transfer_articles')
+@login_required
+def transferArticles():
+    if current_user.authlevel < 3:
+        return redirect(url_for('index'))
+
+    num        = request.args.get('num')
+    from_users = request.args.get('from_users')
+    to_users   = request.args.get('to_users')
+
+    try:
+        num = int(num)
+    except:
+        return make_response('Please enter a valid number.', 500)
+   
+    from_users = from_users.split(',')
+    to_users = to_users.split(',')
+
+    ## make a user dictionary
+    user_dict = {user.username: user.id for user in db_session.query(User).all()}
+
+    ## users in list
+    from_ids = []
+    for u in from_users:
+        from_ids.append(user_dict[u])
+    to_ids = []
+    for u in to_users:
+        to_ids.append(user_dict[u])
+
+    n = assign_lib.transferCoderToCoder(from_ids, to_ids, 'ec', num)
+
+    return make_response('%d articles transferred successfully.' % n, 200)
 
 
 if __name__ == '__main__':

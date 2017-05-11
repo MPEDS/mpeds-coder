@@ -9,15 +9,18 @@
             <li class="tablinks active" id="add-user_button">
               <a href="#">Add user</a>
             </li>
-            <li class="tablinks" id="assign-articles_button">
-              <a href="#">Assign articles</a>
+            <li class="tablinks" id="assign-articles-individual_button">
+              <a href="#">Assign articles by individual</a>
+            </li>
+            <li class="tablinks" id="assign-articles-group_button">
+              <a href="#">Assign articles by group</a>
             </li>
             <li class="tablinks" id="transfer-articles_button">
               <a href="#">Transfer articles</a>
             </li>
-            <li class="tablinks" id="double-check_button">
+<!--             <li class="tablinks" id="double-check_button">
               <a href="#">Double check</a>
-            </li>
+            </li> -->
             <li class="tablinks" id="search-solr_button">
               <a href="#">Search Solr</a>
             </li>
@@ -34,17 +37,17 @@
               </div> 
             </div>
 
-            <div class="tab-pane" id="assign-articles_block">
+            <div class="tab-pane" id="assign-articles-individual_block">
               <p>
-                <small class="form-text text-muted">Assign unassigned articles to coders. You can choose to assign the same <i>n</i> articles to all coders, or <i>n</i> distinct articles to each coder.</small>
+                <small class="form-text text-muted">Assign unassigned articles to coders. You can choose to assign the same <i>n</i> articles to all coders or <i>n</i> distinct articles to each coder.</small>
               </p>
               <div class="row">
-                <div class="col-xs-4 form-group" id="assign-articles-form-group">
-                  <label>Number of articles</label>
-                  <input class="form-control" type="number" name="num-articles" id="num-articles" value="" />
+                <div class="col-xs-4 form-group" id="assign-articles-individual-form-group">
+                  <label>Number of articles (n)</label>
+                  <input class="form-control" type="number" name="num-assign-articles-individual" id="num-assign-articles-individual" value="" />
 
-                  <label for="article-database">Article Database</label>
-                  <select class="form-control" id="article-database">
+                  <label for="article-database-individual">Article Database</label>
+                  <select class="form-control" id="article-database-individual">
                     <option selected value=''>---</option>
                     {% for db in dbs %}
                     <option value="{{ db }}">{{ db }}</option>
@@ -53,58 +56,94 @@
                   <div class="form-control-feedback"></div>
                 </div>
                 <div class="col-xs-4">
-                  <label>Assign to</label>
+                  <label>Users</label>
                   {% for u in ura%}
-                    <div class="form-check">
+                    <div class="form-check" id="individual-users">
                       <label class="form-check-label" id="{{ u }}_user">
                         <input type="checkbox" class='user' id="{{ u }}" value="{{ u }}"> {{ u|safe }}
                       </label>
                     </div>
                   {% endfor %}
-                </div>
-                <div class="col-xs-4">
+                  <p></p>
                   <label>Assign same or different articles?</label>
                   <div class="form-check">
                     <label class="form-check-label">
                       <input class="form-check-input" type="radio" name="article-distribution" id="article-distribution" value="same" /> Same
-                    </label>              
-                  </div>              
+                    </label>
+                  </div>      
                   <div class="form-check">
                     <label class="form-check-label">
                       <input class="form-check-input" type="radio" name="article-distribution" id="article-distribution" value="different" /> Different
                     </label>
-                  </div>              
+                  </div>
                 </div>
               </div>
             </div>
+
+            <div class="tab-pane" id="assign-articles-group_block">
+              <p>
+                <small class="form-text text-muted">Assign unassigned articles to groups of coders. This assigns <i>n</i> articles to each coder, such that <i>k</i> users code each article.</small>
+              </p>
+              <div class="row">
+                <div class="col-xs-4 form-group" id="assign-articles-group-form-group">
+                  <label>Number of articles (n)</label>
+                  <input class="form-control" type="number" name="num-assign-articles-group" id="num-assign-articles-group" value="" />
+
+                  <label for="article-database-group">Article Database</label>
+                  <select class="form-control" id="article-database-group">
+                    <option selected value=''>---</option>
+                    {% for db in dbs %}
+                    <option value="{{ db }}">{{ db }}</option>
+                    {% endfor %}
+                  </select> 
+                  <div class="form-control-feedback"></div>
+                </div>
+                <div class="col-xs-4">
+                  <label>Users</label>
+                  {% for u in ura%}
+                    <div class="form-check" id="group-users">
+                      <label class="form-check-label" id="{{ u }}_user">
+                        <input type="checkbox" class='user' id="{{ u }}" value="{{ u }}"> {{ u|safe }}
+                      </label>
+                    </div>
+                  {% endfor %}
+                  <p></p>
+                  <label>Group size (k)</label>
+                  <input class="form-control" type="number" name="group-size" id="group-size" value="" />                  
+                </div>
+              </div>
+            </div>            
 
             <div class="tab-pane" id="transfer-articles_block">
               <p>
                 <small class="form-text text-muted">Transfers articles which are in the queue of one or more coders into the queue of one or more other coders.</small>
               </p>
               <div class="row">
-                <div class="col-xs-4">
-                  <label>Number of articles</label>
-                  <input class="form-control" type="number" name="num-articles" id="num-articles" value="" />
-                </div>
-                <div class="col-xs-4">
+                <div class="form-group" id="transfer-articles-form-group">
+                  <div class="col-xs-4">
+                    <label>Number of articles</label>
+                    <input class="form-control" type="number" name="num-transfer-articles" id="num-transfer-articles" value="" />
+                    <div class="form-control-feedback"></div>
+                  </div>
+                  <div class="col-xs-4">
+                    {% for u in ura%}
+                      <div class="form-check" id="from-users">
+                        <label class="form-check-label" id="{{ u }}_user">
+                          <input type="checkbox" id="{{ u }}_user" value="{{ u }}"> {{ u|safe }}
+                        </label>
+                      </div>
+                    {% endfor %}
+                  </div>
+                  <div class="col-xs-1">=></div>
+                  <div class="col-xs-3">
                   {% for u in ura%}
-                    <div class="form-check">
+                    <div class="form-check" id="to-users">
                       <label class="form-check-label" id="{{ u }}_user">
                         <input type="checkbox" id="{{ u }}_user" value="{{ u }}"> {{ u|safe }}
                       </label>
                     </div>
                   {% endfor %}
-                </div>
-                <div class="col-xs-1">=></div>
-                <div class="col-xs-3">
-                {% for u in ura%}
-                  <div class="form-check">
-                    <label class="form-check-label" id="{{ u }}_user">
-                      <input type="checkbox" id="{{ u }}_user" value="{{ u }}"> {{ u|safe }}
-                    </label>
                   </div>
-                {% endfor %}
                 </div>
              </div>
            </div>
@@ -183,8 +222,14 @@
         <div class="col-xs-4">
           <h4>Coder stats</h4>
 
-          Remaining unassigned articles: {{ unassigned }}
-
+          <p>
+            <label>Unassigned articles per database</label>
+            <ul>
+            {% for k, v in unassigned %}
+              <li>{{ k }}: {{ v }}</li>
+            {% endfor %}
+            </ul>
+          </p>
           <table class="table table-condensed coder-stats">
             <tr>
               <th></th>
