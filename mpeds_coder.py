@@ -1721,7 +1721,7 @@ def assignArticlesIndividual():
     elif same == 'different':
         for u in users:
             articles = assign_lib.generateSample(num, db_name, 'ec')
-            n_added  = assign_lib.assignmentToCoders(articles, [user_dict[u]], 'ec')
+            n_added  += assign_lib.assignmentToCoders(articles, [user_dict[u]], 'ec')
 
     return make_response('%d articles assigned successfully.' % n_added, 200)
 
@@ -1768,11 +1768,8 @@ def assignArticlesGroup():
         user_ids.append(user_dict[u])
     
     bins       = assign_lib.createBins(user_ids, group_size)
-    print(bins)
     num_sample = assign_lib.generateSampleNumberForBins(num, len(user_ids), group_size)
-    print(num_sample)
     articles   = assign_lib.generateSample(num_sample, db_name, pass_number = 'ec')
-    print(articles)
     assign_lib.assignmentToBin(articles, bins, pass_number = 'ec')
 
     return make_response('%d articles assigned successfully.' % num_sample, 200)
