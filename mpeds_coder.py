@@ -22,6 +22,11 @@ import time
 from math import ceil
 from random import sample, choice
 
+if (sys.version_info < (3, 0)):
+    import urllib2
+else:
+    import urllib.request
+
 ## pandas
 import pandas as pd
 import numpy as np
@@ -881,7 +886,7 @@ def admin():
         jobj = json.loads(res.read())
 
         ## get every other entry in this list
-        pubs = jobj['facet_counts']['facet_fields']['PUBLICATION'][0::2]
+        pubs = sorted(jobj['facet_counts']['facet_fields']['PUBLICATION'][0::2])
 
     ## get user stats for EC
     for count, user in db_session.query(func.count(EventCreatorQueue.id), User.username).\
