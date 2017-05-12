@@ -105,7 +105,6 @@ event_creator_vars = [
 ## multiple variable keys
 multi_vars_keys = v1[:] 
 multi_vars_keys.extend(event_creator_vars[:])
-
 multi_vars_keys = [x[0] for x in multi_vars_keys]
 
 ## pass one variables
@@ -135,11 +134,14 @@ def loadSolr(solr_id):
     no_connect = (-1, [], [])
 
     try:
-        req = urllib2.Request(url)
-        res = urllib2.urlopen(req)
-
-        ## Python 3, to be upgraded
-        #res = urllib.request.urlopen(url)
+        if (sys.version_info < (3, 0)):
+            ## Python 2
+            import urllib2
+            req  = urllib2.Request(url)
+            res  = urllib2.urlopen(req)
+        else:
+            ## Python 3
+            res = urllib.request.urlopen(url)
     except:
         return no_connect
     res = json.loads(res.read())
@@ -827,6 +829,7 @@ def _pubCount():
     pub_total.append( ('Total', total['yes_maybe'], total['coded'], total['in_queue'], total['in_db']) )
     return pub_total
 
+
 @login_required
 def _codedOnce():
     """ Count all articles which have only been coded once, by coder. """
@@ -860,6 +863,25 @@ def admin():
     ura   = [u.username for u in db_session.query(User).filter(User.authlevel == 1).all()]
     coded = {user: {} for user in ura[:]}
     dbs   = [x[0] for x in db_session.query(ArticleMetadata.db_name).distinct()]
+    pubs  = []
+
+    ## get the available publications
+    if app.config['SOLR']:
+        url  = '%s/select?q=*:*&rows=0&wt=json&facet=true&facet.field=PUBLICATION' % app.config['SOLR_ADDR']
+
+        if (sys.version_info < (3, 0)):
+            ## Python 2
+            import urllib2
+            req  = urllib2.Request(url)
+            res  = urllib2.urlopen(req)
+        else:
+            ## Python 3
+            res = urllib.request.urlopen(url)
+
+        jobj = json.loads(res.read())
+
+        ## get every other entry in this list
+        pubs = jobj['facet_counts']['facet_fields']['PUBLICATION'][0::2]
 
     ## get user stats for EC
     for count, user in db_session.query(func.count(EventCreatorQueue.id), User.username).\
@@ -881,8 +903,9 @@ def admin():
         coded      = coded,
         ura        = ura,
         dbs        = dbs,
-        unassigned = unassigned
-    )    
+        unassigned = unassigned,
+        pubs       = pubs
+    )
 
 
 @app.route('/coderstats')
@@ -1807,6 +1830,14 @@ def transferArticles():
     n = assign_lib.transferCoderToCoder(from_ids, to_ids, 'ec', num)
 
     return make_response('%d articles transferred successfully.' % n, 200)
+
+
+@app.route('/_search_solr')
+@login_required
+def searchSolr():
+    if current_user.authlevel < 3:
+        return redirect(url_for('index'))
+
 
 
 if __name__ == '__main__':
