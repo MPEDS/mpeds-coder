@@ -16,7 +16,7 @@ var modifyEvent = function(e) {
       }
   });
 
-  req.success(function() {
+  req.done(function() {
     $("#flash-error").hide();
 
     // remove all the event blocks
@@ -26,6 +26,10 @@ var modifyEvent = function(e) {
 
     // add the event block to the HTML
     $("#event-blocks").append(req.responseText);
+
+    // date listeners
+    $('#start-date-picker').datetimepicker({ format: 'YYYY-MM-DD' });
+    $('#end-date-picker').datetimepicker({ format: 'YYYY-MM-DD' });
 
     // add tab listeners
     $(".tablinks").each(function(){
@@ -82,7 +86,7 @@ var modifyEvent = function(e) {
       }
     });
 
-    req.success(function(cd) {
+    req.done(function(cd) {
       $("#flash-error").hide();
 
       // listeners for text select add, collapse-up/down
@@ -144,9 +148,9 @@ var deleteEvent = function(e) {
     }
   });
 
-  // on success, remove HTML element 
+  // on done, remove HTML element 
   // and the edit block if it exists
-  req.success(function() {
+  req.done(function() {
       $('#flash-error').hide();
       $(e.target).parent().remove();
       $("#event-creator-block_" + eid).remove();
@@ -170,8 +174,8 @@ var getEvents = function(aid) {
       }
   });
 
-  // on success -- add items to list
-  req.success(function(ev) {
+  // on done -- add items to list
+  req.done(function(ev) {
     events = ev['events'];
 
     // empty list
@@ -245,7 +249,7 @@ $(function(){
           }
       });  
 
-      req.success(function(ev) {
+      req.done(function(ev) {
         $("#flash-error").hide();
 
         // go to next

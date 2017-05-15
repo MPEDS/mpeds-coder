@@ -26,7 +26,7 @@ var addUser = function(e) {
       }
     });
 
-    req.success(function() {
+    req.done(function() {
     $('#username-form-group').removeClass('has-error');            
 
     $('#username-form-group').addClass('has-success');
@@ -69,7 +69,7 @@ var assignArticlesIndividual = function(e) {
       }
     });
 
-    req.success(function() {
+    req.done(function() {
         $('#assign-articles-individual-form-group').removeClass('has-error');            
         $('#assign-articles-individual-form-group').addClass('has-success');
         $('#assign-articles-individual-form-group div.form-control-feedback').text(req.responseText);
@@ -105,7 +105,7 @@ var assignArticlesGroup = function(e) {
       }
     });
 
-    req.success(function() {
+    req.done(function() {
         $('#assign-articles-group-form-group').removeClass('has-error');
         $('#assign-articles-group-form-group').addClass('has-success');
         $('#assign-articles-group-form-group div.form-control-feedback').text(req.responseText);
@@ -142,7 +142,7 @@ var transferArticles = function(e) {
       }
     });
 
-    req.success(function() {
+    req.done(function() {
         $('#transfer-articles-form-group').removeClass('has-error');            
 
         $('#transfer-articles-form-group').addClass('has-success');
@@ -166,6 +166,10 @@ $(function(){
 
     // show add user first
     $("#add-user_block").show();
+
+    // date listeners
+    $('#start-date-picker').datetimepicker({ format: 'YYYY-MM-DD' });
+    $('#end-date-picker').datetimepicker({ format: 'YYYY-MM-DD' });
 
     $('#submit').click(function(e) {
         // get the active button to identify correct form

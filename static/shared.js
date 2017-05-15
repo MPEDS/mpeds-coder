@@ -93,8 +93,8 @@ var addSelectedText = function(e, v) {
     },
   });
 
-  // add element or change tab color on success
-  req.success(function() {
+  // add element or change tab color on done
+  req.done(function() {
     $("#flash-error").hide();
     createListItem(e, v, p_id, text);
   });
@@ -128,8 +128,8 @@ var deleteCode = function(e) {
     }
   });
 
-  // on success, remove HTML element
-  req.success(function() {
+  // on done, remove HTML element
+  req.done(function() {
       $('#flash-error').hide();
       $(e.target).parent().remove();
   });
@@ -174,8 +174,8 @@ var addCode = function(e) {
     }
   });
 
-  // add element or change tab color on success
-  req.success(function() {
+  // add element or change tab color on done
+  req.done(function() {
     $("#flash-error").hide();
 
     // create element
@@ -245,7 +245,7 @@ var selectCheckbox = function(e) {
     }
   });
 
-  req.success(function(e) {
+  req.done(function(e) {
     $('#flash-error').hide();
   });
 
@@ -277,7 +277,7 @@ var selectRadio = function(e) {
     }
   });
 
-  req.success(function(e) {
+  req.done(function(e) {
     $('#flash-error').hide();
   });
 
@@ -309,7 +309,7 @@ var storeText = function(e) {
     }
   });
 
-  req.success(function(e) {
+  req.done(function(e) {
     $('#flash-error').hide();
   });
 
@@ -334,7 +334,7 @@ var getCodes = function(ev) {
       }
   });
 
-  req.success(function(cd) {
+  req.done(function(cd) {
     // add existing variable text
     for(i = 0; i < vars.length; i++) {
       v = vars[i];

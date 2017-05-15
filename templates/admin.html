@@ -204,11 +204,22 @@
                   </select>
                 </p>
 
-                <label for="start-date">Start date (YYYY-MM-DD)</label>
-                <input class="form-control" type="date" name="start-date" id="info_start-date" />
 
-                <label for="end-date">End date (YYYY-MM-DD)</label>
-                <input class="form-control" type="date" name="end-date" id="info_end-date" />
+                <label for="start-date">Start date</label>
+                <div id="start-date-picker" class="input-group date">
+                  <input class="form-control" type="text" name="start-date" id="info_start-date"></input>
+                  <span class="input-group-addon">
+                    <span class="glyphicon glyphicon-calendar"></span>
+                  </span>
+                </div>
+
+                <label for="end-date">End date</label>
+                <div id="end-date-picker" class="input-group date">
+                  <input class="form-control" type="text" name="end-date" id="info_end-date"></input>
+                  <span class="input-group-addon">
+                    <span class="glyphicon glyphicon-calendar"></span>
+                  </span>
+                </div>
                </div>
                <div class="col-xs-6">
                 <label for="search-string">Search string</label>
