@@ -305,6 +305,13 @@ a.glyphicon, a.glyphicon:visited {
 	padding: 10 16px;
 }
 
+.form-control-feedback {
+	position: relative;
+	width: auto;
+	height: auto;
+	line-height: 1.4em;
+}
+
 ul#tabselecter {
 	margin-left: 3px;
 	margin-top: 4px;

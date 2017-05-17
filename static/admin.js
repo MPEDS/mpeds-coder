@@ -144,19 +144,44 @@ var transferArticles = function(e) {
 
     req.done(function() {
         $('#transfer-articles-form-group').removeClass('has-error');            
-
         $('#transfer-articles-form-group').addClass('has-success');
         $('#transfer-articles-form-group div.form-control-feedback').text(req.responseText);
     });
 
     req.fail(function() {
         $('#transfer-articles-form-group').removeClass('has-success');            
-
         $('#transfer-articles-form-group').addClass('has-error');
         $('#transfer-articles-form-group div.form-control-feedback').text(req.responseText);
     });
 }
 
+var searchSolr = function(e) {
+    req = $.ajax({
+        type: "GET",
+        url: $SCRIPT_ROOT + '/_search_solr',
+        data: {
+            'database'    : $('#database').val(),
+            'publication' : $('#publication').val(),
+            'start-date'  : $('#start-date').val(),
+            'end-date'    : $('#end-date').val(),
+            'search-str'  : $('#search-string').val(),
+            'solr-ids'    : $('#solr-ids').val()
+        }
+    });
+
+    req.done(function() {
+        $('#search-solr-form-group').removeClass('has-error');            
+        $('#search-solr-form-group').addClass('has-success');
+        $('#search-solr-form-group div.form-control-feedback').text(req.responseText);
+    });
+
+    req.fail(function() {
+        $('#search-solr-form-group').removeClass('has-success');            
+        $('#search-solr-form-group').addClass('has-error');
+        $('#search-solr-form-group div.form-control-feedback').text(req.responseText);
+    });
+
+}
 
 $(function(){ 
     // add tab listeners
@@ -184,6 +209,8 @@ $(function(){
             assignArticlesGroup(e);            
         } else if (current_form == 'transfer-articles') {
             transferArticles(e);
+        } else if (current_form == 'search-solr') {
+            searchSolr(e);
         }
     });
 });

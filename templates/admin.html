@@ -21,11 +21,11 @@
 <!--             <li class="tablinks" id="double-check_button">
               <a href="#">Double check</a>
             </li> -->
-           {% if config['SOLR'] %}
+            {#%  if config['SOLR'] %#}
             <li class="tablinks" id="search-solr_button">
               <a href="#">Search Solr</a>
             </li>
-           {% endif %}
+            {#% endif %#}
           </ul>
           <div class="tab-content" id="admin-actions">
             <div class="tab-pane" id="add-user_block">
@@ -181,33 +181,31 @@
              </div>
            </div>
 
-           {% if config['SOLR'] %}
+           {#% if config['SOLR'] %#}
            <div class="tab-pane" id="search-solr_block">
              <div class="row">
+              <div class="form-group" id="search-solr-form-group">
                <div class="col-xs-6">
-                <p>
                   <h5>Select database or publication</h5>
                   <label for="database">Database</label>
                   <select class="form-control" id="database">
-                    <option selected>---</option>
-                    <option value="gigaword">Annotated Gigaword v5</option>
-                    <option value="ethnic-newswatch">Ethnic NewsWatch</option>
-                    <option value="nyt-ldc">New York Times Annotated Corpus</option>
+                    <option value="">---</option>
+                    <option value="Annotated Gigaword v5">Annotated Gigaword v5</option>
+                    <option value="Ethnic NewsWatch">Ethnic NewsWatch</option>
+                    <option value="LDC">New York Times Annotated Corpus</option>
                   </select>
                   <center>or</center>
                   <label for="publication">Publication</label>
                   <select class="form-control" id="publication">
-                    <option selected>---</option>
+                    <option value="">---</option>
                     {% for pub in pubs %}
                     <option value="{{ pub }}">{{pub|safe}}</option>
                     {% endfor %}
                   </select>
-                </p>
-
 
                 <label for="start-date">Start date</label>
                 <div id="start-date-picker" class="input-group date">
-                  <input class="form-control" type="text" name="start-date" id="info_start-date"></input>
+                  <input class="form-control" type="text" name="start-date" id="start-date"></input>
                   <span class="input-group-addon">
                     <span class="glyphicon glyphicon-calendar"></span>
                   </span>
@@ -215,25 +213,28 @@
 
                 <label for="end-date">End date</label>
                 <div id="end-date-picker" class="input-group date">
-                  <input class="form-control" type="text" name="end-date" id="info_end-date"></input>
+                  <input class="form-control" type="text" name="end-date" id="end-date"></input>
                   <span class="input-group-addon">
                     <span class="glyphicon glyphicon-calendar"></span>
                   </span>
                 </div>
+                <div class="form-control-feedback" id="search-solr-feedback"></div>
                </div>
+
                <div class="col-xs-6">
                 <label for="search-string">Search string</label>
-                <input class="form-control" type="text" name="search-string" id="info_search-string" />
+                <input class="form-control" type="text" name="search-string" id="search-string" />
 
                 <label for="ids">Solr IDs to search</label>
-                <textarea class="form-control form-control-sm" name="ids" id="info_ids" rows="8"></textarea>
+                <textarea class="form-control form-control-sm" name="ids" id="solr-ids" rows="8"></textarea>
                 <p>
                   <small class="form-text text-muted">List each ID on a separate line.</small>
                 </p>
                </div>
+              </div>
              </div>
             </div>
-            {% endif %}
+            {#% endif %#}
 
             <p></p>
             <button type="submit" class="btn btm-primary" id="submit">Submit</button>

@@ -133,7 +133,6 @@ meta_solr = ['PUBLICATION', 'SECTION', 'BYLINE', 'DATELINE', 'DATE', 'INTERNAL_I
 
 ##### load text from Solr database
 def loadSolr(solr_id):
-    import urllib2
     url        = '%s/select?q=id:"%s"&wt=json' % (app.config['SOLR_ADDR'], solr_id)
     not_found  = (0, [], [])
     no_connect = (-1, [], [])
@@ -141,7 +140,6 @@ def loadSolr(solr_id):
     try:
         if (sys.version_info < (3, 0)):
             ## Python 2
-            import urllib2
             req  = urllib2.Request(url)
             res  = urllib2.urlopen(req)
         else:
@@ -1843,7 +1841,52 @@ def searchSolr():
     if current_user.authlevel < 3:
         return redirect(url_for('index'))
 
+    database    = request.args.get('database')
+    publication = request.args.get('publication')
+    start_date  = request.args.get('start-date')
+    end_date    = request.args.get('end-date')
+    search_str  = request.args.get('search-string')
+    solr_ids    = request.args.get('solr-ids')
 
+    if (database == '---' and publication != '') or (database != '' and publication == '---'):
+        return make_response('Choose either a database or publication.', 500)
+
+    ## build query
+    query = []
+
+    print(database)
+
+    ## choose correct database field
+    if database:
+        if database in ['Annotated Gigaword v5', 'LDC']:
+            query.append('DOCSOURCE:"%s"' % database)
+        elif database == 'Ethnic NewsWatch':
+            query.append('Database:"%s"' % database)
+        else:
+            return make_response('Invalid database.', 500)
+
+    if start_date == '' and end_date != '':
+        return make_response('End date needs a matching start date.', 500)
+
+    if publication:
+        query.append('PUBLICATION:"%s"' % publication)
+
+    if start_date:
+        ## set end date to now
+        if not end_date:
+            end_date = dt.datetime.now().strftime('%Y-%m-%d')
+
+        query.append('DATE:[%sT00:00:00.000Z TO %sT00:00:00.000Z]' % (start_date, end_date))
+
+    if search_str:
+        query.append('(%s)' % search_str)
+
+    if solr_ids:
+        query.append('id:(%s)' % " ".join(solr_ids.split('\n')))
+
+    qstr = ' AND '.join(query)
+
+    return make_response('Query completed: %s' % qstr, 200)    
 
 if __name__ == '__main__':
     app.run()
