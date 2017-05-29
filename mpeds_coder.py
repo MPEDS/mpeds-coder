@@ -14,6 +14,7 @@ import json
 import math
 import os
 import re
+import smtplib
 import string
 import sys
 import urllib
@@ -1884,15 +1885,13 @@ def searchSolr():
 
     qstr = ' AND '.join(query)
 
-    import smtplib
-
-    _mail('smtp.wiscmail.wisc.edu', 
-         'Alex Hanna <ahanna@ssc.wisc.edu>', 
-         'alex.hanna@gmail.com',
+    _mail(app.config['EMAIL_SERVER'],
+         app.config['EMAIL_SOLR'],
+         app.config['EMAIL_SOLR'],
          'Solr job to be queued',
          'Query\n\n%s' % qstr)
 
-    return make_response('Query has been put into queue. You will get an email upon completion.', 200)
+    return make_response('Query has been put into email queue. You will get an email upon completion.', 200)
 
 
 def _mail(serverURL=None, sender='', to='', subject='', text=''):

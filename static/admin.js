@@ -160,12 +160,12 @@ var searchSolr = function(e) {
         type: "GET",
         url: $SCRIPT_ROOT + '/_search_solr',
         data: {
-            'database'    : $('#database').val(),
-            'publication' : $('#publication').val(),
-            'start-date'  : $('#start-date').val(),
-            'end-date'    : $('#end-date').val(),
-            'search-str'  : $('#search-string').val(),
-            'solr-ids'    : $('#solr-ids').val()
+            'database'      : $('#database').val(),
+            'publication'   : $('#publication').val(),
+            'start-date'    : $('#start-date').val(),
+            'end-date'      : $('#end-date').val(),
+            'search-string' : $('#search-string').val(),
+            'solr-ids'      : $('#solr-ids').val()
         }
     });
 
