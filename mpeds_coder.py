@@ -1854,8 +1854,6 @@ def searchSolr():
     ## build query
     query = []
 
-    print(database)
-
     ## choose correct database field
     if database:
         if database in ['Annotated Gigaword v5', 'LDC']:
@@ -1886,7 +1884,27 @@ def searchSolr():
 
     qstr = ' AND '.join(query)
 
-    return make_response('Query completed: %s' % qstr, 200)    
+    import smtplib
+
+    _mail('smtp.wiscmail.wisc.edu', 
+         'Alex Hanna <ahanna@ssc.wisc.edu>', 
+         'alex.hanna@gmail.com',
+         'Solr job to be queued',
+         'Query\n\n%s' % qstr)
+
+    return make_response('Query has been put into queue. You will get an email upon completion.', 200)
+
+
+def _mail(serverURL=None, sender='', to='', subject='', text=''):
+    """
+    Usage:
+    mail('somemailserver.com', 'me@example.com', 'someone@example.com', 'test', 'This is a test')
+    """
+    headers = "From: %s\r\nTo: %s\r\nSubject: %s\r\n" % (sender, to, subject)
+    message = headers + text
+    mailServer = smtplib.SMTP(serverURL)
+    mailServer.sendmail(sender, to, message)
+    mailServer.quit()
 
 if __name__ == '__main__':
     app.run()
