@@ -10,13 +10,14 @@ import json
 
 import config
 
-def resetVariableOptions():	
+def loadVariableOptions(filename, reset = False):
 	""" Load current dropdowns from file. """
-	db_session.query(VarOption).delete()
+	if reset:
+		db_session.query(VarOption).delete()
 
 	print("Adding variables...")
 	dds = []
-	with open("dropdowns.csv") as csvfile:
+	with open(filename) as csvfile:
 		reader = csv.reader(csvfile)
 		for row in reader:
 			dds.append( VarOption(variable = row[0], option = row[1]) )
@@ -97,11 +98,12 @@ def addQueueExample():
 
 
 def main():
-	init_db()
-	addArticles('/home/ubuntu/article-metadata/black-newspapers-protest.csv', 'black-newspapers')        
-	resetVariableOptions()
-	addUsersExample()
-	addQueueExample()
+	# init_db()
+	# addArticles('/home/ubuntu/article-metadata/black-newspapers-protest.csv', 'black-newspapers')        
+	loadVariableOptions("dropdowns.csv", reset = True)
+	loadVariableOptions("dropdowns-bp.csv")
+	# addUsersExample()
+	# addQueueExample()
 
 if __name__ == '__main__':
 	main()

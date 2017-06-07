@@ -73,7 +73,8 @@ central = timezone('US/Central')
 ## vars with preset categories
 v1 = [
     ('form',  'Form/Type'),
-    ('issue', 'Issues'),
+    ('issue', 'General issues'),
+    ('black-issue', 'African-American Issues'),
     ('target','Target')
 ]
 
@@ -121,9 +122,18 @@ vars.extend(v3[:])
 ## single value variables
 sv = ['comments', 'protest', 'multi', 'nous', 'ignore']
 
-ec_sv = ['desc', 'start-date', 'end-date', 
-    'location', 'duration', 'date-est',
-    'campaign', 'ritual', 'master-event', 'subevent']
+info_vars = [('campaign', 'part of a larger campaign?'), 
+    ('ritual', 'ritualized or cyclical?'),
+    ('master-event', 'a larger event which contains subevents?'),
+    ('subevent', 'a subevent of a larger event?'),
+    ('counterprotest', 'a counter-protest?'),
+    ('historical', 'a historical (> 1 year) event?'),
+    ('non-us', 'occurring outside of the US?')]
+
+ec_sv = ['article-desc', 'desc', 'start-date', 'end-date', 
+    'location', 'duration', 'date-est']
+
+ec_sv.extend([x[0] for x in info_vars])
 
 ## metadata for Solr
 meta_solr = ['PUBLICATION', 'SECTION', 'BYLINE', 'DATELINE', 'DATE', 'INTERNAL_ID']
@@ -525,39 +535,11 @@ def ecNext():
 @app.route('/event_creator/<aid>')
 @login_required
 def eventCreator(aid):
-    aid       = int(aid)
-    # comments  = []
-    # opts      = {}
-    # curr      = {}
-
-    # ## initialize opts
-    # opts = {v[0]: [] for v in vars}
-
-    # ## built-in dropdown options
-    # for o in db_session.query(VarOption).all():
-    #     opts[ o.variable ].append(o.options)
-
-    # ## None of the above for v1 variables
-    # for k,v in v1:
-    #     opts[ k ].append("_None of the above")
-
-    # ## filter out repeated items and sort
-    # for k,v in opts.items():
-    #     opts[k] = list( set( map(lambda x: x.strip(" .,"), opts[k]) ) )
-    #     opts[k].sort()
-
+    aid        = int(aid)
     article    = db_session.query(ArticleMetadata).filter_by(id = aid).first()
     text, html = prepText(article)
 
-    return render_template(
-        "event-creator.html",
-        aid        = aid,
-        # comments   = comments,
-        # opts       = opts,
-        # curr       = curr,
-        # vars       = event_creator_vars,
-        # v1         = v1,
-        text       = html.decode('utf-8'))
+    return render_template("event-creator.html", aid = aid, text = html.decode('utf-8'))
 
 
 class Pagination(object):
@@ -1424,13 +1406,6 @@ def modifyEvents():
     pn   = request.args.get('pn')
     opts = {}
     curr = {}
-    info_vars = [('campaign', 'part of a larger campaign?'), 
-        ('ritual', 'ritualized or cyclical?'),
-        ('master-event', 'a larger event which contains subevents?'),
-        ('subevent', 'a subevent of a larger event?'),
-        ('counterprotest', 'a counter-protest?'),
-        ('historical', 'a historical (> 1 year) event?'),
-        ('non-us', 'occurring outside of the US?')]
 
     model = None
     if pn == '2':
@@ -1794,6 +1769,9 @@ def assignArticlesGroup():
     for u in users:
         user_ids.append(user_dict[u])
     
+    if len(user_ids) <= group_size:
+        return make_response('Number of users must be greater than k.', 500)
+
     bins       = assign_lib.createBins(user_ids, group_size)
     num_sample = assign_lib.generateSampleNumberForBins(num, len(user_ids), group_size)
     articles   = assign_lib.generateSample(num_sample, db_name, pass_number = 'ec')
