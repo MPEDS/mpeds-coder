@@ -3,6 +3,9 @@
   <li class="tablinks active" id="basicinfo_button">
     <a href="#">Basic Info</a>
   </li>
+  <li class="tablinks" id="yes-no_button">
+    <a href="#">Yes/No</a>
+  </li>
   <li class="tablinks" id="textselect_button">
     <a href="#">Text Select</a>
   </li>
@@ -17,75 +20,80 @@
   -->
   </ul>
   <div class="tab-content">
-  <div class="tab-pane" id="basicinfo_block">
-  <form> 
-    <div class="form-group">
-      <label for="article-desc">Provide a short description of this article.</label>
-      <textarea class="form-control form-control-sm" name="article-desc" id="info_article-desc" rows="3">{{ curr['article-desc']|safe }}</textarea>
+    <div class="tab-pane" id="basicinfo_block">
+      <form> 
+        <div class="form-group">
+          <label for="article-desc">Provide a short description of this article.</label>
+          <textarea class="form-control form-control-sm" name="article-desc" id="info_article-desc" rows="3">{{ curr['article-desc']|safe }}</textarea>
 
-      <label for="desc">Provide a short description of this event.</label>
-      <textarea class="form-control form-control-sm" name="desc" id="info_desc" rows="3">{{ curr['desc']|safe }}</textarea>
+          <label for="desc">Provide a short description of this event.</label>
+          <textarea class="form-control form-control-sm" name="desc" id="info_desc" rows="3">{{ curr['desc']|safe }}</textarea>
 
-      <label for="start-date">Start date</label>
-      <div id="start-date-picker" class="input-group date">
-        <input class="form-control" type="text" name="start-date" id="info_start-date" value="{{ curr['start-date'] }}"></input>
-        <span class="input-group-addon">
-          <span class="glyphicon glyphicon-calendar"></span>
-        </span>
-      </div>
+          <label for="start-date">Start date</label>
+          <div id="start-date-picker" class="input-group date">
+            <input class="form-control" type="text" name="start-date" id="info_start-date" value="{{ curr['start-date'] }}"></input>
+            <span class="input-group-addon">
+              <span class="glyphicon glyphicon-calendar"></span>
+            </span>
+          </div>
 
-      <label for="end-date">End date</label>
-      <div id="end-date-picker" class="input-group date">
-        <input class="form-control" type="text" name="end-date" id="info_end-date" value="{{ curr['end-date'] }}"></input>
-        <span class="input-group-addon">
-          <span class="glyphicon glyphicon-calendar"></span>
-        </span>
-      </div>
+          <label for="end-date">End date</label>
+          <div id="end-date-picker" class="input-group date">
+            <input class="form-control" type="text" name="end-date" id="info_end-date" value="{{ curr['end-date'] }}"></input>
+            <span class="input-group-addon">
+              <span class="glyphicon glyphicon-calendar"></span>
+            </span>
+          </div>
 
-      <label for="location">Location (City, State/Province, Country)</label>
-      <input class="form-control" type="text" name="location" id="info_location" value="{{ curr['location'] }}" />
+          <label for="location">Location (City, State/Province, Country)</label>
+          <input class="form-control" type="text" name="location" id="info_location" value="{{ curr['location'] }}" />
+        </div>
+      </form>
     </div>
 
-    <div class="form-group">
-      <label>Is the start date exact or approximate?</label>
-      <div class="form-check">
-        <label class="form-check-label">
-          <input class="form-check-input basic-info" type="radio" name="date-est" id="info_date-est" value="exact" {{ 'checked' if curr['date-est'] == 'exact' else '' }}> Exact
-        </label>
+    <div class="tab-pane" id="yes-no_block">
+      <form>
+      <div class="form-group">
+        <label>Is the start date exact or approximate?</label>
+        <div class="form-check">
+          <label class="form-check-label">
+            <input class="form-check-input basic-info" type="radio" name="date-est" id="info_date-est" value="exact" {{ 'checked' if curr['date-est'] == 'exact' else '' }}> Exact
+          </label>
+        </div>
+
+        <div class="form-check">
+          <label class="form-check-label">
+            <input class="form-check-input basic-info" type="radio" name="date-est" id="info_date-est" value="approximate" {{ 'checked' if curr['date-est'] == 'approximate' else '' }}> Approximate
+          </label>
+        </div>
+        <p></p>
+        <label>Does this event span one day or more than one day?</label>
+        <div class="form-check">
+          <label class="form-check-label">
+            <input class="form-check-input basic-info" type="radio" name="duration" id="info_duration" value="one" {{ 'checked' if curr['duration'] == 'one' else '' }}> One
+          </label>              
+        </div>
+        <div class="form-check">
+          <label class="form-check-label">
+            <input class="form-check-input basic-info" type="radio" name="duration" id="info_duration" value="more-than-one" {{ 'checked' if curr['duration'] == 'more-than-one' else '' }}> More than one
+          </label>                      
+        </div>
       </div>
 
-      <div class="form-check">
-        <label class="form-check-label">
-          <input class="form-check-input basic-info" type="radio" name="date-est" id="info_date-est" value="approximate" {{ 'checked' if curr['date-est'] == 'approximate' else '' }}> Approximate
-        </label>
-      </div>
-      <p></p>
-      <label>Does this event span one day or more than one day?</label>
-      <div class="form-check">
-        <label class="form-check-label">
-          <input class="form-check-input basic-info" type="radio" name="duration" id="info_duration" value="one" {{ 'checked' if curr['duration'] == 'one' else '' }}> One
-        </label>              
-      </div>
-      <div class="form-check">
-        <label class="form-check-label">
-          <input class="form-check-input basic-info" type="radio" name="duration" id="info_duration" value="more-than-one" {{ 'checked' if curr['duration'] == 'more-than-one' else '' }}> More than one
-        </label>                      
-      </div>
-    </div>
+      <div class="form-group">
+        <label>Is this event: </label>
 
-    <div class="form-group">
-      <label>Is this event: </label>
-
-      {% for k, v in info_vars %}
-      <div class="form-check">
-        <label class="form-check-label" id="l_info_{{ k }}">
-          <input type="checkbox" id="info_{{ k }}" value="{{ k }}" {{ 'checked' if curr[k] == 'yes' else '' }}> {{ v|safe }}
-        </label>
+        {% for k, v in info_vars %}
+        <div class="form-check">
+          <label class="form-check-label" id="l_info_{{ k }}">
+            <input type="checkbox" id="info_{{ k }}" value="{{ k }}" {{ 'checked' if curr[k] == 'yes' else '' }}> {{ v|safe }}
+          </label>
+        </div>
+        {% endfor %}
       </div>
-      {% endfor %}
-    </div>
-  </form>
+    </form>
   </div>
+
   <div class="tab-pane" id="textselect_block">
     <span class="instructions">Highlight text and click <a class="glyphicon glyphicon-plus"></a> for the relevant category.</span>
     {% for k,v in vars %}

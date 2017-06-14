@@ -57,7 +57,7 @@ var modifyEvent = function(e) {
     $("#options_form").show(); 
 
     // listeners for info radio buttons
-    $('#basicinfo_block :radio').change(selectRadio);
+    $('#yes-no_block :radio').change(selectRadio);
 
     // listeners for text fields
     // $('#basicinfo_block :date').blur(storeText); // doesn't work in Firefox :(
