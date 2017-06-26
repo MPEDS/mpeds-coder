@@ -336,12 +336,20 @@ def summarizeText(s):
         return n
     return s
 
+
 @app.template_filter('datetime')
 def format_datetime(value):
     if value:
         return dt.datetime.strftime(value, "%Y-%m-%d %H:%M:%S")
+    return ''
 
-    return 'never coded'
+
+@app.template_filter('nonestr')
+def nonestr(s):
+    if s is not None:
+        return s
+    return ''
+
 
 ## java string hashcode
 ## copy-pasta from http://garage.pimentech.net/libcommonPython_src_python_libcommon_javastringhashcode/
@@ -677,8 +685,7 @@ def code2queue(sort, sort_dir, page = 1):
         return redirect(url_for('index'))
 
     ## get existing queue items to note which ones are coded
-    spqs = {spq.article_id: 1 for spq in db_session.query(SecondPassQueue)
-            .filter(SecondPassQueue.coded_dt != None).all()}
+    spqs = {spq.article_id: 1 for spq in db_session.query(SecondPassQueue).filter(SecondPassQueue.coded_dt != None).all()}
 
     ## get coding info
     cfp_dict  = {}
@@ -964,6 +971,7 @@ def coderStats():
         pub_total  = pub_total,
         last_cfp   = last_cfp,
         last_csp   = last_csp,
+        last_cec   = last_cec,
         pn         = 'ec',
         pass_title = 'Event Creator Status',
         ura        = ura,
@@ -998,17 +1006,20 @@ def userArticleList(pn, page = 1):
         return make_response("Invalid page.", 404)
 
     return render_template("list.html", 
-        pn = pn,
+        pn  = pn,
         aqs = aqs,
         pagination = pagination)
 
 
 ## generate report CSV file and store locally/download
-@app.route('/generate_coder_stats/<pn>/<action>')
+@app.route('/_generate_coder_stats')
 @login_required
-def generateCoderAudit(pn, action):
+def generateCoderAudit():
     if current_user.authlevel < 3:
         return redirect(url_for('index'))
+
+    pn = request.args.get('pn')
+    action = request.args.get('action')
 
     # last_month = dt.datetime.now(tz = central) - dt.timedelta(weeks=4)
     users = {u.id: u.username for u in db_session.query(User).all()}
@@ -1061,9 +1072,9 @@ def generateCoderAudit(pn, action):
         filename = '%s/coder-table_%s.csv' % (app.config['WD'], dt.datetime.now().strftime('%Y-%m-%d'))
         file = open(filename, 'w')
         file.write(file_str)
-        return make_response("File generated at %s." % filename, 200)
+        return jsonify(result={"status": 200, "filename": filename})
     else:
-        return make_response("Illegal action.", 404)
+        return make_response("Illegal action.", 500)
 
 #####
 ##### Internal calls

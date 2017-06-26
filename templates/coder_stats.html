@@ -1,5 +1,6 @@
 {% extends "layout.html" %}
 {% block body %}
+<script src="{{ url_for('static', filename='coderstats.js') }}" type="text/javascript"></script>
 <div class="container">
   <div class="row">
     <div class="col-xs-6">
@@ -15,9 +16,9 @@
 	    	{% for u in ura %}
 	    	<tr>
 	    		<td>{{ u|capitalize }}</td>
-                <td>{{ coded[u]['lw'][pn] }}</td>
-                <td>{{ coded[u]['completed'][pn] }}</td>
-                <td>{{ coded[u]['remaining'][pn] }}</td>
+                <td>{{ coded[u]['lw'][pn]|nonestr }}</td>
+                <td>{{ coded[u]['completed'][pn]|nonestr }}</td>
+                <td>{{ coded[u]['remaining'][pn]|nonestr }}</td>
                 <td>{{ coded[u]['dt'][pn]|datetime }}</td>
 	    	</tr>
 	    	{% endfor %}
@@ -89,13 +90,20 @@
                 <td>Second pass</td>
                 <td>{{ last_csp[0].timestamp|datetime  if last_csp else '' }}</td>
                 <td>{{ last_csp[1].username|capitalize if last_csp else '' }}</td>
-            </tr>        
+            </tr>
+            <tr>
+                <td>Event creator</td>
+                <td>{{ last_cec[0].timestamp|datetime  if last_cec else '' }}</td>
+                <td>{{ last_cec[1].username|capitalize if last_cec else '' }}</td>
+            </tr>   
         </table>
 
         <h4>Coder Audit</h4>
-<!--         <p><a href="{{ url_for('generateCoderAudit', pn='1', action='download') }}">Download first pass table</a> (tab-separated format)</p>
- -->
-        <p><a href="{{ url_for('generateCoderAudit', pn='ec', action='save') }}">Generate event creator coder table</p> 
+            <div id="coder-audit-form-group">
+            <!--<p><a href="{{ url_for('generateCoderAudit', pn='1', action='download') }}">Download first pass table</a> (tab-separated format)</p>-->
+                <p><button type="submit" class="btn btm-primary" id="generate-ec">Generate event creator coder table</button></p>
+                <div class="form-control-feedback"></div>
+            </div>
     </div>
     {% endif %}
   </div>

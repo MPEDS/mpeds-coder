@@ -27,20 +27,18 @@ var addUser = function(e) {
     });
 
     req.done(function() {
-    $('#username-form-group').removeClass('has-error');            
-
-    $('#username-form-group').addClass('has-success');
-    $('#username-form-group div.form-control-feedback').html('User <b>' 
-        + username + '</b> created. Their password is <b>' 
-        + req.responseJSON['result']['password'] + '</b>. ' + 
-        'Please save this.');
+        $('#username-form-group').removeClass('has-error');
+        $('#username-form-group').addClass('has-success');
+        $('#username-form-group div.form-control-feedback').html('User <b>' 
+            + username + '</b> created. Their password is <b>' 
+            + req.responseJSON['result']['password'] + '</b>. ' + 
+            'Please save this.');
     });
 
     req.fail(function() {
-      $('#username-form-group').removeClass('has-success');            
-
-      $('#username-form-group').addClass('has-error');
-      $('#username-form-group div.form-control-feedback').text(req.responseText);
+        $('#username-form-group').removeClass('has-success');
+        $('#username-form-group').addClass('has-error');
+        $('#username-form-group div.form-control-feedback').text(req.responseText);
     });
 }
 
