@@ -1702,34 +1702,54 @@ def addUser():
     return jsonify(result={"status": 200, "password": password})
 
 
-@app.route('/_assign_articles_individual')
+@app.route('/_assign_articles')
 @login_required
-def assignArticlesIndividual():
+def assignArticles():
     if current_user.authlevel < 3:
         return redirect(url_for('index'))
 
     num     = request.args.get('num')
     db_name = request.args.get('db')
+    pub     = request.args.get('pub')
+    ids     = request.args.get('ids')
     users   = request.args.get('users')
     same    = request.args.get('same')
+    group_size = request.args.get('group_size')
+    
+    ## input validations
+    if num == '' and ids == '':
+        return make_response('Please enter a valid number of articles or a list of IDs.', 500)
+    if num != '' and ids != '':
+        return make_response('You can either enter a number of articles or a list of IDs, but not both.', 500)
+    if db_name == '' and pub == '' and ids == '':
+        return make_response('Please select a valid database or publication, or enter a list of IDs.', 500)
+    if db_name != '' and pub != '':
+        return make_response('You can only choose a database or publication, but not both.', 500)
+    if same is None and group_size == '':
+        return make_response('Please select a "same" or "different" option, or enter a group size number.', 500)
+    if same is not None and group_size != '':
+        return make_response('You can only choose same/different or a group size. Force reload the page to reset same/different.', 500)
+    if num != '':
+        try:
+            num = int(num)
+        except:
+            return make_response('Please enter a valid number of articles.', 500)
 
-    try:
-        num = int(num)
-    except:
-        return make_response('Please enter a valid number.', 500)
+        ## get number of unassigned articles
+        if pub:
+            publication = "-".join(publication.split())
+            full_set    = set([x.id for x in db_session.query(ArticleMetadata).filter_by(db_id.like('%s%' % publication)).all()])
+        else:
+            full_set    = set([x.id for x in db_session.query(ArticleMetadata).filter_by(db_name = db_name).all()])
 
-    if db_name == '':
-        return make_response('Please select a valid database.', 500)
+        assigned   = set([x[0] for x in db_session.query(distinct(EventCreatorQueue.article_id)).all()])
+        unassigned = len( full_set - assigned )
 
-    if same is None:
-        return make_response('Please select a "same" or "different" option.', 500)
+        if num > unassigned:
+            return make_response('Select a number less than or equal to number of unassigned articles.', 500)
 
-    ## get number of unassigned articles
-    unassigned = len( set([x.id for x in db_session.query(ArticleMetadata).filter_by(db_name = db_name).all()]) - \
-        set([x[0] for x in db_session.query(distinct(EventCreatorQueue.article_id)).all()]) )
-
-    if num > unassigned:
-        return make_response('Select a number less than or equal to number of unassigned articles.', 500)
+    if users == '':
+        return make_response('Please select some users.', 500)
 
     users = users.split(',')
 
@@ -1740,17 +1760,55 @@ def assignArticlesIndividual():
     user_ids = []
     for u in users:
         user_ids.append(user_dict[u])
+        
+    if group_size != '':
+        try:
+            group_size = int(group_size)
+        except:
+            return make_response('Please enter a valid group size.', 500)
+
+        if len(user_ids) <= group_size:
+            return make_response('Number of users must be greater than k.', 500)
 
     n_added = 0
-    ## make assignment
-    if same == 'same':
-        ## assign all the same articles
-        articles = assign_lib.generateSample(num, db_name, 'ec')
-        n_added  = assign_lib.assignmentToCoders(articles, user_ids, 'ec')
-    elif same == 'different':
-        for u in users:
-            articles = assign_lib.generateSample(num, db_name, 'ec')
-            n_added  += assign_lib.assignmentToCoders(articles, [user_dict[u]], 'ec')
+    ## assign a number of articles
+    if ids == '':
+        ## assign by individual
+        if group_size == '':
+            if same == 'same':
+                if db_name:
+                    articles = assign_lib.generateSample(num, db_name, 'ec')
+                else:
+                    articles = assign_lib.generateSample(num, None, 'ec', pub)
+                n_added = assign_lib.assignmentToCoders(articles, user_ids, 'ec')
+            elif same == 'different':
+                for u in users:
+                    if db_name:
+                        articles = assign_lib.generateSample(num, db_name, 'ec')
+                    else:
+                        articles = assign_lib.generateSample(num, None, 'ec', pub)
+                    n_added  += assign_lib.assignmentToCoders(articles, [user_dict[u]], 'ec')
+        else:
+            ## assignment by bin
+            bins       = assign_lib.createBins(user_ids, group_size)
+            num_sample = assign_lib.generateSampleNumberForBins(num, len(user_ids), group_size)
+            if db_name:
+                articles = assign_lib.generateSample(num_sample, db_name, pass_number = 'ec')
+            else: 
+                articles = assign_lib.generateSample(num, None, 'ec', pub)
+            assign_lib.assignmentToBin(articles, bins, pass_number = 'ec')
+            n_added = len(articles)
+    else: 
+        ## assignment by ID
+        if group_size:
+            ## can't assign by ID because of the factorial math
+            return make_response('Cannot assign articles by ID with bins.', 500)
+
+        articles = assign_lib.getArticlesbyID(ids.split('\n'))
+        if same == 'same':
+            n_added = assign_lib.assignmentToCoders(articles, user_ids, 'ec')
+        elif same == 'different':
+            return make_response('Can only assign the same articles by ID.', 500)
 
     return make_response('%d articles assigned successfully.' % n_added, 200)
 
@@ -1758,52 +1816,11 @@ def assignArticlesIndividual():
 @app.route('/_assign_articles_group')
 @login_required
 def assignArticlesGroup():
-    if current_user.authlevel < 3:
-        return redirect(url_for('index'))
-
-    num     = request.args.get('num')
-    db_name = request.args.get('db')
-    users   = request.args.get('users')
-    group_size = request.args.get('group_size')
-
-    try:
-        num = int(num)
-    except:
-        return make_response('Please enter a valid number of articles.', 500)
-
-    try:
-        group_size = int(group_size)
-    except:
-        return make_response('Please enter a valid group size.', 500)
-
-    if db_name == '':
-        return make_response('Please select a valid database.', 500)
-
-    ## get number of unassigned articles
-    unassigned = len( set([x.id for x in db_session.query(ArticleMetadata).filter_by(db_name = db_name).all()]) - \
-        set([x[0] for x in db_session.query(distinct(EventCreatorQueue.article_id)).all()]) )
-
-    if num > unassigned:
-        return make_response('Select a number less than or equal to number of unassigned articles.', 500)
-
-    users = users.split(',')
-
-    ## make a user dictionary
-    user_dict = {user.username: user.id for user in db_session.query(User).all()}
-
     ## users in list
     user_ids = []
     for u in users:
         user_ids.append(user_dict[u])
     
-    if len(user_ids) <= group_size:
-        return make_response('Number of users must be greater than k.', 500)
-
-    bins       = assign_lib.createBins(user_ids, group_size)
-    num_sample = assign_lib.generateSampleNumberForBins(num, len(user_ids), group_size)
-    articles   = assign_lib.generateSample(num_sample, db_name, pass_number = 'ec')
-    assign_lib.assignmentToBin(articles, bins, pass_number = 'ec')
-
     return make_response('%d articles assigned successfully.' % num_sample, 200)
 
 

@@ -43,13 +43,16 @@ var addUser = function(e) {
 }
 
 
-var assignArticlesIndividual = function(e) {
-    var num        = $('#num-assign-articles-individual').val();
-    var db         = $('#article-database-individual').val();
-    var users    = [];
+var assignArticles = function(e) {
+    var num        = $('#num-assign-articles').val();
+    var db         = $('#article-database').val();
+    var pub        = $('#assign-articles-publication').val();
+    var ids        = $('#assign-articles-ids').val();
+    var users      = [];
+    var group_size = $('#group-size').val();
 
     // gets the checkbox
-    var same  = $('input[name=article-distribution]:checked').val();
+    var same = $('input[name=article-distribution]:checked').val();
 
     // gets all the checked users
     $('#individual-users input.user:checked').each(function() {
@@ -58,61 +61,28 @@ var assignArticlesIndividual = function(e) {
 
     req = $.ajax({
       type: "GET",
-      url:  $SCRIPT_ROOT + '/_assign_articles_individual',
+      url:  $SCRIPT_ROOT + '/_assign_articles',
       data: {
-        'num': num,
-        'db': db,
-        'users': users.join(),
-        'same': same
-      }
-    });
-
-    req.done(function() {
-        $('#assign-articles-individual-form-group').removeClass('has-error');            
-        $('#assign-articles-individual-form-group').addClass('has-success');
-        $('#assign-articles-individual-form-group div.form-control-feedback').text(req.responseText);
-    });
-
-    req.fail(function() {
-        $('#assign-articles-individual-form-group').removeClass('has-success');            
-        $('#assign-articles-individual-form-group').addClass('has-error');
-        $('#assign-articles-individual-form-group div.form-control-feedback').text(req.responseText);
-    });
-}
-
-
-var assignArticlesGroup = function(e) {
-    var num        = $('#num-assign-articles-group').val();
-    var db         = $('#article-database-group').val();
-    var users    = [];
-    var group_size = $('#group-size').val();
-
-    // gets all the checked users
-    $('#group-users input.user:checked').each(function() {
-        users.push($(this).val());
-    });
-
-    req = $.ajax({
-      type: "GET",
-      url:  $SCRIPT_ROOT + '/_assign_articles_group',
-      data: {
-        'num': num,
-        'db': db,
-        'users': users.join(),
+        'num':        num,
+        'db':         db,
+        'pub':        pub,
+        'ids':        ids,
+        'users':      users.join(),
+        'same':       same,
         'group_size': group_size
       }
     });
 
     req.done(function() {
-        $('#assign-articles-group-form-group').removeClass('has-error');
-        $('#assign-articles-group-form-group').addClass('has-success');
-        $('#assign-articles-group-form-group div.form-control-feedback').text(req.responseText);
+        $('#assign-articles-form-group').removeClass('has-error');            
+        $('#assign-articles-form-group').addClass('has-success');
+        $('#assign-articles-form-group div.form-control-feedback').text(req.responseText);
     });
 
     req.fail(function() {
-        $('#assign-articles-group-form-group').removeClass('has-success');            
-        $('#assign-articles-group-form-group').addClass('has-error');
-        $('#assign-articles-group-form-group div.form-control-feedback').text(req.responseText);
+        $('#assign-articles-form-group').removeClass('has-success');            
+        $('#assign-articles-form-group').addClass('has-error');
+        $('#assign-articles-form-group div.form-control-feedback').text(req.responseText);
     });
 }
 
@@ -201,10 +171,10 @@ $(function(){
         // create user
         if (current_form == 'add-user') {
             addUser(e);
-        } else if (current_form == 'assign-articles-individual') {
-            assignArticlesIndividual(e);
-        } else if (current_form == 'assign-articles-group') {
-            assignArticlesGroup(e);            
+        } else if (current_form == 'assign-articles') {
+            assignArticles(e);
+        // } else if (current_form == 'assign-articles-group') {
+        //     assignArticlesGroup(e);            
         } else if (current_form == 'transfer-articles') {
             transferArticles(e);
         } else if (current_form == 'search-solr') {

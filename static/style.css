@@ -246,6 +246,10 @@ div#skippingDiv p {
 	padding: 4 0 4 10px;
 }
 
+div.users {
+	border-left: 1px solid #EEE;
+}
+
 table#code2queue {
 	width: 75%;
 }

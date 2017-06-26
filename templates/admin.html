@@ -9,12 +9,12 @@
             <li class="tablinks active" id="add-user_button">
               <a href="#">Add user</a>
             </li>
-            <li class="tablinks" id="assign-articles-individual_button">
-              <a href="#">Assign articles by individual</a>
+            <li class="tablinks" id="assign-articles_button">
+              <a href="#">Assign articles</a>
             </li>
-            <li class="tablinks" id="assign-articles-group_button">
+<!--             <li class="tablinks" id="assign-articles-group_button">
               <a href="#">Assign articles by group</a>
-            </li>
+            </li> -->
             <li class="tablinks" id="transfer-articles_button">
               <a href="#">Transfer articles</a>
             </li>
@@ -43,25 +43,27 @@
               </div>
             </div>
 
-            <div class="tab-pane" id="assign-articles-individual_block">
+            <div class="tab-pane" id="assign-articles_block">
               <p>
-                <small class="form-text text-muted">Assign unassigned articles to coders. You can choose to assign the same <i>n</i> articles to all coders or <i>n</i> distinct articles to each coder.</small>
+                <small class="form-text text-muted">Assign unassigned articles to coders. You can choose to assign the same <i>n</i> articles to all coders, <i>n</i> distinct articles to each coder, or assigns <i>n</i> articles to each coder, such that <i>k</i> users code each article.</small>
               </p>
               <div class="row">
-                <div class="col-xs-4 form-group" id="assign-articles-individual-form-group">
+                <p>
+                  <div id="assign-articles-form-group">
+                    <div class="form-control-feedback"></div>
+                  </div>
+                </p>
+                
+                <div class="col-xs-4 form-group">
                   <label>Number of articles (n)</label>
-                  <input class="form-control" type="number" name="num-assign-articles-individual" id="num-assign-articles-individual" value="" />
-
-                  <label for="article-database-individual">Article Database</label>
-                  <select class="form-control" id="article-database-individual">
-                    <option selected value=''>---</option>
-                    {% for db in dbs %}
-                    <option value="{{ db }}">{{ db }}</option>
-                    {% endfor %}
-                  </select> 
-                  <div class="form-control-feedback"></div>
+                  <input class="form-control" type="number" name="num-assign-articles" id="num-assign-articles" value="" />
                 </div>
+                <div class="col-xs-1"><b>or</b></div>
                 <div class="col-xs-4">
+                  <label for="assign-articles-ids">IDs to assign</label>
+                  <textarea class="form-control form-control-sm" name="ids" id="assign-articles-ids" rows="8"></textarea>
+                </div>
+                <div class="col-xs-3 users">
                   <label>Users</label>
                   {% for u in ura%}
                     <div class="form-check" id="individual-users">
@@ -70,7 +72,33 @@
                       </label>
                     </div>
                   {% endfor %}
-                  <p></p>
+                </div>
+              </div>
+              <hr/>
+              <div class="row form-group">
+                <div class="col-xs-4">
+                  <label for="article-database">Article Database</label>
+                  <select class="form-control" id="article-database">
+                    <option selected value=''>---</option>
+                    {% for db in dbs %}
+                    <option value="{{ db }}">{{ db }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+                <div class="col-xs-1"><b>or</b></div>
+                <div class="col-xs-4">
+                  <label for="publication">Publication</label>
+                  <select class="form-control" id="assign-articles-publication">
+                    <option value="">---</option>
+                    {% for pub in pubs %}
+                    <option value="{{ pub }}">{{pub|safe}}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+              </div>
+              <hr/>
+              <div class="row form-group">
+                <div class="col-xs-4">
                   <label>Assign same or different articles?</label>
                   <div class="form-check">
                     <label class="form-check-label">
@@ -83,10 +111,15 @@
                     </label>
                   </div>
                 </div>
+                <div class="col-xs-1"><b>or</b></div>
+                <div class="col-xs-4">
+                  <label>Group size (k)</label>
+                  <input class="form-control" type="number" name="group-size" id="group-size" value="" />
+                </div>
               </div>
             </div>
 
-            <div class="tab-pane" id="assign-articles-group_block">
+<!--             <div class="tab-pane" id="assign-articles-group_block">
               <p>
                 <small class="form-text text-muted">Assign unassigned articles to groups of coders. This assigns <i>n</i> articles to each coder, such that <i>k</i> users code each article.</small>
               </p>
@@ -119,7 +152,7 @@
                 </div>
               </div>
             </div>            
-
+ -->
             <div class="tab-pane" id="transfer-articles_block">
               <p>
                 <small class="form-text text-muted">Transfers articles which are in the queue of one or more coders into the queue of one or more other coders.</small>
