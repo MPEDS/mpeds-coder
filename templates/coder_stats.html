@@ -92,8 +92,10 @@
             </tr>        
         </table>
 
-        <h4>Downloads</h4>
-        <p><a href="{{ url_for('generateCoderAudit') }}">Download first pass table for last four weeks</a> (tab-separated format)</p>
+        <h4>Coder Audit</h4>
+<!--         <p><a href="{{ url_for('generateCoderAudit', pn='1', action='download') }}">Download first pass table</a> (tab-separated format)</p>
+ -->
+        <p><a href="{{ url_for('generateCoderAudit', pn='ec', action='save') }}">Generate event creator coder table</p> 
     </div>
     {% endif %}
   </div>

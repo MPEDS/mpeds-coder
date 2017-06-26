@@ -1003,26 +1003,30 @@ def userArticleList(pn, page = 1):
         pagination = pagination)
 
 
-## generate report CSV file
-@app.route('/download_coder_stats')
+## generate report CSV file and store locally/download
+@app.route('/generate_coder_stats/<pn>/<action>')
 @login_required
-def generateCoderAudit():
+def generateCoderAudit(pn, action):
     if current_user.authlevel < 3:
         return redirect(url_for('index'))
 
-    last_month = dt.datetime.now(tz = central) - dt.timedelta(weeks=4)
-    users      = {u.id: u.username for u in db_session.query(User).all()}
+    # last_month = dt.datetime.now(tz = central) - dt.timedelta(weeks=4)
+    users = {u.id: u.username for u in db_session.query(User).all()}
 
-    file  = ''
-    cols  = [x.name for x in CodeFirstPass.__table__.columns]
+    if pn == '1':
+        model = CodeFirstPass
+    elif pn == 'ec':
+        model = CodeEventCreator
+
+    file_str = ''
+    cols     = [x.name for x in model.__table__.columns]
     cols.append('publication')
-    query = db_session.query(CodeFirstPass, ArticleMetadata).join(ArticleMetadata).\
-        filter(CodeFirstPass.timestamp > last_month).all()
+    query = db_session.query(model, ArticleMetadata).join(ArticleMetadata).all()
 
     if len(query) <= 0:
         return
 
-    file += "\t".join(cols) + "\n"
+    file_str += "\t".join(cols) + "\n"
     for row in query:
         fp  = row[0]
         am  = row[1]
@@ -1032,6 +1036,9 @@ def generateCoderAudit():
             if c == 'coder_id':
                 toPrint.append( users[fp.__getattribute__(c)] )
             elif c == 'publication':
+                if am.db_id is None:
+                    continue 
+
                  ## get the publication name from db_id
                 if 'AGW' in am.db_id:
                     pub = "-".join(am.db_id.split("_")[0:2])
@@ -1043,12 +1050,20 @@ def generateCoderAudit():
             else:
                 toPrint.append( validate(fp.__getattribute__(c)) )
 
-        file += "\t".join( map(lambda x: x.decode("utf-8"), toPrint) ) + "\n"
+        file_str += "\t".join( map(lambda x: x.decode("utf-8"), toPrint) ) + "\n"
 
-    response = make_response(file)
-    response.headers["Content-Disposition"] = "attachment; filename=coder-table.tsv"
-    response.headers["mime-type"] = "text/csv"
-    return response
+    if action == 'download':
+        response = make_response(file_str)
+        response.headers["Content-Disposition"] = "attachment; filename=coder-table.tsv"
+        response.headers["mime-type"] = "text/csv"
+        return response
+    elif action == 'save':
+        filename = '%s/coder-table_%s.csv' % (app.config['WD'], dt.datetime.now().strftime('%Y-%m-%d'))
+        file = open(filename, 'w')
+        file.write(file_str)
+        return make_response("File generated at %s." % filename, 200)
+    else:
+        return make_response("Illegal action.", 404)
 
 #####
 ##### Internal calls
