@@ -1015,6 +1015,7 @@ def userArticleList(pn, page = 1):
 @app.route('/_generate_coder_stats')
 @login_required
 def generateCoderAudit():
+    import codecs
     if current_user.authlevel < 3:
         return redirect(url_for('index'))
 
@@ -1070,8 +1071,8 @@ def generateCoderAudit():
         return response
     elif action == 'save':
         filename = '%s/coder-table_%s.csv' % (app.config['WD'], dt.datetime.now().strftime('%Y-%m-%d'))
-        file = open(filename, 'w')
-        file.write(file_str)
+        with codecs.open(filename, 'w', encoding = 'utf-8') as file:
+            file.write(file_str)
         return jsonify(result={"status": 200, "filename": filename})
     else:
         return make_response("Illegal action.", 500)
