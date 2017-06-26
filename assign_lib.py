@@ -85,7 +85,7 @@ def generateSample(n, db_name = None, pass_number = '1', publication = None):
         ## database will be implicit        
         if publication:
             publication = "-".join(publication.split())
-            query = [x.id for x in db_session.query(ArticleMetadata).filter_by(db_id.like('%s%' % publication)).all()]
+            query = [x.id for x in db_session.query(ArticleMetadata).filter(ArticleMetadata.db_id.like('%s%%' % publication)).all()]
         else:
             query = [x.id for x in db_session.query(ArticleMetadata).filter_by(db_name = db_name).all()]
 

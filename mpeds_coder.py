@@ -1737,8 +1737,8 @@ def assignArticles():
 
         ## get number of unassigned articles
         if pub:
-            publication = "-".join(publication.split())
-            full_set    = set([x.id for x in db_session.query(ArticleMetadata).filter_by(db_id.like('%s%' % publication)).all()])
+            pub = "-".join(pub.split())
+            full_set    = set([x.id for x in db_session.query(ArticleMetadata).filter(ArticleMetadata.db_id.like('%s%%' % pub)).all()])
         else:
             full_set    = set([x.id for x in db_session.query(ArticleMetadata).filter_by(db_name = db_name).all()])
 
