@@ -1050,8 +1050,6 @@ def generateCoderAudit():
             else:
                 to_print += ( validate(fp.__getattribute__(c)), )
 
-        cols.extend(['publication', 'pub_date', 'solr_id'])
-
         ## add publication, publication date, and solr_id
         pub      = ''
         pub_date = ''
@@ -1077,6 +1075,8 @@ def generateCoderAudit():
             pub_date = pieces[1]
         to_print += ( pub, pub_date, solr_id )
         to_df.append(to_print)
+
+    cols.extend(['publication', 'pub_date', 'solr_id'])
 
     ## let the dataframe do all the heavy lifting for CSV formatting
     df = pd.DataFrame(to_df, columns = cols)
