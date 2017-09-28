@@ -98,10 +98,10 @@ def addQueueExample():
 
 
 def main():
-	# init_db()
-	# addArticles('/home/ubuntu/article-metadata/black-newspapers-protest.csv', 'black-newspapers')        
-	loadVariableOptions("dropdowns.csv", reset = True)
-	loadVariableOptions("dropdowns-bp.csv")
+	#init_db()
+	addArticles('/home/ubuntu/article-metadata/us-newswires-to-sheriff-2017-09-15.csv', 'black_newswires')
+	#loadVariableOptions("dropdowns.csv", reset = True)
+	#loadVariableOptions("dropdowns-bp.csv")
 	# addUsersExample()
 	# addQueueExample()
 
