@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-    MPEDS coder
+    MPEDS Annotation Interface
     ~~~~~~
 
     Alex Hanna
@@ -74,8 +74,9 @@ central = timezone('US/Central')
 v1 = [
     ('form',  'Form/Type'),
     ('issue', 'General issues'),
-    ('black-issue', 'African-American Issues'),
-    ('target','Target')
+    ('racial-issue', 'Racial Issues'),
+    ('target','Target'),
+    ('scope', 'Scope')
 ]
 
 ## open-ended vars
@@ -94,20 +95,13 @@ v3 = [
     ('viol',   'Violence')
 ]
 
-event_creator_vars = [
-    ('actor-text',  'Actors'),
-    ('form-text',  'Actions / forms'),
-    ('bystander-text', 'Bystanders'),
-    ('issue-text', 'Issues'),
-    ('mvmt-org-text', 'Movement organizations'),
-    ('police-text', 'Police'),
-    ('police-actions-text', 'Police actions'),
-    ('politician-named-text', 'Politicians'),
-    ('propdam-text', 'Property damage'),
-    ('size-text', 'Size'),
-    ('target-text', 'Target'),
-    ('viol-text',   'Violence to persons')
-]
+event_creator_vars = []
+for var in open('text-selects.csv', 'r').read().split('\n'):
+    var = var.strip()
+    if var:
+        key  = '-'.join(re.split('[ /]', var.lower()))
+        key += '-text'
+        event_creator_vars.append( (key, var) )
 
 ## multiple variable keys
 multi_vars_keys = v1[:] 
@@ -122,13 +116,14 @@ vars.extend(v3[:])
 ## single value variables
 sv = ['comments', 'protest', 'multi', 'nous', 'ignore']
 
-info_vars = [('campaign', 'part of a larger campaign?'), 
+info_vars = [
+    ('slogans', 'contain slogans or other protest symbols?'),
+    ('quotes', 'contain direct quotes?'),
+    ('campaign', 'part of a larger on-campus campaign?'), 
     ('ritual', 'ritualized or cyclical?'),
-    ('master-event', 'a larger event which contains subevents?'),
-    ('subevent', 'a subevent of a larger event?'),
     ('counterprotest', 'a counter-protest?'),
     ('historical', 'a historical (> 1 year) event?'),
-    ('non-us', 'occurring outside of the US?')]
+    ('non-us', 'occurring outside of Canada or the US?')]
 
 ec_sv = ['article-desc', 'desc', 'start-date', 'end-date', 
     'location', 'duration', 'date-est']
@@ -136,7 +131,8 @@ ec_sv = ['article-desc', 'desc', 'start-date', 'end-date',
 ec_sv.extend([x[0] for x in info_vars])
 
 ## metadata for Solr
-meta_solr = ['PUBLICATION', 'SECTION', 'BYLINE', 'DATELINE', 'DATE', 'INTERNAL_ID']
+meta_solr = ['PUBLICATION', 'SECTION', 'BYLINE', 
+    'DATELINE', 'DATE', 'INTERNAL_ID']
 
 #####
 ##### Helper functions
