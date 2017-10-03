@@ -122,7 +122,11 @@ vars.extend(v3[:])
 ## single value variables
 sv = ['comments', 'protest', 'multi', 'nous', 'ignore']
 
-info_vars = [('campaign', 'part of a larger campaign?'), 
+info_vars = [
+    ('af-am', 'an African-American protest?'),
+    ('protest-not-af-am', 'a protest, but not African-American?'),
+    ('uncertain', 'uncertain whether African-American protest?'),
+    ('campaign', 'part of a larger campaign?'), 
     ('ritual', 'ritualized or cyclical?'),
     ('master-event', 'a larger event which contains subevents?'),
     ('subevent', 'a subevent of a larger event?'),
