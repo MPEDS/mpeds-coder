@@ -113,26 +113,24 @@ vars = v1[:]
 vars.extend(v2[:])
 vars.extend(v3[:])
 
-## single value variables
+## single value variables for first-pass coding
 sv = ['comments', 'protest', 'multi', 'nous', 'ignore']
 
-info_vars = [
-    ('slogans', 'contain slogans or other protest symbols?'),
-    ('quotes', 'contain direct quotes?'),
-    ('campaign', 'part of a larger on-campus campaign?'), 
-    ('ritual', 'ritualized or cyclical?'),
-    ('counterprotest', 'a counter-protest?'),
-    ('historical', 'a historical (> 1 year) event?'),
-    ('non-us', 'occurring outside of Canada or the US?')]
+## read in all checkbox lines
+lines = open(app.config['WD'] + '/yes-no.csv').read().split('\n')
+info_vars = []
+for line in lines:
+    x = line.strip().split(',')
+    if len(x) > 1:
+        info_vars.append( (x[0], x[1]) )
 
-ec_sv = ['article-desc', 'desc', 'start-date', 'end-date', 
+event_creator_single_value = ['article-desc', 'desc', 'start-date', 'end-date', 
     'location', 'duration', 'date-est']
 
-ec_sv.extend([x[0] for x in info_vars])
+event_creator_single_value.extend([x[0] for x in info_vars])
 
 ## metadata for Solr
-meta_solr = ['PUBLICATION', 'SECTION', 'BYLINE', 
-    'DATELINE', 'DATE', 'INTERNAL_ID']
+meta_solr = ['PUBLICATION', 'SECTION', 'BYLINE', 'DATELINE', 'DATE', 'INTERNAL_ID']
 
 #####
 ##### Helper functions
@@ -1464,7 +1462,7 @@ def modifyEvents():
         eid = int(eid)
         ## get the current values
         for code in db_session.query(model).filter_by(event_id = eid, coder_id = current_user.id).all():
-            if code.variable in sv or code.variable in ec_sv:
+            if code.variable in sv or code.variable in event_creator_single_value:
                 curr[code.variable] = code.value
             else:
                 ## stash in array

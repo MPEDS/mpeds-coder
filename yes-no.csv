@@ -1,0 +1,8 @@
+non-campus,occur off-campus with no on-campus component?
+non-us,occur outside of Canada or the US?
+slogans,contain slogans or other protest symbols?
+quotes,contain direct quotes?
+campaign,part of a larger on-campus campaign?
+ritual,ritualized or cyclical?
+counterprotest,a counter-protest?
+historical,a historical (> 1 year) event?
