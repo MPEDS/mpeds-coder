@@ -96,7 +96,7 @@ v3 = [
 ]
 
 event_creator_vars = []
-for var in open('text-selects.csv', 'r').read().split('\n'):
+for var in open(app.config['WD'] + '/text-selects.csv', 'r').read().split('\n'):
     var = var.strip()
     if var:
         key  = '-'.join(re.split('[ /]', var.lower()))
