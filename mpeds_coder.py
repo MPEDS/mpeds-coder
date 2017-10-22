@@ -1054,8 +1054,9 @@ def generateCoderAudit():
             ## e.g.
             ## AGW_AFP_ENG_20040104.0056
             pieces   = am.db_id.split("_")
-            pub      = "-".join(pieces[0:2])
-            pub_date = dt.datetime.strptime(pieces[2], '%Y%m%d').strftime('%Y-%m-%d')
+            pub      = "-".join(pieces[0:3])
+            pub_date   = pieces[3].split('.')[0]
+            pub_date = dt.datetime.strptime(pub_date, '%Y%m%d').strftime('%Y-%m-%d')
         elif 'NYT' in am.db_id:
             ## e.g. 
             ## 1989/03/11/0230638.xml_LDC_NYT
