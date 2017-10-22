@@ -1488,9 +1488,6 @@ def modifyEvents():
         opts[ o.variable ].append(o.options)
 
     ## None of the above for v1 variables
-    for k,v in v1:
-        opts[ k ].append("_None of the above")
-
     if pn in ['1', '2']:
         for k,v in v2:
             ## coder 1-generated dropdown options
