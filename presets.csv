@@ -14,6 +14,7 @@ form,Violence/attack
 form,Symbolic display/symbolic action
 form,Press conference
 form,Hunger Strike
+form,_Other Form
 issue,Abortion (For)
 issue,Abortion (Against)/Pro-life
 issue,Accessibility
@@ -38,6 +39,8 @@ issue,Traditional marriage/family
 issue,Transgender issues
 issue,Tuition, fees, financial aid
 issue,University governance
+issue,_Other Issue
+issue,_Not relevant
 racial-issue,Affirmative action (For)
 racial-issue,Affirmative action (Against)
 racial-issue,Anti-racism
@@ -61,6 +64,8 @@ racial-issue,Sovereignty/governance
 racial-issue,Underrepresentation in hiring 
 racial-issue,White supremacy (For)
 racial-issue,White supremacy (Against)
+racial-issue,_Other Issue
+racial-issue,_Not relevant
 target,Ethnic/racial group
 target,Foreign government
 target,Individual
@@ -72,6 +77,7 @@ target,Domestic government
 target,Political party
 target,Private/business
 target,University/school
+target,_Other target
 scope,This campus
 scope,Other campuses
 scope,City/town
