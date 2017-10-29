@@ -75,8 +75,7 @@ v1 = [
     ('form',  'Form/Type'),
     ('issue', 'General issues'),
     ('racial-issue', 'Racial Issues'),
-    ('target','Target'),
-    ('scope', 'Scope')
+    ('target','Target')
 ]
 
 ## open-ended vars
