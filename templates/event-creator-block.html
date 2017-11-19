@@ -79,18 +79,18 @@
           </label>                      
         </div>
       </div>
-
+      {% for question, values in yes_no_vars.iteritems() %}
       <div class="form-group">
-        <label>Does/is this event/article: </label>
-
-        {% for k, v in info_vars %}
+        <label>{{ question|safe }}</label>
+        {% for list_items in values %}
         <div class="form-check">
-          <label class="form-check-label" id="l_info_{{ k }}">
-            <input type="checkbox" id="info_{{ k }}" value="{{ k }}" {{ 'checked' if curr[k] == 'yes' else '' }}> {{ v|safe }}
+          <label class="form-check-label" id="l_info_{{ list_items[0] }}">
+            <input type="checkbox" id="info_{{ list_items[0] }}" value="{{ list_items[0] }}" {{ 'checked' if curr[list_items[0]] == 'yes' else '' }}> {{ list_items[1]|safe }}
           </label>
         </div>
         {% endfor %}
       </div>
+      {% endfor %}
     </form>
   </div>
 

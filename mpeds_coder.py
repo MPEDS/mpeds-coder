@@ -22,6 +22,7 @@ import datetime as dt
 import time
 from math import ceil
 from random import sample, choice
+import yaml
 
 if (sys.version_info < (3, 0)):
     import urllib2
@@ -115,18 +116,14 @@ vars.extend(v3[:])
 ## single value variables for first-pass coding
 sv = ['comments', 'protest', 'multi', 'nous', 'ignore']
 
-## read in all checkbox lines
-lines = open(app.config['WD'] + '/yes-no.csv').read().split('\n')
-info_vars = []
-for line in lines:
-    x = line.strip().split(',')
-    if len(x) > 1:
-        info_vars.append( (x[0], x[1]) )
+## yaml for yes/no variables
+yes_no_vars = yaml.load(open('yes-no.yml', 'r'))
 
+## mark the single-valued items
 event_creator_single_value = ['article-desc', 'desc', 'start-date', 'end-date', 
     'location', 'duration', 'date-est']
 
-event_creator_single_value.extend([x[0] for x in info_vars])
+event_creator_single_value.extend([[x[0] for x in v] for k, v in yes_no_vars.iteritems()])
 
 ## metadata for Solr
 meta_solr = ['PUBLICATION', 'SECTION', 'BYLINE', 'DATELINE', 'DATE', 'INTERNAL_ID']
@@ -1506,7 +1503,7 @@ def modifyEvents():
             v1 = v1, 
             v2 = v2,
             vars = event_creator_vars,
-            info_vars = info_vars,
+            yes_no_vars = yes_no_vars,
             opts = opts, 
             curr = curr, 
             event_id = eid)
