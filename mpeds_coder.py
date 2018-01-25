@@ -134,6 +134,7 @@ meta_solr = ['PUBLICATION', 'SECTION', 'BYLINE', 'DATELINE', 'DATE', 'INTERNAL_I
 
 ##### load text from Solr database
 def loadSolr(solr_id):
+    solr_id    = urllib.quote(solr_id)
     url        = '%s/select?q=id:"%s"&wt=json' % (app.config['SOLR_ADDR'], solr_id)
     not_found  = (0, [], [])
     no_connect = (-1, [], [])

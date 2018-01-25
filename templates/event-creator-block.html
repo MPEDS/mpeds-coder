@@ -85,7 +85,7 @@
         {% for list_items in values %}
         <div class="form-check">
           <label class="form-check-label" id="l_info_{{ list_items[0] }}">
-            <input type="checkbox" id="info_{{ list_items[0] }}" value="{{ list_items[0] }}" {{ 'checked' if curr[list_items[0]] == 'yes' else '' }}> {{ list_items[1]|safe }}
+            <input type="checkbox" id="info_{{ list_items[0] }}" value="{{ list_items[0] }}" {{ 'checked' if curr[list_items[0]] and (curr[list_items[0]] == 'yes' or curr[list_items[0]][0] =='yes') else '' }}> {{ list_items[1]|safe }}
           </label>
         </div>
         {% endfor %}
