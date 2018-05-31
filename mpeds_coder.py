@@ -1913,25 +1913,8 @@ def searchSolr():
 
     qstr = ' AND '.join(query)
 
-    _mail(app.config['EMAIL_SERVER'],
-         app.config['EMAIL_SOLR'],
-         app.config['EMAIL_SOLR'],
-         'Solr job to be queued',
-         'Query\n\n%s' % qstr)
+    return make_response(qstr, 200)
 
-    return make_response('Query has been put into email queue. You will get an email upon completion.', 200)
-
-
-def _mail(serverURL=None, sender='', to='', subject='', text=''):
-    """
-    Usage:
-    mail('somemailserver.com', 'me@example.com', 'someone@example.com', 'test', 'This is a test')
-    """
-    headers = "From: %s\r\nTo: %s\r\nSubject: %s\r\n" % (sender, to, subject)
-    message = headers + text
-    mailServer = smtplib.SMTP(serverURL)
-    mailServer.sendmail(sender, to, message)
-    mailServer.quit()
 
 if __name__ == '__main__':
     app.run()
