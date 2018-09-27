@@ -1,6 +1,6 @@
 from database import db_session, init_db
 from models import User, ArticleMetadata, CodeFirstPass, CodeSecondPass, CodeEventCreator, \
-	ArticleQueue, SecondPassQueue, EventCreatorQueue, VarOption, Event
+	ArticleQueue, SecondPassQueue, EventCreatorQueue, Event
 from sqlalchemy import func
 
 import csv
@@ -9,22 +9,6 @@ import glob
 import json
 
 import config
-
-def loadVariableOptions(filename, reset = False):
-	""" Load current dropdowns from file. """
-	if reset:
-		db_session.query(VarOption).delete()
-
-	print("Adding variables...")
-	dds = []
-	with open(filename) as csvfile:
-		reader = csv.reader(csvfile)
-		for row in reader:
-			dds.append( VarOption(variable = row[0], option = row[1]) )
-
-	db_session.add_all(dds)
-	db_session.commit()
-
 
 def addArticlesExample(db_name = 'test'):
 	""" Add articles from example directory. """
@@ -100,7 +84,6 @@ def addQueueExample():
 def main():
 	# init_db()
 	# addArticles('/home/ubuntu/article-metadata/black-newspapers-protest.csv', 'black-newspapers')        
-	loadVariableOptions("presets.csv", reset = True)
 	# addUsersExample()
 	# addQueueExample()
 

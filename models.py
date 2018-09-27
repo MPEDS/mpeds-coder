@@ -190,22 +190,6 @@ class User(Base, UserMixin):
         return '<Coder %r>' % (self.id)
 
 
-class VarOption(Base):
-    __tablename__ = 'var_option'
-    id       = Column(Integer, primary_key=True)
-    variable = Column(String(100), nullable = False)
-    options  = Column(String(100), nullable = False)
-    parent   = Column(Integer)
-
-    def __init__(self, variable, option, parent = None):
-        self.variable = variable
-        self.options   = option
-        self.parent   = parent
-
-    def __repr__(self):
-        return '<VarOption %r>' % (self.id)
-
-
 class FormTemplate(Base):
     __tablename__ = 'form_template'
     id = Column(Integer, primary_key = True, autoincrement=True)

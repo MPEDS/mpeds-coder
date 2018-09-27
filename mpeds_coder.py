@@ -69,16 +69,6 @@ lm.login_view = 'login'
 ## retrieve central time
 central = timezone('US/Central')
 
-# variable lists
-
-## vars with preset categories
-v1 = [
-    ('form',  'Form/Type'),
-    ('issue', 'General issues'),
-    ('racial-issue', 'Racial Issues'),
-    ('target','Target')
-]
-
 ## open-ended vars
 v2 = [
     ('loc',    'Location'),
@@ -102,6 +92,10 @@ for var in open(app.config['WD'] + '/text-selects.csv', 'r').read().split('\n'):
         key  = '-'.join(re.split('[ /]', var.lower()))
         key += '-text'
         event_creator_vars.append( (key, var) )
+
+## load preset variables
+preset_vars = yaml.load(open(app.config['WD'] + '/presets.yaml', 'r'))
+v1 = [(x, str.title(x).replace('-', ' ')) for x in sorted(preset_vars.keys())]
 
 ## multiple variable keys
 multi_vars_keys = v1[:] 
@@ -1481,8 +1475,9 @@ def modifyEvents():
         eid = ev.id
 
     ## built-in dropdown options
-    for o in db_session.query(VarOption).all():
-        opts[ o.variable ].append(o.options)
+    for preset_key in sorted(preset_vars.keys()):
+        for preset_value in preset_vars[preset_key]:
+            opts[ preset_key ].append(preset_value)
 
     ## None of the above for v1 variables
     if pn in ['1', '2']:
