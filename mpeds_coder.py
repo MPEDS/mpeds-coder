@@ -641,7 +641,6 @@ def paginate(query, page, per_page=20, error_out=True):
     if page < 1 and error_out:
         abort(404)
 
-    print("per_page" + str(per_page))
     items = query.limit(per_page).offset((page - 1) * per_page).all()
     if not items and page != 1 and error_out:
         abort(404)
@@ -838,8 +837,8 @@ def admin():
     if current_user.authlevel < 3:
         return redirect(url_for('index'))
 
-    ura   = [u.username for u in db_session.query(User).filter(User.authlevel == 1).all()]
-    coded = {user: {} for user in ura[:]}
+    ura   = {u.id: u.username for u in db_session.query(User).filter(User.authlevel == 1).all()}
+    coded = {user: {} for user in ura.keys()}
     dbs   = [x[0] for x in db_session.query(ArticleMetadata.db_name).distinct()]
     pubs  = []
 
@@ -862,12 +861,12 @@ def admin():
         pubs = sorted(jobj['facet_counts']['facet_fields']['PUBLICATION'][0::2])
 
     ## get user stats for EC
-    for count, user in db_session.query(func.count(EventCreatorQueue.id), User.username).\
-        join(User).group_by(User.username).filter(EventCreatorQueue.coded_dt == None, User.username.in_(ura)).all():
+    for count, user in db_session.query(func.count(EventCreatorQueue.id), User.id).\
+        join(User).group_by(User.id).filter(EventCreatorQueue.coded_dt == None, User.id.in_(ura.keys())).all():
         coded[user]['remaining'] = count
 
-    for count, user in db_session.query(func.count(EventCreatorQueue.id), User.username).\
-        join(User).group_by(User.username).filter(EventCreatorQueue.coded_dt != None, User.username.in_(ura)).all():
+    for count, user in db_session.query(func.count(EventCreatorQueue.id), User.id).\
+        join(User).group_by(User.id).filter(EventCreatorQueue.coded_dt != None, User.id.in_(ura.keys())).all():
         coded[user]['completed'] = count
 
     ## get number of unassigned articles
@@ -969,30 +968,65 @@ def coderStats():
 @app.route('/userarticlelist/<pn>/<int:page>')
 @login_required
 def userArticleList(pn, page = 1):
+    """ View for coders to see their past articles. """
+    model = None
     if pn == '1':
-        pagination = paginate(db_session.query(ArticleQueue, ArticleMetadata).\
-        filter(ArticleQueue.coder_id == current_user.id, ArticleQueue.coded_dt != None).\
-        join(ArticleMetadata).\
-        order_by(desc(ArticleQueue.coded_dt)), page, 10000, True)
-        aqs = pagination.items
+        model = ArticleQueue
     elif pn == '2':
-        pagination = paginate(db_session.query(SecondPassQueue, ArticleMetadata).\
-        filter(SecondPassQueue.coder_id == current_user.id, SecondPassQueue.coded_dt != None).\
-        join(ArticleMetadata).\
-        order_by(desc(SecondPassQueue.coded_dt)), page, 10000, True)
-        aqs = pagination.items
-    elif pn == 'ec':
-        pagination = paginate(db_session.query(EventCreatorQueue, ArticleMetadata).\
-        filter(EventCreatorQueue.coder_id == current_user.id, EventCreatorQueue.coded_dt != None).\
-        join(ArticleMetadata).\
-        order_by(desc(EventCreatorQueue.coded_dt)), page, 10000, True)
-        aqs = pagination.items
+        model = SecondPassQueue
+    elif pn =='ec':
+        model = EventCreatorQueue
     else:
         return make_response("Invalid page.", 404)
+    
+    pagination = paginate(db_session.query(model, ArticleMetadata).\
+                          filter(model.coder_id == current_user.id, model.coded_dt != None).\
+                          join(ArticleMetadata).\
+                          order_by(desc(model.coded_dt)), page, 10000, True)
+    aqs = pagination.items
 
     return render_template("list.html", 
         pn  = pn,
         aqs = aqs,
+        pagination = pagination)
+
+
+@app.route('/userarticlelist/admin/<is_coded>/<coder_id>/<pn>')
+@app.route('/userarticlelist/admin/<is_coded>/<coder_id>/<pn>/<int:page>')
+@login_required
+def userArticleListAdmin(coder_id, is_coded, pn, page = 1):
+    """ View for admins to manually inspect specific coder queues. """
+    if current_user.authlevel < 3:
+        return redirect(url_for('index'))
+
+    model = None
+    if pn == '1':
+        model = ArticleQueue
+    elif pn == '2':
+        model = SecondPassQueue
+    elif pn =='ec':
+        model = EventCreatorQueue
+    else:
+        return make_response("Invalid page.", 404)
+
+    is_coded_condition = None
+    if is_coded == '0':
+        is_coded_condition = model.coded_dt == None
+    else:
+        is_coded_condition = model.coded_dt != None
+
+    pagination = paginate(db_session.query(model, ArticleMetadata).\
+                          filter(model.coder_id == coder_id, is_coded_condition).\
+                          join(ArticleMetadata).\
+                          order_by(desc(model.coded_dt)), page, 10000, True)
+    aqs = pagination.items
+    username = db_session.query(User).filter(User.id == int(coder_id)).first().username
+
+    return render_template("list.html", 
+        pn  = pn,
+        aqs = aqs,
+        is_coded = is_coded,
+        username = username,
         pagination = pagination)
 
 
@@ -1805,11 +1839,10 @@ def assignArticles():
             ## can't assign by ID because of the factorial math
             return make_response('Cannot assign articles by ID with bins.', 500)
 
-        ## TK: This doesn't do the assignmetn for some reason.
-        ids = map(lambda x: int(x), ids.split('\n'))
-        articles = assign_lib.getArticlesbyID(ids)
+        ## TK: This doesn't do the assignment for some reason.
+        ids = map(lambda x: int(x), ids.strip().split('\n'))
         if same == 'same':
-            n_added = assign_lib.assignmentToCoders(articles, user_ids, 'ec')
+            n_added = assign_lib.assignmentToCoders(ids, user_ids, 'ec')
         elif same == 'different':
             return make_response('Can only assign the same articles by ID.', 500)
 

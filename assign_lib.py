@@ -102,7 +102,7 @@ def generateSample(n, db_name = None, pass_number = '1', publication = None):
 
 
 def getArticlesbyID(ids):
-    articles = [x.id for x in db_session.query(ArticleMetadata).filter(ArticleMetadata.db_id.in_(ids)).all()]
+    articles = [x.id for x in db_session.query(ArticleMetadata).filter(ArticleMetadata.id.in_(ids)).all()]
     return articles
 
 
@@ -117,7 +117,8 @@ def getUnpairedSecondPass():
 
 def assignmentToBin(article_ids, coder_bins, pass_number = '1'):
     """Given a list of bins, assign one article to each coder in the bin"""
-    i   = 0
+    i = 0
+    print(article_ids)
     for article_id in article_ids:
         my_bin = coder_bins[i]
 
@@ -177,18 +178,15 @@ def assignmentToCoders(article_ids, coder_ids, pass_number = '1'):
     ## add to queues
     to_add = []
     for coder_id in coder_ids:
-        existing = [x.article_id for x in db_session.query(model).all()]
-
         for a in article_ids:
-            if a not in existing:
-                if pass_number == '1':
-                    item = ArticleQueue(article_id = a, coder_id = coder_id)
-                elif pass_number == '2':
-                    item = SecondPassQueue(article_id = a, coder_id = coder_id)
-                elif pass_number == 'ec':
-                    item = EventCreatorQueue(article_id = a, coder_id = coder_id)
+            if pass_number == '1':
+                item = ArticleQueue(article_id = a, coder_id = coder_id)
+            elif pass_number == '2':
+                item = SecondPassQueue(article_id = a, coder_id = coder_id)
+            elif pass_number == 'ec':
+                item = EventCreatorQueue(article_id = a, coder_id = coder_id)
 
-                to_add.append( item )
+            to_add.append( item )
 
     db_session.add_all(to_add)
     db_session.commit()

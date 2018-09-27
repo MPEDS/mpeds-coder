@@ -119,40 +119,6 @@
               </div>
             </div>
 
-<!--             <div class="tab-pane" id="assign-articles-group_block">
-              <p>
-                <small class="form-text text-muted">Assign unassigned articles to groups of coders. This assigns <i>n</i> articles to each coder, such that <i>k</i> users code each article.</small>
-              </p>
-              <div class="row">
-                <div class="col-xs-4 form-group" id="assign-articles-group-form-group">
-                  <label>Number of articles (n)</label>
-                  <input class="form-control" type="number" name="num-assign-articles-group" id="num-assign-articles-group" value="" />
-
-                  <label for="article-database-group">Article Database</label>
-                  <select class="form-control" id="article-database-group">
-                    <option selected value=''>---</option>
-                    {% for db in dbs %}
-                    <option value="{{ db }}">{{ db }}</option>
-                    {% endfor %}
-                  </select> 
-                  <div class="form-control-feedback"></div>
-                </div>
-                <div class="col-xs-4">
-                  <label>Users</label>
-                  {% for u in ura%}
-                    <div class="form-check" id="group-users">
-                      <label class="form-check-label" id="{{ u }}_user">
-                        <input type="checkbox" class='user' id="{{ u }}" value="{{ u }}"> {{ u|safe }}
-                      </label>
-                    </div>
-                  {% endfor %}
-                  <p></p>
-                  <label>Group size (k)</label>
-                  <input class="form-control" type="number" name="group-size" id="group-size" value="" />                  
-                </div>
-              </div>
-            </div>            
- -->
             <div class="tab-pane" id="transfer-articles_block">
               <p>
                 <small class="form-text text-muted">Transfers articles which are in the queue of one or more coders into the queue of one or more other coders.</small>
@@ -290,11 +256,14 @@
               <th>Remaining</th>
               <th>Completed</th>
             </tr>
-              {% for u in ura %}
+              {% for u in ura.keys() %}
               <tr>
-                <td>{{ u|capitalize }}</td>
-                <td>{{ coded[u]['remaining'] }}</td>
-                <td>{{ coded[u]['completed'] }}</td>
+                <td>{{ ura[u]|capitalize }}</td>
+                <td>
+		  <a href="{{url_for('userArticleListAdmin', pn = 'ec', is_coded = 0, coder_id = u) }}">{{ coded[u]['remaining'] }}</a>
+		</td>
+                <td>
+		  <a href="{{url_for('userArticleListAdmin', pn = 'ec', is_coded = 1, coder_id = u) }}">{{ coded[u]['completed'] }}</a>	
               </tr>
               {% endfor %}
             </table>

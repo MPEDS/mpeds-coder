@@ -187,7 +187,7 @@ class User(Base, UserMixin):
             return str(self.id)  # python 3
 
     def __repr__(self):
-        return '<Coder %r>' % (self.id)
+        return '<Coder %r>' % (self.username)
 
 
 class FormTemplate(Base):

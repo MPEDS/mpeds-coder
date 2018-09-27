@@ -2,31 +2,35 @@
 {% block body %}
   <link rel="stylesheet" type="text/css" href="//cdn.datatables.net/1.10.11/css/jquery.dataTables.css">
     <div class="container">
-      <div class="row">
-        <div class="col-xs-12">
-        	<h3>Articles you've coded</h3>
-        	<table class="table table-condensed table-striped" id="list">
-            <thead>
-          		<tr>
-          			<th>&nbsp;</th>
-          			<th class="col-xs-8">Title</th>
-          			<th class="col-xs-2">Last updated</th>
-          		</tr>
-            </thead>
-            <tbody>
-          		{% for aq, am in aqs %}
-          		<tr>
-                    {% if pn == '1' %}
-              			<td><a href="{{ url_for('code1', aid = aq.article_id) }}" target="_blank">{{ aq.article_id }}</a></th>
-                    {% elif pn == '2' %}
-                    <td><a href="{{ url_for('code2', aid = aq.article_id) }}" target="_blank">{{ aq.article_id }}</a></th>
-                    {% elif pn == 'ec' %}
-                    <td><a href="{{ url_for('eventCreator', aid = aq.article_id) }}" target="_blank">{{ aq.article_id }}</a></th>
-                    {% endif %}
-                    <td>{{ am.title }}</td>
-                    <td>{{ aq.coded_dt.strftime('%Y-%m-%d %H:%M:%S') }}</td>
-          		</tr>
-          		{% endfor %}
+	{% if current_user.authlevel > 2 %}
+	<h2>{{ username|capitalize }}'s {{ 'remaining' if is_coded == '0' else 'completed' }} queue</h2>
+	{% else %}
+	<h2>My coded articles</h2>
+	{% endif %}
+	<div class="row">
+	  <div class="col-xs-12">
+	    <table class="table table-condensed table-striped" id="list">
+	      <thead>
+		<tr>
+		  <th>&nbsp;</th>
+		  <th class="col-xs-8">Title</th>
+		  <th class="col-xs-2">Last updated</th>
+		</tr>
+	     </thead>
+	     <tbody>
+	       {% for aq, am in aqs %}
+	       <tr>
+		 {% if pn == '1' %}
+		 <td><a href="{{ url_for('code1', aid = aq.article_id) }}" target="_blank">{{ aq.article_id }}</a></th>
+                 {% elif pn == '2' %}
+                 <td><a href="{{ url_for('code2', aid = aq.article_id) }}" target="_blank">{{ aq.article_id }}</a></th>
+                 {% elif pn == 'ec' %}
+                 <td><a href="{{ url_for('eventCreator', aid = aq.article_id) }}" target="_blank">{{ aq.article_id }}</a></th>
+                 {% endif %}
+		 <td>{{ am.title }}</td>
+		 <td>{{ aq.coded_dt.strftime('%Y-%m-%d %H:%M:%S') if aq.coded_dt else '' }}</td>
+              </tr>
+              {% endfor %}
             </tbody>
 	        </table>
           {% macro render_pagination(pagination) %}
