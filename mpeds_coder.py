@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-    MPEDS coder
+    MPEDS Annotation Interface
     ~~~~~~
 
     Alex Hanna
@@ -22,6 +22,7 @@ import datetime as dt
 import time
 from math import ceil
 from random import sample, choice
+import yaml
 
 if (sys.version_info < (3, 0)):
     import urllib2
@@ -68,16 +69,6 @@ lm.login_view = 'login'
 ## retrieve central time
 central = timezone('US/Central')
 
-# variable lists
-
-## vars with preset categories
-v1 = [
-    ('form',  'Form/Type'),
-    ('issue', 'General issues'),
-    ('black-issue', 'African-American Issues'),
-    ('target','Target')
-]
-
 ## open-ended vars
 v2 = [
     ('loc',    'Location'),
@@ -94,20 +85,17 @@ v3 = [
     ('viol',   'Violence')
 ]
 
-event_creator_vars = [
-    ('actor-text',  'Actors'),
-    ('form-text',  'Actions / forms'),
-    ('bystander-text', 'Bystanders'),
-    ('issue-text', 'Issues'),
-    ('mvmt-org-text', 'Movement organizations'),
-    ('police-text', 'Police'),
-    ('police-actions-text', 'Police actions'),
-    ('politician-named-text', 'Politicians'),
-    ('propdam-text', 'Property damage'),
-    ('size-text', 'Size'),
-    ('target-text', 'Target'),
-    ('viol-text',   'Violence to persons')
-]
+event_creator_vars = []
+for var in open(app.config['WD'] + '/text-selects.csv', 'r').read().split('\n'):
+    var = var.strip()
+    if var:
+        key  = '-'.join(re.split('[ /]', var.lower()))
+        key += '-text'
+        event_creator_vars.append( (key, var) )
+
+## load preset variables
+preset_vars = yaml.load(open(app.config['WD'] + '/presets.yaml', 'r'))
+v1 = [(x, str.title(x).replace('-', ' ')) for x in sorted(preset_vars.keys())]
 
 ## multiple variable keys
 multi_vars_keys = v1[:] 
@@ -119,25 +107,17 @@ vars = v1[:]
 vars.extend(v2[:])
 vars.extend(v3[:])
 
-## single value variables
+## single value variables for first-pass coding
 sv = ['comments', 'protest', 'multi', 'nous', 'ignore']
 
-info_vars = [
-    ('af-am', 'an African-American protest?'),
-    ('protest-not-af-am', 'a protest, but not African-American?'),
-    ('uncertain', 'uncertain whether African-American protest?'),
-    ('campaign', 'part of a larger campaign?'), 
-    ('ritual', 'ritualized or cyclical?'),
-    ('master-event', 'a larger event which contains subevents?'),
-    ('subevent', 'a subevent of a larger event?'),
-    ('counterprotest', 'a counter-protest?'),
-    ('historical', 'a historical (> 1 year) event?'),
-    ('non-us', 'occurring outside of the US?')]
+## yaml for yes/no variables
+yes_no_vars = yaml.load(open(app.config['WD'] + '/yes-no.yml', 'r'))
 
-ec_sv = ['article-desc', 'desc', 'start-date', 'end-date', 
+## mark the single-valued items
+event_creator_single_value = ['article-desc', 'desc', 'start-date', 'end-date', 
     'location', 'duration', 'date-est']
 
-ec_sv.extend([x[0] for x in info_vars])
+event_creator_single_value.extend([[x[0] for x in v] for k, v in yes_no_vars.iteritems()])
 
 ## metadata for Solr
 meta_solr = ['PUBLICATION', 'SECTION', 'BYLINE', 'DATELINE', 'DATE', 'INTERNAL_ID']
@@ -148,6 +128,7 @@ meta_solr = ['PUBLICATION', 'SECTION', 'BYLINE', 'DATELINE', 'DATE', 'INTERNAL_I
 
 ##### load text from Solr database
 def loadSolr(solr_id):
+    solr_id    = urllib.quote(solr_id)
     url        = '%s/select?q=id:"%s"&wt=json' % (app.config['SOLR_ADDR'], solr_id)
     not_found  = (0, [], [])
     no_connect = (-1, [], [])
@@ -1473,7 +1454,7 @@ def modifyEvents():
         eid = int(eid)
         ## get the current values
         for code in db_session.query(model).filter_by(event_id = eid, coder_id = current_user.id).all():
-            if code.variable in sv or code.variable in ec_sv:
+            if code.variable in sv or code.variable in event_creator_single_value:
                 curr[code.variable] = code.value
             else:
                 ## stash in array
@@ -1494,13 +1475,11 @@ def modifyEvents():
         eid = ev.id
 
     ## built-in dropdown options
-    for o in db_session.query(VarOption).all():
-        opts[ o.variable ].append(o.options)
+    for preset_key in sorted(preset_vars.keys()):
+        for preset_value in preset_vars[preset_key]:
+            opts[ preset_key ].append(preset_value)
 
     ## None of the above for v1 variables
-    for k,v in v1:
-        opts[ k ].append("_None of the above")
-
     if pn in ['1', '2']:
         for k,v in v2:
             ## coder 1-generated dropdown options
@@ -1520,7 +1499,7 @@ def modifyEvents():
             v1 = v1, 
             v2 = v2,
             vars = event_creator_vars,
-            info_vars = info_vars,
+            yes_no_vars = yes_no_vars,
             opts = opts, 
             curr = curr, 
             event_id = eid)
@@ -1826,7 +1805,9 @@ def assignArticles():
             ## can't assign by ID because of the factorial math
             return make_response('Cannot assign articles by ID with bins.', 500)
 
-        articles = assign_lib.getArticlesbyID(ids.split('\n'))
+        ## TK: This doesn't do the assignmetn for some reason.
+        ids = map(lambda x: int(x), ids.split('\n'))
+        articles = assign_lib.getArticlesbyID(ids)
         if same == 'same':
             n_added = assign_lib.assignmentToCoders(articles, user_ids, 'ec')
         elif same == 'different':

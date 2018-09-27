@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="utf-8">
@@ -21,28 +22,29 @@
     </script>
   </head>
   <body>
-    <header class="navbar navbar-default" id="top" role="navigation"> 
+    <header class="navbar navbar-default" id="top">
       <div class="container-fluid">
         <div class="navbar-header">
-        <button class="navbar-toggle" type="button" data-toggle="collapse" data-target=".bs-navbar-collapse">
-          <span class="sr-only">Toggle navigation</span>
-          <span class="icon-bar"></span>
-          <span class="icon-bar"></span>
-          <span class="icon-bar"></span>
-        </button>
-        <a href="{{ url_for('index') }}" class="navbar-brand">{{ config['SITE_TITLE'] }}</a>
-      </div>
-      <nav class="collapse navbar-collapse bs-navbar-collapse" role="navigation">
-        <ul class="nav navbar-nav navbar-left">
+          <button class="navbar-toggle" type="button" data-toggle="collapse" data-target=".bs-navbar-collapse">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a href="{{ url_for('index') }}" class="navbar-brand">{{ config['SITE_TITLE'] }}</a>
+	</div>
+	<nav class="collapse navbar-collapse bs-navbar-collapse">
+          <ul class="nav navbar-nav navbar-left">
             <li><a href="{{ url_for('index') }}">Home</a></li>
-        </ul>
-        <ul class="nav navbar-nav navbar-right">
-          {% if current_user.is_authenticated %}
+          </ul>
+          <ul class="nav navbar-nav navbar-right">
+            {% if current_user.is_authenticated %}
             <li class="user_info" id="user_{{ current_user.id }}"><a>Logged in as {{ current_user.username|capitalize }}</a></li>
             <li><a href="{{ url_for('logout') }}">Logout</a></li>
-          {% endif %}
-        </ul>
-      </nav>
+            {% endif %}
+          </ul>
+	</nav>
+      </div>
     </header> 
     {% for message in get_flashed_messages() %}
       <div class="flash">{{ message }}</div>
