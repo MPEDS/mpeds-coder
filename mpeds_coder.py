@@ -55,7 +55,7 @@ from sqlite3 import dbapi2 as sqlite3
 ## app-specific
 from database import db_session
 from models import ArticleMetadata, ArticleQueue, CodeFirstPass, CodeSecondPass, CodeEventCreator, \
-    Event, EventCreatorQueue, SecondPassQueue, User, VarOption
+    Event, EventCreatorQueue, SecondPassQueue, User
 
 # create our application
 app = Flask(__name__)
