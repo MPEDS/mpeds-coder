@@ -38,7 +38,7 @@ var createListItem = function(e, v, p_id, text) {
 }
 
 var addSelectedText = function(e, v) {
-  var oText  = '';
+  var oText  = "";
   var tStart = 0;
   var tEnd   = 0;
   var el     = '';
@@ -49,8 +49,6 @@ var addSelectedText = function(e, v) {
   // the various methods of getting the text object
   if (window.getSelection) {
       oText = window.getSelection();
-  } else if (document.selection) {
-      oText = document.selection.createRange().text;
   } else if (document.getSelection) {
       oText = document.getSelection();
   }

@@ -96,7 +96,7 @@ var modifyEvent = function(e) {
 
         for (j = 0; j < actions.length; j++) {
           var type = actions[j];
-          $('#' + type + '_' + v).click( generate_handler( v, type ) );
+          $('#' + type + '_' + v).on("click", generate_handler( v, type ) );
         }
 
         // add text select variable text

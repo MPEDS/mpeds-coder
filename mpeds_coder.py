@@ -1810,7 +1810,9 @@ def assignArticles():
             ## can't assign by ID because of the factorial math
             return make_response('Cannot assign articles by ID with bins.', 500)
 
-        articles = assign_lib.getArticlesbyID(ids.split('\n'))
+        ## TK: This doesn't do the assignmetn for some reason.
+        ids = map(lambda x: int(x), ids.split('\n'))
+        articles = assign_lib.getArticlesbyID(ids)
         if same == 'same':
             n_added = assign_lib.assignmentToCoders(articles, user_ids, 'ec')
         elif same == 'different':
