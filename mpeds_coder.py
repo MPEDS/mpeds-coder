@@ -86,12 +86,18 @@ v3 = [
 ]
 
 event_creator_vars = []
-for var in open(app.config['WD'] + '/text-selects.csv', 'r').read().split('\n'):
-    var = var.strip()
-    if var:
-        key  = '-'.join(re.split('[ /]', var.lower()))
-        key += '-text'
-        event_creator_vars.append( (key, var) )
+
+## if there's the yaml text selects
+if os.path.isfile(app.config['WD'] + '/text-selects.yaml'):
+    ecs = yaml.load(open(app.config['WD'] + '/text-selects.yaml', 'r'))
+    event_creator_vars = [(x, ecs[x]) for x in ecs.keys()]
+elif os.path.isfile(app.config['WD'] + '/text-selects.csv'):
+    for var in open(app.config['WD'] + '/text-selects.csv', 'r').read().split('\n'):
+        var = var.strip()
+        if var:
+            key  = '-'.join(re.split('[ /]', var.lower()))
+            key += '-text'
+            event_creator_vars.append( (key, var) )
 
 ## load preset variables
 preset_vars = yaml.load(open(app.config['WD'] + '/presets.yaml', 'r'))
