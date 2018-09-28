@@ -68,7 +68,7 @@
                   {% for u in ura%}
                     <div class="form-check" id="individual-users">
                       <label class="form-check-label" id="{{ u }}_user">
-                        <input type="checkbox" class='user' id="{{ u }}" value="{{ u }}"> {{ u|safe }}
+                        <input type="checkbox" class='user' id="{{ u }}" value="{{ u }}"> {{ ura[u]|safe }}
                       </label>
                     </div>
                   {% endfor %}
@@ -134,7 +134,7 @@
                     {% for u in ura%}
                       <div class="form-check" id="from-users">
                         <label class="form-check-label" id="{{ u }}_user">
-                          <input type="checkbox" id="{{ u }}_user" value="{{ u }}"> {{ u|safe }}
+                          <input type="checkbox" id="{{ u }}_user" value="{{ u }}"> {{ ura[u]|safe }}
                         </label>
                       </div>
                     {% endfor %}
@@ -144,7 +144,7 @@
                   {% for u in ura%}
                     <div class="form-check" id="to-users">
                       <label class="form-check-label" id="{{ u }}_user">
-                        <input type="checkbox" id="{{ u }}_user" value="{{ u }}"> {{ u|safe }}
+                        <input type="checkbox" id="{{ u }}_user" value="{{ u }}"> {{ ura[u]|safe }}
                       </label>
                     </div>
                   {% endfor %}
