@@ -67,8 +67,8 @@
                   <label>Users</label>
                   {% for u in ura%}
                     <div class="form-check" id="individual-users">
-                      <label class="form-check-label" id="{{ u }}_user_assignment_label">
-                        <input type="checkbox" class='user' id="{{ ura[u] }}_user_assignment" value="{{ ura[u] }}"> {{ ura[u]|safe }}
+                      <label class="form-check-label" id="{{ u }}_user">
+                        <input type="checkbox" class='user' id="{{ u }}" value="{{ u }}"> {{ ura[u]|safe }}
                       </label>
                     </div>
                   {% endfor %}
@@ -133,8 +133,8 @@
                   <div class="col-xs-4">
                     {% for u in ura%}
                       <div class="form-check" id="from-users">
-                        <label class="form-check-label" id="{{ u }}_fromuser_label">
-                          <input type="checkbox" id="{{ ura[u] }}_fromuser" value="{{ ura[u] }}"> {{ ura[u]|safe }}
+                        <label class="form-check-label" id="{{ u }}_user">
+                          <input type="checkbox" id="{{ u }}_user" value="{{ u }}"> {{ ura[u]|safe }}
                         </label>
                       </div>
                     {% endfor %}
@@ -143,8 +143,8 @@
                   <div class="col-xs-3">
                   {% for u in ura%}
                     <div class="form-check" id="to-users">
-                      <label class="form-check-label" id="{{ ura[u] }}_touser_label">
-                        <input type="checkbox" id="{{ ura[u] }}_touser" value="{{ ura[u] }}"> {{ ura[u]|safe }}
+                      <label class="form-check-label" id="{{ u }}_user">
+                        <input type="checkbox" id="{{ u }}_user" value="{{ u }}"> {{ ura[u]|safe }}
                       </label>
                     </div>
                   {% endfor %}
@@ -161,8 +161,8 @@
                 <div class="col-xs-3">
                 {% for u in ura%}
                   <div class="form-check">
-                    <label class="form-check-label" id="{{ ura[u] }}_user">
-                      <input type="checkbox" id="{{ ura[u] }}_user" value="{{ u }}"> {{ ura[u]|safe }}
+                    <label class="form-check-label" id="{{ u }}_user">
+                      <input type="checkbox" id="{{ u }}_user" value="{{ u }}"> {{ u|safe }}
                     </label>
                   </div>
                 {% endfor %}
