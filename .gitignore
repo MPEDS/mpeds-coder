@@ -30,3 +30,7 @@ config.py
 *.yml
 *.yaml
 *.csv
+
+# emacs
+*~
+*#
