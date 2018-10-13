@@ -7,7 +7,7 @@ import config
 #engine = create_engine('sqlite:///mpeds.db', convert_unicode=True)
 mysql_engine = create_engine('mysql://%s:%s@localhost/%s?charset=utf8' % 
     (config.MYSQL_USER, config.MYSQL_PASS, config.MYSQL_DB), 
-    convert_unicode=True)
+                             convert_unicode=True)
 db_session = scoped_session(sessionmaker(autocommit=False,
                                          autoflush=False,
                                          bind=mysql_engine))

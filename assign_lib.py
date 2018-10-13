@@ -46,7 +46,9 @@ def deleteUser(username):
 ########
 
 def generateSample(n, db_name = None, pass_number = '1', publication = None):
-    """Create a sample of articles of size N. """
+    """
+    Create a sample of articles of size N. 
+    """
     if pass_number == '1':
         if db_name == None:
             raise Exception('Need a database name for first pass coding.')
@@ -61,7 +63,9 @@ def generateSample(n, db_name = None, pass_number = '1', publication = None):
 
         ## prioritize articles which have more than 1 coder
         df = pd.DataFrame(db_session.query(CodeFirstPass.article_id, CodeFirstPass.coder_id).\
-            filter(CodeFirstPass.variable == 'protest', or_(CodeFirstPass.value == 'yes', CodeFirstPass.value == 'maybe')).\
+            filter(CodeFirstPass.variable == 'protest', 
+                   or_(CodeFirstPass.value == 'yes', 
+                       CodeFirstPass.value == 'maybe')).\
             all(), columns = ['article_id', 'coder_id'])
 
         gr = df.groupby('article_id').agg(np.count_nonzero)
@@ -82,12 +86,14 @@ def generateSample(n, db_name = None, pass_number = '1', publication = None):
         existing = [x[0] for x in db_session.query(distinct(EventCreatorQueue.article_id)).all()]
 
         ## query by publication
-        ## database will be implicit        
+        ## database will be implicit
         if publication:
             publication = "-".join(publication.split())
-            query = [x.id for x in db_session.query(ArticleMetadata).filter(ArticleMetadata.db_id.like('%s%%' % publication)).all()]
+            query = [x.id for x in db_session.query(ArticleMetadata).\
+                     filter(ArticleMetadata.db_id.like('%s%%' % publication)).all()]
         else:
-            query = [x.id for x in db_session.query(ArticleMetadata).filter_by(db_name = db_name).all()]
+            query = [x.id for x in db_session.query(ArticleMetadata).\
+                     filter_by(db_name = db_name).all()]
 
     ## if articles aren't in existing queues, add them to the population
     population = list(set(query) - set(existing))
@@ -96,7 +102,12 @@ def generateSample(n, db_name = None, pass_number = '1', publication = None):
     if len(population) < n:
         sample = population
     else:
-        sample = random.sample(population, n)
+        ## if publication is defined, order and take the first n articles
+        if publication:
+            population = sorted(population)
+            sample = population[:n]
+        else:
+            sample = random.sample(population, n)
     
     return sample
 
@@ -166,7 +177,7 @@ def assignDoubleCheck(coder_id1, coder_id2, n, pass_number = 1):
     assignmentToCoders(df.article_id[0:n].values, coder_id2, pass_number = pass_number)
 
 
-def assignmentToCoders(article_ids, coder_ids, pass_number = '1'):
+def assignmentToCoders(article_ids, coder_ids, pass_number):
     """ Assigns each article to all coders in list. """
     if pass_number == '1':
         model = ArticleQueue
@@ -177,21 +188,22 @@ def assignmentToCoders(article_ids, coder_ids, pass_number = '1'):
 
     ## add to queues
     to_add = []
-    for coder_id in coder_ids:
+    for c in coder_ids:
         for a in article_ids:
             if pass_number == '1':
-                item = ArticleQueue(article_id = a, coder_id = coder_id)
+                item = ArticleQueue(article_id = a, coder_id = c)
             elif pass_number == '2':
-                item = SecondPassQueue(article_id = a, coder_id = coder_id)
+                item = SecondPassQueue(article_id = a, coder_id = c)
             elif pass_number == 'ec':
-                item = EventCreatorQueue(article_id = a, coder_id = coder_id)
+                item = EventCreatorQueue(article_id = a, coder_id = c)
 
-            to_add.append( item )
+            to_add.append(item)
 
     db_session.add_all(to_add)
     db_session.commit()
 
     return len(to_add)
+
 
 def transferCoderToCoder(coder1, coder2, pass_number = '1', n_to_assign = 0):
     """ Transfer articles from coder1 to coder2 """

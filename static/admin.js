@@ -173,8 +173,6 @@ $(function(){
             addUser(e);
         } else if (current_form == 'assign-articles') {
             assignArticles(e);
-        // } else if (current_form == 'assign-articles-group') {
-        //     assignArticlesGroup(e);            
         } else if (current_form == 'transfer-articles') {
             transferArticles(e);
         } else if (current_form == 'search-solr') {

@@ -870,7 +870,11 @@ def admin():
         coded[user]['completed'] = count
 
     ## get number of unassigned articles
+    ## TK: Eventually generate this count for publications
     unassigned = []
+    #all_metadata = db_session.query(ArticleMetadata).all()
+    #assigned_metadata = db_session.query(EventCreatorQueue).all()
+
     for db in dbs:
         unassigned.append( (db, len( set([x.id for x in db_session.query(ArticleMetadata).filter_by(db_name = db).all()]) - \
         set([x[0] for x in db_session.query(distinct(EventCreatorQueue.article_id)).all()]))) )
@@ -978,17 +982,16 @@ def userArticleList(pn, page = 1):
         model = EventCreatorQueue
     else:
         return make_response("Invalid page.", 404)
-    
+
     pagination = paginate(db_session.query(model, ArticleMetadata).\
-                          filter(model.coder_id == current_user.id, model.coded_dt != None).\
-                          join(ArticleMetadata).\
-                          order_by(desc(model.coded_dt)), page, 10000, True)
-    aqs = pagination.items
+            filter(model.coder_id == current_user.id, model.coded_dt != None).\
+            join(ArticleMetadata).\
+            order_by(desc(model.coded_dt)), page, 10000, True)
 
     return render_template("list.html", 
-        pn  = pn,
-        aqs = aqs,
-        pagination = pagination)
+                           pn  = pn,
+                           aqs = pagination.items,
+                           pagination = pagination)
 
 
 @app.route('/userarticlelist/admin/<is_coded>/<coder_id>/<pn>')
@@ -1015,16 +1018,16 @@ def userArticleListAdmin(coder_id, is_coded, pn, page = 1):
     else:
         is_coded_condition = model.coded_dt != None
 
+    ## show articles in the order they entered the user's queue
     pagination = paginate(db_session.query(model, ArticleMetadata).\
-                          filter(model.coder_id == coder_id, is_coded_condition).\
-                          join(ArticleMetadata).\
-                          order_by(desc(model.coded_dt)), page, 10000, True)
-    aqs = pagination.items
+                     filter(model.coder_id == coder_id, is_coded_condition).\
+                     join(ArticleMetadata).\
+                     order_by(model.id), page, 10000, True)
     username = db_session.query(User).filter(User.id == int(coder_id)).first().username
 
     return render_template("list.html", 
         pn  = pn,
-        aqs = aqs,
+        aqs = pagination.items,
         is_coded = is_coded,
         username = username,
         pagination = pagination)
@@ -1773,9 +1776,11 @@ def assignArticles():
         ## get number of unassigned articles
         if pub:
             pub = "-".join(pub.split())
-            full_set    = set([x.id for x in db_session.query(ArticleMetadata).filter(ArticleMetadata.db_id.like('%s%%' % pub)).all()])
+            full_set = set([x.id for x in db_session.query(ArticleMetadata).\
+                            filter(ArticleMetadata.db_id.like('%s%%' % pub)).all()])
         else:
-            full_set    = set([x.id for x in db_session.query(ArticleMetadata).filter_by(db_name = db_name).all()])
+            full_set = set([x.id for x in db_session.query(ArticleMetadata).\
+                            filter_by(db_name = db_name).all()])
 
         assigned   = set([x[0] for x in db_session.query(distinct(EventCreatorQueue.article_id)).all()])
         unassigned = len( full_set - assigned )
@@ -1786,16 +1791,8 @@ def assignArticles():
     if users == '':
         return make_response('Please select some users.', 500)
 
-    users = users.split(',')
+    user_ids = map(lambda x: int(x), users.split(','))
 
-    ## make a user dictionary
-    user_dict = {user.username: user.id for user in db_session.query(User).all()}
-
-    ## users in list
-    user_ids = []
-    for u in users:
-        user_ids.append(user_dict[u])
-        
     if group_size != '':
         try:
             group_size = int(group_size)
@@ -1811,18 +1808,21 @@ def assignArticles():
         ## assign by individual
         if group_size == '':
             if same == 'same':
+                ## assign by database
                 if db_name:
                     articles = assign_lib.generateSample(num, db_name, 'ec')
                 else:
+                    ## assign by publication
                     articles = assign_lib.generateSample(num, None, 'ec', pub)
+
                 n_added = assign_lib.assignmentToCoders(articles, user_ids, 'ec')
             elif same == 'different':
-                for u in users:
+                for u in user_ids:
                     if db_name:
                         articles = assign_lib.generateSample(num, db_name, 'ec')
                     else:
                         articles = assign_lib.generateSample(num, None, 'ec', pub)
-                    n_added  += assign_lib.assignmentToCoders(articles, [user_dict[u]], 'ec')
+                    n_added  += assign_lib.assignmentToCoders(articles, [u], 'ec')
         else:
             ## assignment by bin
             bins       = assign_lib.createBins(user_ids, group_size)
@@ -1839,7 +1839,6 @@ def assignArticles():
             ## can't assign by ID because of the factorial math
             return make_response('Cannot assign articles by ID with bins.', 500)
 
-        ## TK: This doesn't do the assignment for some reason.
         ids = map(lambda x: int(x), ids.strip().split('\n'))
         if same == 'same':
             n_added = assign_lib.assignmentToCoders(ids, user_ids, 'ec')
@@ -1847,17 +1846,6 @@ def assignArticles():
             return make_response('Can only assign the same articles by ID.', 500)
 
     return make_response('%d articles assigned successfully.' % n_added, 200)
-
-
-@app.route('/_assign_articles_group')
-@login_required
-def assignArticlesGroup():
-    ## users in list
-    user_ids = []
-    for u in users:
-        user_ids.append(user_dict[u])
-    
-    return make_response('%d articles assigned successfully.' % num_sample, 200)
 
 
 @app.route('/_transfer_articles')
@@ -1875,19 +1863,8 @@ def transferArticles():
     except:
         return make_response('Please enter a valid number.', 500)
    
-    from_users = from_users.split(',')
-    to_users = to_users.split(',')
-
-    ## make a user dictionary
-    user_dict = {user.username: user.id for user in db_session.query(User).all()}
-
-    ## users in list
-    from_ids = []
-    for u in from_users:
-        from_ids.append(user_dict[u])
-    to_ids = []
-    for u in to_users:
-        to_ids.append(user_dict[u])
+    from_users = map(lambda x: int(x), from_users.split(','))
+    to_users = map(lambda x: int(x), to_users.split(','))
 
     n = assign_lib.transferCoderToCoder(from_ids, to_ids, 'ec', num)
 
