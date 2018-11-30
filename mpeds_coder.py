@@ -1872,7 +1872,7 @@ def transferArticles():
     from_users = map(lambda x: int(x), from_users.split(','))
     to_users = map(lambda x: int(x), to_users.split(','))
 
-    n = assign_lib.transferCoderToCoder(from_ids, to_ids, 'ec', num)
+    n = assign_lib.transferCoderToCoder(from_users, to_users, 'ec', num)
 
     return make_response('%d articles transferred successfully.' % n, 200)
 
