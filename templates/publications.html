@@ -1,0 +1,32 @@
+{% extends "layout.html" %}
+{% block body %}
+  <link rel="stylesheet" type="text/css" href="//cdn.datatables.net/1.10.11/css/jquery.dataTables.css">
+    <div class="container">
+      <h2>Publication report</h2>
+	<div class="row">
+	  <div class="col-xs-12">
+	    <table class="table table-condensed table-striped" id="list">
+	      <thead>
+		<tr>
+		  <th class="col-xs-6">Publication</th>
+		  <th class="col-xs-2">In queue</th>
+		  <th class="col-xs-2">Total</th>
+		  <th class="col-xs-2">To be coded</th>
+		</tr>
+	     </thead>
+	     <tbody>
+	       {% for pub, in_queue, total, to_be_coded in pub_list %}
+	       <tr>
+		 <td>{{ pub|safe }}</td>
+		 <td>{{ in_queue }}</td>
+		 <td>{{ total }}</td>
+		 <td>{{ to_be_coded }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+	    </table>
+          </div>
+	</div>
+    </div>
+  <script src="{{ url_for('static', filename='list.js') }}" type="text/javascript"></script>
+{% endblock %}

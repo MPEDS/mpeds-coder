@@ -13,7 +13,8 @@
 <!-- 				<h4>Second pass</h4>
 				<p><a href="{{ url_for('code2Next') }}">Coding interface</a> | <a href="{{ url_for('userArticleList', pn = 2) }}">List</a> | <a href="{{ url_for('code2queue', sort = 'percent_yes', sort_dir = 'desc') }}">First pass summary</a></p> -->
 			{% else %}
-				<p><a href="{{ url_for('admin') }}">Admin Dashboard</a></p>
+	    <p><a href="{{ url_for('admin') }}">Admin Dashboard</a></p>
+	    <p><a href="{{ url_for('publications') }}">Publication report</a></p>
 			{% endif %}
 			<p><a href="{{ url_for('coderStats') }}">Coder stats</a></p>
 		</div>

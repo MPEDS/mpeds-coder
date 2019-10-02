@@ -21,7 +21,8 @@ import urllib
 import datetime as dt
 import time
 from math import ceil
-from random import sample, choice
+from random import sample
+from random import choice
 import yaml
 
 if (sys.version_info < (3, 0)):
@@ -47,7 +48,7 @@ import assign_lib
 
 ## db
 from sqlalchemy.exc import OperationalError
-from sqlalchemy import func, desc, distinct, or_
+from sqlalchemy import func, desc, distinct, or_, text
 from sqlalchemy.sql import select
 from sqlalchemy.schema import Table
 from sqlite3 import dbapi2 as sqlite3
@@ -90,7 +91,7 @@ event_creator_vars = []
 ## if there's the yaml text selects
 if os.path.isfile(app.config['WD'] + '/text-selects.yaml'):
     ecs = yaml.load(open(app.config['WD'] + '/text-selects.yaml', 'r'))
-    event_creator_vars = [(x, ecs[x]) for x in ecs.keys()]
+    event_creator_vars = [(x, ecs[x]) for x in sorted(ecs.keys())]
 elif os.path.isfile(app.config['WD'] + '/text-selects.csv'):
     for var in open(app.config['WD'] + '/text-selects.csv', 'r').read().split('\n'):
         var = var.strip()
@@ -850,16 +851,17 @@ def admin():
 
     ## get the available publications
     if app.config['SOLR']:
-        url  = '%s/select?q=*:*&rows=0&wt=json&facet=true&facet.field=PUBLICATION' % app.config['SOLR_ADDR']
+        url = '{}/select?q=Database:"University%20Wire"&rows=0&wt=json'.format(app.config['SOLR_ADDR'])
+        fparams = 'facet=true&facet.field=PUBLICATION&facet.limit=1000'
 
         if (sys.version_info < (3, 0)):
             ## Python 2
             import urllib2
-            req  = urllib2.Request(url)
+            req  = urllib2.Request(url + '&' + fparams)
             res  = urllib2.urlopen(req)
         else:
             ## Python 3
-            res = urllib.request.urlopen(url)
+            res = urllib.request.urlopen(url + '&' + fparams)
 
         jobj = json.loads(res.read())
 
@@ -973,7 +975,45 @@ def coderStats():
         coded_once = coded_once
     )
 
+@app.route('/publications')
+@app.route('/publications/<sort>')
+@login_required
+def publications(sort = 'tbc'):
+    """
+      Geenerate list of all publications and all articles remaining. 
+    """
+    if current_user.authlevel < 3:
+        return redirect(url_for('index'))
 
+    ## TK: Write code to sort by selected attribute
+    
+    query = """
+    SELECT REPLACE(REPLACE(dem.publication, '-', ' '), '   ', ' - ') as publication, 
+    COALESCE(num.in_queue,0) as in_queue, 
+    dem.total as total,
+    IF(in_queue IS NULL OR in_queue = 0, total, total - in_queue) AS to_be_coded 
+    FROM
+    (
+    SELECT SUBSTRING_INDEX(am.db_id, '_', 1) as publication, COUNT(*) AS in_queue
+    FROM article_metadata am
+    WHERE am.db_name = 'uwire' AND am.id IN (SELECT article_id FROM event_creator_queue)
+    GROUP BY 1
+) num RIGHT JOIN
+(
+    SELECT SUBSTRING_INDEX(am.db_id, '_', 1) as publication, COUNT(*) AS total
+    FROM article_metadata am
+    WHERE db_name = 'uwire'
+    GROUP BY 1
+) dem ON num.publication = dem.publication
+ORDER BY to_be_coded DESC, total DESC
+    """
+    
+    result = db_session.execute(query)
+    rows = [(row[0], row[1], row[2], row[3]) for row in result]
+
+    return render_template("publications.html", pub_list = rows)
+
+    
 @app.route('/userarticlelist/<pn>')
 @app.route('/userarticlelist/<pn>/<int:page>')
 @login_required
