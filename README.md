@@ -9,6 +9,8 @@ This system is built in Python using the [Flask](http://flask.pocoo.org/) microf
 
 It also uses [Bootstrap](http://getbootstrap.com/) for CSS and [jQuery](https://jquery.com/) for JavaScript. It only works in Firefox (for now).
 
+Testing.
+
 ## Setup
 
 To populate the database with example information, first run the setup script.
