@@ -82,10 +82,12 @@ def addQueueExample():
 
 
 def main():
-	# init_db()
-	# addArticles('/home/ubuntu/article-metadata/black-newspapers-protest.csv', 'black-newspapers')	
+	init_db()
+	addArticles('/home/ubuntu/article-metadata/black-newspapers-protest-wisconsin-test.csv', 'black-newspapers')	
 	# addUsersExample()
 	# addQueueExample()
+	pass
+
 
 if __name__ == '__main__':
 	main()
