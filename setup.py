@@ -28,18 +28,18 @@ def addArticlesExample(db_name = 'test'):
 
 
 def addArticles(filename, db_name):
-        articles = []
-        with open(filename) as csvfile:
-                reader = csv.reader(csvfile)
-                for row in reader:
-                        title = row[0]
-                        db_id = row[1]
-                        if title == 'TITLE':
-                                continue
-                        articles.append( ArticleMetadata(filename = db_id, db_id = db_id, title = title, db_name = db_name) )
+	articles = []
+	with open(filename) as csvfile:
+		reader = csv.reader(csvfile)
+		for row in reader:
+			title = row[0]
+			db_id = row[1]
+			if title == 'TITLE':
+				continue
+			articles.append( ArticleMetadata(filename = db_id, db_id = db_id, title = title, db_name = db_name) )
 
-        db_session.add_all(articles)
-        db_session.commit()
+	db_session.add_all(articles)
+	db_session.commit()
 
 
 def addUsersExample():
@@ -82,10 +82,12 @@ def addQueueExample():
 
 
 def main():
-	# init_db()
-	# addArticles('/home/ubuntu/article-metadata/black-newspapers-protest.csv', 'black-newspapers')        
+	init_db()
+	addArticles('/home/ubuntu/article-metadata/black-newspapers-protest-wisconsin-test.csv', 'black-newspapers')	
 	# addUsersExample()
 	# addQueueExample()
+	pass
+
 
 if __name__ == '__main__':
 	main()
