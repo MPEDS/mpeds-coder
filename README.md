@@ -20,4 +20,4 @@ Then run the Flask test server with the following.
 
 ## Acknowledgments
 
-Development of this interface has been supported by a National Science Foundation Graduate Research Fellowship and National Science Foundation grant [SES-1423784](http://www.nsf.gov/awardsearch/showAward?AWD_ID=1423784). Thanks to Emanuel Ubert and Katie Fallon for working with this system since its inception, and to many undergraduate annotators who have put a lot of time working with and refining this system.
+Development of this interface has been supported by a National Science Foundation Graduate Research Fellowship and National Science Foundation grants [SES-1423784](http://www.nsf.gov/awardsearch/showAward?AWD_ID=1423784) and [SES-1918342](https://www.nsf.gov/awardsearch/showAward?AWD_ID=1918342). Thanks to Emanuel Ubert, Katie Fallon, and David Skalinder for working with this system since its inception, and to countless annotators who have put a significant time working with and refining this system.
