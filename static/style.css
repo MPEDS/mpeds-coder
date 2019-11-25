@@ -66,7 +66,7 @@ label, select, option, input {
 .hl-19,
 .hl-20,
 .hl-21 {
-	## background-color: #BF9000;
+	# background-color: #BF9000;
 	background-color: #00A3CC;
 }
 
@@ -174,10 +174,6 @@ label.form-check-label {
 	margin: 0px;
 }
 
-/*.varlist label {
-	line-height: 0.8em;
-}
-*/
 .varblock p:hover {
 	background-color: #eee;
 }
@@ -216,6 +212,20 @@ table.coder-stats {
 
 #list-events {
 	border-bottom: 1px solid #ccc;
+}
+
+.event-desc {
+	padding: 2 2 2 2px;	
+}
+
+.event-desc.selected {
+	background-color: rgb(159, 188, 252);
+}
+
+.event-desc a.glyphicon {
+	top:0;
+	right:0;
+	position: absolute;
 }
 
 .code2-event label,
