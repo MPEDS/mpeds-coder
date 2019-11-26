@@ -1427,9 +1427,10 @@ def getEvents():
         if pn == '2':
             rvar = {'loc': [], 'form': []}
         elif pn == 'ec':
-            rvar = {'desc': []}
+            rvar = {'desc': [], 'article-desc': []}
 
-        ev   = {}
+        yes_nos = []
+        ev = {}
         ev['id'] = event.id
 
         codes = db_session.query(model).\
@@ -1439,20 +1440,21 @@ def getEvents():
         if len(codes) == 0:
             continue
 
-        ## look at all the codes in the list
+        ## get the fields in rvar
         for code in codes:
-            ## if its form and in pass EC, use a text select
             if code.variable in rvar.keys():
                 ## otherwise, just use the value
                 rvar[code.variable].append(code.value)
-
-        ## join these all together in the form
-        ## location1, location2...form1, form2
         
         if pn == '2':
             ev['repr'] = ", ".join(rvar['loc']) + '-' + ', '.join(rvar['form'])
         elif pn =='ec':
-            ev['repr'] = ", ".join(rvar['desc'])
+            if len(rvar['desc']) > 0 and len(rvar['desc'][0]) > 0:
+                ev['repr'] = ", ".join(rvar['desc'])
+            elif len(rvar['article-desc']) > 0 and len(rvar['article-desc'][0]) > 0:
+                ev['repr'] = "(no event description): " + ", ".join(rvar['article-desc'])
+            else:
+                ev['repr'] = "(no article description)"
 
         evs.append(ev)
 
