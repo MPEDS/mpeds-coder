@@ -1,7 +1,7 @@
 /* Add or edit an event. Controls the event list. */
 var modifyEvent = function(e) {
   var aid  = $(".article").attr("id").split("_")[1];
-  var eid  = e.target.parentElement.id.split("_")[1];
+  var eid  = e.target.id.split("_")[1];
   var pn   = $('#pass_number').val();
   var vars = [];
 
@@ -91,7 +91,7 @@ var modifyEvent = function(e) {
 
       // listeners for text select add, collapse-up/down
       for (i = 0; i < vars.length; i++) {
-        var v       = vars[i];
+        var v = vars[i];
         var actions = ['add', 'collapse-down', 'collapse-up'];
 
         for (j = 0; j < actions.length; j++) {
@@ -105,7 +105,7 @@ var modifyEvent = function(e) {
             o = cd[v][j];
             createListItem('', v, o[0], o[1]);
           }
-        }      
+        }
       }
     });
 
@@ -150,10 +150,10 @@ var deleteEvent = function(e) {
 
   // on done, remove HTML element 
   // and the edit block if it exists
-  req.done(function() {
-      $('#flash-error').hide();
-      $(e.target).parent().remove();
-      $("#event-creator-block_" + eid).remove();
+    req.done(function() {
+	$('#flash-error').hide();
+	$('div#event-item_' + eid).remove();
+	$("#event-creator-block_" + eid).remove();
   });
 
   req.fail(function() {
@@ -188,12 +188,20 @@ var getEvents = function(aid) {
 
       var date = new Date();
 
-      // create a datetime hashes
+      // create datetime hashes for icons
+      var min_hash = ["min", event_id, date.getTime()].join("_");	
       var edit_hash = ["edit", event_id, date.getTime()].join("_");
       var del_hash  = ["del", event_id, date.getTime()].join("_");
 
       // create elements
-      var event = "<p id='listevent_" + event_id + "'>" + event_id + ": " + event_repr + " <a id='" + edit_hash + "' class='glyphicon glyphicon-pencil'></a> <a id='" + del_hash + "' class='glyphicon glyphicon-remove'></a></p>";
+	var event = "<div id='event-item_" + event_id + "' class='event-item'>" +
+	    "<div class='vartitle icons'><span>" + event_id + "</span> " +
+//	    "<a id='" + min_hash + "' class='glyphicon glyphicon-chevron-down'></a> " +
+	    "<a id='" + edit_hash + "' class='glyphicon glyphicon-pencil'></a> " +
+	    "<a id='" + del_hash + "' class='glyphicon glyphicon-trash'></a>" +
+	    "</div> " +
+	    "<p class='event-desc'>" + event_repr + "</p>" +
+	    "</div>";
 
       // add new events
       $('#list-events').append(event);

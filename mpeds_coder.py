@@ -1427,7 +1427,7 @@ def getEvents():
         if pn == '2':
             rvar = {'loc': [], 'form': []}
         elif pn == 'ec':
-            rvar = {'location': [], 'form': []}
+            rvar = {'desc': []}
 
         ev   = {}
         ev['id'] = event.id
@@ -1452,10 +1452,7 @@ def getEvents():
         if pn == '2':
             ev['repr'] = ", ".join(rvar['loc']) + '-' + ', '.join(rvar['form'])
         elif pn =='ec':
-            ev['repr'] = ", ".join(rvar['location']) + '-' + ', '.join(rvar['form'])
-
-        if len(ev['repr']) > 30:
-            ev['repr'] = ev['repr'][0:15] + " ... " + ev['repr'][-15:]
+            ev['repr'] = ", ".join(rvar['desc'])
 
         evs.append(ev)
 
@@ -1479,7 +1476,8 @@ def getCodes():
         model = CodeEventCreator
 
     ## load current values
-    curr = db_session.query(model).filter_by(coder_id = current_user.id, event_id = ev, article_id = aid).all()
+    curr = db_session.query(model).\
+           filter_by(coder_id = current_user.id, event_id = ev, article_id = aid).all()
     cd   = {}
 
     for c in curr:
