@@ -88,7 +88,7 @@ var modifyEvent = function(e) {
 
     req.done(function(cd) {
       $("#flash-error").hide();
-
+  
       // listeners for text select add, collapse-up/down
       for (i = 0; i < vars.length; i++) {
         var v = vars[i];
@@ -105,19 +105,25 @@ var modifyEvent = function(e) {
             o = cd[v][j];
             createListItem('', v, o[0], o[1]);
           }
-        }
+        }	  
       }
+	
+      // highlight the current event desc text box
+      $('.event-desc').each(function() {
+	  $(this).removeClass('selected');
+      });
+
+      $('#event-desc_' + eid).addClass('selected');
     });
 
     // listener for submit and save
     $("#save").click(function(e) {
-        var event_id = $(e.target).parent().attr("id").split("_")[1];
-
         // remove all the event blocks
         $(".event-block").each(function() {
           $(this).remove();
         });
 
+	// loads all the event blocks
         getEvents(aid);
     });
   });
@@ -200,7 +206,7 @@ var getEvents = function(aid) {
 	    "<a id='" + edit_hash + "' class='glyphicon glyphicon-pencil'></a> " +
 	    "<a id='" + del_hash + "' class='glyphicon glyphicon-trash'></a>" +
 	    "</div> " +
-	    "<p class='event-desc'>" + event_repr + "</p>" +
+	    "<p id='event-desc_" + event_id + "' class='event-desc'>" + event_repr + "</p>" +
 	    "</div>";
 
       // add new events
