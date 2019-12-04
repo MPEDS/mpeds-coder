@@ -66,7 +66,7 @@ label, select, option, input {
 .hl-19,
 .hl-20,
 .hl-21 {
-	## background-color: #BF9000;
+	# background-color: #BF9000;
 	background-color: #00A3CC;
 }
 
@@ -174,10 +174,6 @@ label.form-check-label {
 	margin: 0px;
 }
 
-/*.varlist label {
-	line-height: 0.8em;
-}
-*/
 .varblock p:hover {
 	background-color: #eee;
 }
@@ -210,12 +206,37 @@ table.coder-stats {
 	margin-left: -25px;
 }
 
-#addeventblock .vartitle {
+.vartitle {
 	text-align: right;
 }
 
-#list-events {
-	border-bottom: 1px solid #ccc;
+div.event-item {
+    display: flex;
+    margin: 6px auto;
+}
+
+.event-desc {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    height: 80px;
+    width: 220px;
+    border: 1px solid #CCC;
+    border-radius: 5px;
+}
+
+.event-desc:hover {
+    background-color: #E2E3E5;
+}
+
+.event-desc.selected {
+    background-color: #CCE5FF;
+}
+
+div.icons {
+    float: left;
+    width: 30px;
+    margin-right: 6px;
+    line-height: 1.2em;
 }
 
 .code2-event label,
@@ -307,6 +328,16 @@ a.glyphicon, a.glyphicon:visited {
 
 #admin-actions {
 	padding: 10 16px;
+}
+
+textarea.form-control,
+input.form-control {
+    line-height: 1.2em;
+    font-size: 0.85em;
+}
+
+textarea.form-control {
+    height:80px;
 }
 
 .form-control-feedback {

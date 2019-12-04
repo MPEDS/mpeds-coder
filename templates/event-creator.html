@@ -4,13 +4,19 @@
     <script src="{{ url_for('static', filename='ec.js') }}" type="text/javascript"></script>
     <div class="container-fluid">
       <div class="row">
-        <div class="col-xs-8">
+        <div class="col-xs-6">
           <div class="error" id="flash-error" style="display:none;"></div>
           <div class="article" id="article_{{ aid }}">
             {{ text|safe }}
           </div>
         </div>
-        <div class="col-xs-4">
+        <div class="col-xs-3">
+          <div class="sticky">
+	    <h4>Event descriptions</h4>
+            <div id="list-events" class="varlist overflow-auto"></div>
+          </div>
+	</div>
+        <div class="col-xs-3">
           <div class="sticky">
             <input type="hidden" name="pass_number" id="pass_number" value="ec" />
             <div id="secondpassinfo">
@@ -19,7 +25,6 @@
                   <span>Add event</span> 
                   <a id="add-event" class="glyphicon glyphicon-plus"></a>
                 </div>
-                <div id="list-events" class="varlist"></div>
                 <div id="event-blocks" class="varlist"></div>
               </div>
             </div>
