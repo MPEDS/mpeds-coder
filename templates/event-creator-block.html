@@ -46,7 +46,17 @@
           </div>
 
           <label for="state">State/Province</label>
+          <select class="form-control" name="state" id="info_state">
+            {# TODO: these options display but don't save.  curr[] needs investigation. 
+            Alternatively, selects might need a special handler in ec.js #}
+            {% for k,v in [('', 'Select one'), (curr['yes'], 'Yes'), (curr['no'], 'No'), (curr['maybe'], 'Maybe')] %}
+              <option value="{{ k }}">{{ v }}</option>
+            {% endfor %}
+          </select>
+
+          <!--
           <input class="form-control" type="text" name="state" id="info_state" value="{{ curr['state'] }}" />
+          -->
 
           <label for="city">City/Town</label>
           <input class="form-control" type="text" name="city" id="info_city" value="{{ curr['city'] }}" />
