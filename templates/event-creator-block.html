@@ -47,16 +47,18 @@
 
           <label for="state">State/Province</label>
           <select class="form-control" name="state" id="info_state">
-            {# TODO: these options display but don't save.  curr[] needs investigation. 
-            Alternatively, selects might need a special handler in ec.js #}
-            {% for k,v in [('', 'Select one'), (curr['yes'], 'Yes'), (curr['no'], 'No'), (curr['maybe'], 'Maybe')] %}
-              <option value="{{ k }}">{{ v }}</option>
+            {# TODO: this should all work, except strings are being saved as [u'strings'] #}
+            {% for k,v in [('', 'Select one'), ('yes', 'Yes'), ('no', 'No'), ('maybe', 'Maybe')] %}
+              <option value="{{ k }}" {% if curr['state'] == k %}{{ 'selected' }}{% endif %}>{{ v }}</option>
             {% endfor %}
           </select>
 
-          <!--
-          <input class="form-control" type="text" name="state" id="info_state" value="{{ curr['state'] }}" />
-          -->
+            <!-- {% for k,v in [('', 'Select one'), ('yes', 'Yes'), ('no', 'No'), ('maybe', 'Maybe')] %}
+              {{ k }} {% if curr['state'] == k %}{{ 'selected' }}{% endif %}{{ v }} <br \>
+            {% endfor %}
+            {{ curr['state'] }} <br \>
+            {{ curr['city'] }} <br \>
+            -->
 
           <label for="city">City/Town</label>
           <input class="form-control" type="text" name="city" id="info_city" value="{{ curr['city'] }}" />
