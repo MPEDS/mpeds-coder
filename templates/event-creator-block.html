@@ -53,13 +53,6 @@
             {% endfor %}
           </select>
 
-            <!-- {% for k,v in [('', 'Select one'), ('yes', 'Yes'), ('no', 'No'), ('maybe', 'Maybe')] %}
-              {{ k }} {% if curr['state'] == k %}{{ 'selected' }}{% endif %}{{ v }} <br \>
-            {% endfor %}
-            {{ curr['state'] }} <br \>
-            {{ curr['city'] }} <br \>
-            -->
-
           <label for="city">City/Town</label>
           <input class="form-control" type="text" name="city" id="info_city" value="{{ curr['city'] }}" />
 
