@@ -45,11 +45,10 @@
             </span>
           </div>
 
-          <label for="state">State/Province</label>
+          <label for="state">State/Province/Territory</label>
           <select class="form-control" name="state" id="info_state">
-            {# TODO: this should all work, except strings are being saved as [u'strings'] #}
-            {% for k,v in [('', 'Select one'), ('yes', 'Yes'), ('no', 'No'), ('maybe', 'Maybe')] %}
-              <option value="{{ k }}" {% if curr['state'] == k %}{{ 'selected' }}{% endif %}>{{ v }}</option>
+            {% for value, text in state_and_territory_vals.iteritems() %}
+              <option value="{{ value }}" {% if curr['state'] == value %}{{ 'selected' }}{% endif %}>{{ text }}</option>
             {% endfor %}
           </select>
 
