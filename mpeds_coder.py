@@ -24,7 +24,6 @@ from math import ceil
 from random import sample
 from random import choice
 import yaml
-from collections import OrderedDict
 
 if (sys.version_info < (3, 0)):
     import urllib2
@@ -137,19 +136,6 @@ meta_solr = ['PUBLICATION', 'SECTION', 'BYLINE', 'DATELINE', 'DATE', 'INTERNAL_I
 #####
 ##### Helper functions
 #####
-
-##### Enable OrderedDict with PyYAML
-##### Copy-pasta from https://stackoverflow.com/a/21912744 on 2019-12-12
-def ordered_load(stream, Loader=yaml.Loader, object_pairs_hook=OrderedDict):
-    class OrderedLoader(Loader):
-        pass
-    def construct_mapping(loader, node):
-        loader.flatten_mapping(node)
-        return object_pairs_hook(loader.construct_pairs(node))
-    OrderedLoader.add_constructor(
-        yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG,
-        construct_mapping)
-    return yaml.load(stream, OrderedLoader)
 
 ##### load text from Solr database
 def loadSolr(solr_id):
