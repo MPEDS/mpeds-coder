@@ -47,6 +47,7 @@
 
           <label for="state">State/Province/Territory</label>
           <select class="form-control" name="state" id="info_state">
+            <option value="">Select one</option>
             {% for value, text in state_and_territory_vals.iteritems() %}
               <option value="{{ value }}" {% if curr['state'] == value %}{{ 'selected' }}{% endif %}>{{ text }}</option>
             {% endfor %}
