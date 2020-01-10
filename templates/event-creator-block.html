@@ -42,11 +42,19 @@
             </span>
           </div>
 
-          <label for="state">State/Province</label>
-          <input class="form-control" type="text" name="state" id="info_state" value="{{ curr['state'] }}" />
+          <label for="state">State/Province/Territory</label>
+          <select class="form-control" name="state" id="info_state">
+            <option value="">Select one</option>
+            {% for value, text in state_and_territory_vals.iteritems() %}
+              <option value="{{ value }}" {% if curr['state'] == value %}{{ 'selected' }}{% endif %}>{{ text }}</option>
+            {% endfor %}
+          </select>
 
-          <label for="city">City</label>
+          <label for="city">City/Town</label>
           <input class="form-control" type="text" name="city" id="info_city" value="{{ curr['city'] }}" />
+
+          <label for="other-location">Other location</label>
+          <input class="form-control" type="text" name="other-location" id="info_other-location" value="{{ curr['other-location'] }}" />
         </div>
       </form>
     </div>
