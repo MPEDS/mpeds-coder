@@ -1,3 +1,27 @@
+/* Edit article-level info. */
+var modifyArticleAnnotations = function() {
+  var aid  = $(".article").attr("id").split("_")[1];
+  var pn   = $('#pass_number').val();
+
+  $('#article-annotation-blocks').html("In modifyArticle! <br />" + Date($.now())) // DEBUG
+  req = $.ajax({
+      type: "GET",
+      url:  $SCRIPT_ROOT + '/_load_article_annotation_block',
+      data: {
+        'article_id': aid,
+      }
+  });
+
+  req.done(function() {
+      $('#article-annotation-blocks').append(req.responseText);
+  });
+
+  req.fail(function(e) {
+    $("#flash-error").text("Error loading article annotation block.");
+    $("#flash-error").show();
+  });
+}
+
 /* Add or edit an event. Controls the event list. */
 var modifyEvent = function(e) {
   var aid  = $(".article").attr("id").split("_")[1];
@@ -252,6 +276,9 @@ $(function(){
   // add event listener
   $('#add-event').click(modifyEvent);
 
+  // test code for article block
+  modifyArticleAnnotations()
+
   // mark done handler
   $('#mark-done').each(function() {
     $(this).click(function() {
@@ -277,4 +304,4 @@ $(function(){
     }); 
   });
 
-});    
+});

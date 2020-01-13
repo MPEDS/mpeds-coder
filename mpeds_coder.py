@@ -1508,6 +1508,14 @@ def getCodes():
     return jsonify(cd)
 
 
+@app.route('/_load_article_annotation_block')
+@login_required
+def modifyArticleAnnotations():
+
+    testreturn = "<div>Good AJAX! " + dt.datetime.now().strftime('%Y-%m-%d %H:%M:%S') + "</div>" # DEBUG
+    return testreturn
+
+
 @app.route('/_load_event_block')
 @login_required
 def modifyEvents():
