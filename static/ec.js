@@ -9,6 +9,7 @@ var modifyArticleAnnotations = function() {
       url:  $SCRIPT_ROOT + '/_load_article_annotation_block',
       data: {
         'article_id': aid,
+        'pn': pn
       }
   });
 
