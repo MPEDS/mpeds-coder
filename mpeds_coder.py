@@ -1544,7 +1544,8 @@ def modifyArticleAnnotations():
         except:
             errmsg = string.join([str(i) for i in sys.exc_info()])
             pass
-        template = 'event-creator-block.html'
+        template = 'article-annotation-block.html'
+        #template = 'event-creator-block.html'
     else:
         return make_response("Not a valid model.", 404)
 
@@ -1599,22 +1600,22 @@ def modifyArticleAnnotations():
 ###        ## Why would we want these alphabetically?
 ###        #opts[k].sort()
 ###
-    #return render_template(template, 
+    return render_template(template, 
 ###            v1 = v1, 
 ###            v2 = v2,
 ###            vars = event_creator_vars,
 ###            yes_no_vars = yes_no_vars,
 ###            opts = opts, 
-            #curr = curr, 
+            curr = curr)
 ###            event_id = eid)
 
-    try:
-        errmsg
-    except NameError:
-        errmsg = "no errmsg"
-    testreturn = "<div>Good AJAX! " + dt.datetime.now().strftime('%Y-%m-%d %H:%M:%S') + errmsg + "</div>" # DEBUG
-    return testreturn
-
+#    try:
+#        errmsg
+#    except NameError:
+#        errmsg = "no errmsg"
+#    testreturn = "<div>Good AJAX! " + dt.datetime.now().strftime('%Y-%m-%d %H:%M:%S') + errmsg + "</div>" # DEBUG
+#    return testreturn
+#
 
 @app.route('/_load_event_block')
 @login_required

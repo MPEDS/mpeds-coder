@@ -1,0 +1,27 @@
+<div class="dummy-event-block" id="article-block">
+  <div class="dummy-tab-content">
+    <div class="dummy-tab-pane" id="dummy-basicinfo_block">
+      <form> 
+        <div class="form-group">
+          <label for="dummy-article-desc">Provide a short description of this article.</label>
+          <textarea class="form-control form-control-sm" name="dummy-article-desc" id="dummy-info_article-desc">{{ curr['article-desc']|safe }}</textarea>
+	    </div>
+        
+    	<div class="form-group">
+          <label>If this article was skipped, how come?</label>
+          <div class="form-check">
+            <label class="form-check-label">
+              <input class="form-check-input basic-info" type="radio" name="date-est" id="dummy-info_date-est" value="exact" {{ 'checked' if curr['date-est'] == 'exact' else '' }} /> No protests
+            </label>
+          </div>
+	  
+          <div class="form-check">
+            <label class="form-check-label">
+              <input class="form-check-input basic-info" type="radio" name="date-est" id="dummy-info_date-est" value="approximate" {{ 'checked' if curr['date-est'] == 'approximate' else '' }} /> Protest(s), but no black protests
+            </label>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>      
+</div>
