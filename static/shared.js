@@ -238,7 +238,7 @@ var selectArticleCheckbox = function(e) {
     data: {
       article:  aid,
       variable: variable,
-      value:    val //,
+      value:    val
     }
   });
 
@@ -262,7 +262,6 @@ var selectCheckbox = function(e) {
   var variable = el.attr("id").split("_")[1];
   var val      = el.val();
 
-alert("In selectCheckbox");
   // for some of the basic info variables, id == val. change to 'yes'
   if (variable == val) {
     val = 'yes';
@@ -318,6 +317,38 @@ var selectRadio = function(e) {
       variable: variable,
       value:    val,
       event:    eid
+    }
+  });
+
+  req.done(function(e) {
+    $('#flash-error').hide();
+  });
+
+  req.fail(function(e) {
+    $("#flash-error").text("Error changing radio button.");
+    $("#flash-error").show();
+  });
+}
+
+/* Adds or deletes values for each variable based on radio buttons selected. */
+var storeArticleTextInput = function(e) {
+  var el       = $(e.target);
+  var aid      = $(".article").attr("id").split("_")[1];  
+//  var eid      = el.closest(".event-block").attr("id").split("_")[1];
+  var pn       = $('#pass_number').val();
+
+  var variable = el.attr("id").split("_")[1];
+  var val      = el.val();
+
+  // change code
+  req = $.ajax({
+    type: "GET",
+    url:  $SCRIPT_ROOT + '/_change_article_code/' + pn,
+    data: {
+      article:  aid,
+      variable: variable,
+      value:    val //,
+//      event:    eid
     }
   });
 
