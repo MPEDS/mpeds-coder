@@ -212,13 +212,11 @@ var generate_handler = function( v, type ) {
 var selectArticleCheckbox = function(e) {
   var el       = $(e.target);
   var aid      = $(".article").attr("id").split("_")[1];  
-//  var eid      = el.closest(".event-block").attr("id").split("_")[1];
   var pn       = $('#pass_number').val();
 
   var variable = el.attr("id").split("_")[1];
   var val      = el.val();
 
-alert("In selectArticleCheckbox");
   // for some of the basic info variables, id == val. change to 'yes'
   if (variable == val) {
     val = 'yes';
@@ -241,7 +239,6 @@ alert("In selectArticleCheckbox");
       article:  aid,
       variable: variable,
       value:    val //,
-//      event:    eid
     }
   });
 
