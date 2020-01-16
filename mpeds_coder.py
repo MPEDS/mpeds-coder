@@ -1185,6 +1185,7 @@ def generateCoderAudit():
 @app.route('/_add_article_code/<pn>')
 @login_required
 def addArticleCode(pn):
+    """ Adds a record to article coding table. """
     aid  = int(request.args.get('article'))
     var  = request.args.get('variable')
     val  = request.args.get('value')
@@ -1226,35 +1227,16 @@ def addArticleCode(pn):
 @app.route('/_del_article_code/<pn>')
 @login_required
 def delArticleCode(pn):
-    """ Deletes a record from coding tables. """
+    """ Deletes a record from article coding table. """
     article  = request.args.get('article')
     variable = request.args.get('variable')
     value    = request.args.get('value')
-    event    = request.args.get('event')
 
-    if False:
-        pass
-    elif pn == '1':
-        a = db_session.query(CodeFirstPass).filter_by(
+    if pn == 'ec':
+        a = db_session.query(CoderArticleAnnotation).filter_by(
             article_id = article,
             variable   = variable,
             value      = value,
-            coder_id   = current_user.id
-        ).all()
-    elif pn == '2':
-        a = db_session.query(CodeSecondPass).filter_by(
-            article_id = article,
-            variable   = variable,
-            value      = value,
-            event_id   = event,
-            coder_id   = current_user.id
-        ).all()
-    elif pn == 'ec':
-        a = db_session.query(CodeEventCreator).filter_by(
-            article_id = article,
-            variable   = variable,
-            value      = value,
-            event_id   = event,
             coder_id   = current_user.id
         ).all()
     else:
