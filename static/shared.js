@@ -139,6 +139,7 @@ var deleteCode = function(e) {
 }
 
 /* Adds a value for a variable if not available in the current list. */
+// DS 2020-01-16: Looks like this is only used by code1.js and code2.js
 var addCode = function(e) {
   var oText    = '';
   var aid      = $(".article").attr("id").split("_")[1];
@@ -207,10 +208,11 @@ var generate_handler = function( v, type ) {
   };
 }
 
-/* Adds or deletes values for each article variable based on checkboxes. */
+/* Adds or deletes values for article variables based on checkboxes. */
 var selectArticleCheckbox = function(e) {
   var el       = $(e.target);
   var aid      = $(".article").attr("id").split("_")[1];  
+//  var eid      = el.closest(".event-block").attr("id").split("_")[1];
   var pn       = $('#pass_number').val();
 
   var variable = el.attr("id").split("_")[1];
@@ -234,11 +236,12 @@ alert("In selectArticleCheckbox");
 
   req = $.ajax({
     type: "GET",
-    url:  $SCRIPT_ROOT + '/_' + action + '_code/' + pn,
+    url:  $SCRIPT_ROOT + '/_' + action + '_article_code/' + pn,
     data: {
       article:  aid,
       variable: variable,
       value:    val //,
+//      event:    eid
     }
   });
 
@@ -363,6 +366,7 @@ var storeText = function(e) {
   });
 }
 
+// DS 2020-01-16: it looks like nothing anywhere calls this?
 var getCodes = function(ev) {
   // prepopulate existing fields
   var aid = $(".article").attr("id").split("_")[1];    

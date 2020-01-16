@@ -1182,6 +1182,163 @@ def generateCoderAudit():
 ##### Internal calls
 #####
 
+@app.route('/_add_article_code/<pn>')
+@login_required
+def addArticleCode(pn):
+    aid  = int(request.args.get('article'))
+    var  = request.args.get('variable')
+    val  = request.args.get('value')
+    ev   = request.args.get('event')
+    text = request.args.get('text')
+    aqs  = []
+    now  = dt.datetime.now(tz = central).replace(tzinfo = None)
+
+    if pn == '1':
+        model = CodeFirstPass
+
+        ## store highlighted text on first pass
+        if text:
+            p = CodeFirstPass(aid, var, val, current_user.id, text)
+        else:
+            p = CodeFirstPass(aid, var, val, current_user.id)
+
+        ## update datetime on every edit
+        aq = db_session.query(ArticleQueue).filter_by(article_id = aid, coder_id = current_user.id).first()
+        aq.coded_dt = now
+        aqs.append(aq)
+    elif pn == '2':
+        model = CodeSecondPass
+        p     = CodeSecondPass(aid, ev, var, val, current_user.id)
+
+        for aq in db_session.query(SecondPassQueue).filter_by(article_id = aid, coder_id = current_user.id).all():
+            aq.coded_dt = now
+            aqs.append(aq)
+    elif pn == 'ec':
+        model = CodeEventCreator
+        p     = CodeEventCreator(aid, ev, var, val, current_user.id, text)
+
+        for aq in db_session.query(EventCreatorQueue).filter_by(article_id = aid, coder_id = current_user.id).all():
+            aq.coded_dt = now
+            aqs.append(aq)
+    else:
+        return make_response("Invalid model", 404)
+
+    ## variables which only have one value per article
+    if var in sv:
+        if pn == '1':
+            a = db_session.query(model).filter_by(
+                article_id = aid,
+                variable   = var,
+                coder_id   = current_user.id
+            ).all()
+        else:
+            ## for second pass and event coder, filter for distinct event
+            a = db_session.query(model).filter_by(
+                article_id = aid,
+                variable   = var,
+                event_id   = ev,
+                coder_id   = current_user.id
+            ).all()
+
+        ## if there's more then one, delete them
+        if len(a) > 0:
+            for o in a:
+                db_session.delete(o);
+
+            db_session.commit()
+
+    ## if this is a 2nd comment pass comment and it is null, skip it
+    if var == 'comments' and pn == '2' and val == '':
+        return jsonify(result={"status": 200})
+
+    # try:
+    db_session.add(p)
+    db_session.add_all(aqs)
+    db_session.commit()
+    return make_response("", 200)
+
+
+@app.route('/_del_article_code/<pn>')
+@login_required
+def delArticleCode(pn):
+    """ Deletes a record from coding tables. """
+    article  = request.args.get('article')
+    variable = request.args.get('variable')
+    value    = request.args.get('value')
+    event    = request.args.get('event')
+
+    if False:
+        pass
+    elif pn == '1':
+        a = db_session.query(CodeFirstPass).filter_by(
+            article_id = article,
+            variable   = variable,
+            value      = value,
+            coder_id   = current_user.id
+        ).all()
+    elif pn == '2':
+        a = db_session.query(CodeSecondPass).filter_by(
+            article_id = article,
+            variable   = variable,
+            value      = value,
+            event_id   = event,
+            coder_id   = current_user.id
+        ).all()
+    elif pn == 'ec':
+        a = db_session.query(CodeEventCreator).filter_by(
+            article_id = article,
+            variable   = variable,
+            value      = value,
+            event_id   = event,
+            coder_id   = current_user.id
+        ).all()
+    else:
+        return make_response("Invalid model", 404)
+
+    if len(a) > 0:
+        for o in a:
+            db_session.delete(o)
+
+        db_session.commit()
+
+        return jsonify(result={"status": 200})
+    else:
+        return make_response("", 404)
+
+
+@app.route('/_change_article_code/<pn>')
+@login_required
+def changeArticleCode(pn):
+    """ 
+        Changes a radio button by removing all prior values, adds one new one. 
+        Only implemented for event creator right now.
+    """
+    article  = request.args.get('article')
+    variable = request.args.get('variable')
+    value    = request.args.get('value')
+    event    = request.args.get('event')
+
+    ## delete all prior values
+    a = db_session.query(CodeEventCreator).filter_by(
+        article_id = article,
+        variable   = variable,
+        event_id   = event,
+        coder_id   = current_user.id
+    ).all()
+
+    for o in a:
+        db_session.delete(o)
+    db_session.commit()
+
+    ## add new value
+    ec = CodeEventCreator(article, event, variable, value, current_user.id) 
+
+    db_session.add(ec)
+    db_session.commit()
+
+    return jsonify(result={"status": 200})
+
+
 @app.route('/_add_code/<pn>')
 @login_required
 def addCode(pn):
@@ -1256,32 +1413,6 @@ def addCode(pn):
     db_session.add_all(aqs)
     db_session.commit()
     return make_response("", 200)
-
-
-@app.route('/_del_event')
-@login_required
-def delEvent():
-    """ Delete an event. """
-    # if current_user.authlevel < 2:
-    #     return redirect(url_for('index'))
-
-    eid = int(request.args.get('event'))
-    pn  = request.args.get('pn');
-
-    model = None
-    if pn == '2':
-        model = CodeSecondPass
-    elif pn == 'ec':
-        model = CodeEventCreator
-    else:
-        return make_response("Invalid model.", 404)
-
-    db_session.query(model).filter_by(event_id = eid).delete()
-    db_session.query(Event).filter_by(id = eid).delete()
-
-    db_session.commit()
-
-    return make_response("Delete succeeded.", 200)
 
 
 @app.route('/_del_code/<pn>')
@@ -1363,6 +1494,32 @@ def changeCode(pn):
     db_session.commit()
 
     return jsonify(result={"status": 200})
+
+
+@app.route('/_del_event')
+@login_required
+def delEvent():
+    """ Delete an event. """
+    # if current_user.authlevel < 2:
+    #     return redirect(url_for('index'))
+
+    eid = int(request.args.get('event'))
+    pn  = request.args.get('pn');
+
+    model = None
+    if pn == '2':
+        model = CodeSecondPass
+    elif pn == 'ec':
+        model = CodeEventCreator
+    else:
+        return make_response("Invalid model.", 404)
+
+    db_session.query(model).filter_by(event_id = eid).delete()
+    db_session.query(Event).filter_by(id = eid).delete()
+
+    db_session.commit()
+
+    return make_response("Delete succeeded.", 200)
 
 
 @app.route('/_mark_ec_done')
