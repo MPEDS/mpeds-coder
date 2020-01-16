@@ -217,6 +217,7 @@ var selectCheckbox = function(e) {
   var variable = el.attr("id").split("_")[1];
   var val      = el.val();
 
+alert("In selectCheckbox");
   // for some of the basic info variables, id == val. change to 'yes'
   if (variable == val) {
     val = 'yes';
