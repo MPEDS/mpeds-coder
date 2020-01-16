@@ -14,7 +14,117 @@ var modifyArticleAnnotations = function() {
   });
 
   req.done(function() {
-      $('#article-annotation-blocks').append(req.responseText);
+    $("#flash-error").hide();
+
+//    // remove all the event blocks
+//    $(".event-block").each(function() {
+//      $(this).remove();
+//    });
+//
+    // add the article block to the HTML
+    $('#article-annotation-blocks').append(req.responseText);
+
+//    // date listeners
+//    $('#start-date-picker').datetimepicker({ format: 'YYYY-MM-DD' });
+//    $('#end-date-picker').datetimepicker({ format: 'YYYY-MM-DD' });
+//
+//    // add tab listeners
+//    $(".tablinks").each(function(){
+//      $(this).click(changeTab);
+//    });
+//
+//    // show basic info first
+//    $("#basicinfo_block").show();
+//
+    // add listeners for options
+    // DS: these seem to be fold-out checkboxes (using radios to control folds)
+    // This setup makes it unclear whether the radio itself will be recorded...
+    $("#preset_block :radio").each(function() {
+      $(this).change(function(e) {
+        var variable = $(e.target).attr("id").split("_")[1];
+
+        // hide everything
+        $(".options").each( function() { $(this).hide() });
+
+        // except options for currently selected variable
+        $("#options_" + variable).show();
+      });
+    });
+
+//    // show 'form' options upon default
+//    $('#varevent_form').prop("checked", true);
+//    $("#options_form").show(); 
+//
+    // listeners for info radio buttons
+    $('#yes-no_block :radio').change(selectRadio);
+
+    // listeners for text fields
+    // $('#basicinfo_block :date').blur(storeText); // doesn't work in Firefox :(
+    $('#basicinfo_block :text').blur(storeText);
+    $('#basicinfo_block textarea').blur(storeText);
+
+    // listeners for adding or deleting checkboxes
+    $(':checkbox').change(selectCheckbox);
+
+//    // Get text select vars from DOM  
+//    $('.varblock').each(function() {
+//      var i = $(this).attr("id").split("_")[1];
+//      vars.push(i); 
+//    });
+//
+//    // load text selects with this
+//    // doing it like this because this function adds additional listeners
+//    req = $.ajax({
+//      type: "GET",
+//      url:  $SCRIPT_ROOT + '/_get_codes',
+//      data: {
+//        'article': aid,
+//        'event': eid,
+//        'pn': pn
+//      }
+//    });
+//
+//    req.done(function(cd) {
+//      $("#flash-error").hide();
+//  
+      // listeners for text select add, collapse-up/down
+      // DS: this might be better for fold-out items?
+      for (i = 0; i < vars.length; i++) {
+        var v = vars[i];
+        var actions = ['add', 'collapse-down', 'collapse-up'];
+
+        for (j = 0; j < actions.length; j++) {
+          var type = actions[j];
+          $('#' + type + '_' + v).on("click", generate_handler( v, type ) );
+        }
+
+        // add text select variable text
+        if(cd[v]) {
+          for(j = 0; j < cd[v].length; j++) {
+            o = cd[v][j];
+            createListItem('', v, o[0], o[1]);
+          }
+        }	  
+      }
+	
+//      // highlight the current event desc text box
+//      $('.event-desc').each(function() {
+//	  $(this).removeClass('selected');
+//      });
+//
+//      $('#event-desc_' + eid).addClass('selected');
+//    });
+//
+//    // listener for submit and save
+//    $("#save").click(function(e) {
+//        // remove all the event blocks
+//        $(".event-block").each(function() {
+//          $(this).remove();
+//        });
+//
+//	// loads all the event blocks
+//        getEvents(aid);
+//    });
   });
 
   req.fail(function(e) {

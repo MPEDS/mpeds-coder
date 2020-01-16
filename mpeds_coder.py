@@ -60,6 +60,7 @@ from models import ArticleMetadata, ArticleQueue, CoderArticleAnnotation, \
 CodeFirstPass, CodeSecondPass, CodeEventCreator, \
 Event, EventCreatorQueue, SecondPassQueue, User
 
+# DEBUG BLOCK
 #errmsg = "Init!"
 #try:
 #    pass
@@ -1525,32 +1526,17 @@ def getCodes():
 @app.route('/_load_article_annotation_block')
 @login_required
 def modifyArticleAnnotations():
-###    eid  = request.args.get('event_id')
     aid  = int(request.args.get('article_id'))
     pn   = request.args.get('pn')
-###    opts = {}
     curr = {}
 
     model = None
-###    if pn == '2':
-###        model = CodeSecondPass
-###        template = 'event-block.html'
     if pn == 'ec':
-        try:
-            model = CoderArticleAnnotation
-            #errmsg = string.join(("a", "b", "c"), ".")
-            #errmsg = repr(CoderArticleAnnotation) + " repr!"
-            #pass
-        except:
-            errmsg = string.join([str(i) for i in sys.exc_info()])
-            pass
+        model = CoderArticleAnnotation
         template = 'article-annotation-block.html'
-        #template = 'event-creator-block.html'
     else:
         return make_response("Not a valid model.", 404)
 
-###    if eid:
-###        eid = int(eid)
     ## get the current values
     for annotation in db_session.query(model).filter_by(article_id = aid, coder_id = current_user.id).all():
         if annotation.variable in sv or annotation.variable in event_creator_single_value:
@@ -1565,57 +1551,8 @@ def modifyArticleAnnotations():
             if annotation.text is None:
                 curr[annotation.variable].append(annotation.value)
 
-    #curr['programmatic test'].append('ptest')
-    #errmsg = 555
-###    else:
-###        ## add a new event
-###        ev  = Event(aid)
-###        db_session.add(ev)
-###        db_session.commit()
-###
-###        eid = ev.id
-###
-###    ## initialize drop-down options
-###    opts = {v[0]: [] for v in vars}
-###
-###    ## built-in dropdown options
-###    for preset_key in sorted(preset_vars.keys()):
-###        for preset_value in preset_vars[preset_key]:
-###            opts[ preset_key ].append(preset_value)
-###
-###    ## None of the above for v1 variables
-###    if pn in ['1', '2']:
-###        for k,v in v2:
-###            ## coder 1-generated dropdown options
-###            for o in db_session.query(CodeFirstPass).filter_by(variable = k, article_id = aid).all():
-###                opts[ o.variable ].append(o.text)
-###
-###            ## coder 2-generated dropdown options
-###            for o in db_session.query(CodeSecondPass).filter_by(variable = k, article_id = aid, coder_id = current_user.id).all():
-###                opts[ o.variable ].append(o.value)
-###
-###    ## filter out repeated items and sort
-###    for k,v in opts.items():
-###        opts[k] = list( set( map(lambda x: x.strip(" .,"), opts[k]) ) )
-###        ## Why would we want these alphabetically?
-###        #opts[k].sort()
-###
     return render_template(template, 
-###            v1 = v1, 
-###            v2 = v2,
-###            vars = event_creator_vars,
-###            yes_no_vars = yes_no_vars,
-###            opts = opts, 
             curr = curr)
-###            event_id = eid)
-
-#    try:
-#        errmsg
-#    except NameError:
-#        errmsg = "no errmsg"
-#    testreturn = "<div>Good AJAX! " + dt.datetime.now().strftime('%Y-%m-%d %H:%M:%S') + errmsg + "</div>" # DEBUG
-#    return testreturn
-#
 
 @app.route('/_load_event_block')
 @login_required
