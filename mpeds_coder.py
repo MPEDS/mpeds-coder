@@ -1188,34 +1188,13 @@ def addArticleCode(pn):
     aid  = int(request.args.get('article'))
     var  = request.args.get('variable')
     val  = request.args.get('value')
-    ev   = request.args.get('event')
     text = request.args.get('text')
     aqs  = []
     now  = dt.datetime.now(tz = central).replace(tzinfo = None)
 
-    if pn == '1':
-        model = CodeFirstPass
-
-        ## store highlighted text on first pass
-        if text:
-            p = CodeFirstPass(aid, var, val, current_user.id, text)
-        else:
-            p = CodeFirstPass(aid, var, val, current_user.id)
-
-        ## update datetime on every edit
-        aq = db_session.query(ArticleQueue).filter_by(article_id = aid, coder_id = current_user.id).first()
-        aq.coded_dt = now
-        aqs.append(aq)
-    elif pn == '2':
-        model = CodeSecondPass
-        p     = CodeSecondPass(aid, ev, var, val, current_user.id)
-
-        for aq in db_session.query(SecondPassQueue).filter_by(article_id = aid, coder_id = current_user.id).all():
-            aq.coded_dt = now
-            aqs.append(aq)
-    elif pn == 'ec':
-        model = CodeEventCreator
-        p     = CodeEventCreator(aid, ev, var, val, current_user.id, text)
+    if pn == 'ec':
+        model = CoderArticleAnnotation
+        p     = CoderArticleAnnotation(aid, var, val, current_user.id, text)
 
         for aq in db_session.query(EventCreatorQueue).filter_by(article_id = aid, coder_id = current_user.id).all():
             aq.coded_dt = now
@@ -1225,20 +1204,11 @@ def addArticleCode(pn):
 
     ## variables which only have one value per article
     if var in sv:
-        if pn == '1':
-            a = db_session.query(model).filter_by(
-                article_id = aid,
-                variable   = var,
-                coder_id   = current_user.id
-            ).all()
-        else:
-            ## for second pass and event coder, filter for distinct event
-            a = db_session.query(model).filter_by(
-                article_id = aid,
-                variable   = var,
-                event_id   = ev,
-                coder_id   = current_user.id
-            ).all()
+        a = db_session.query(model).filter_by(
+            article_id = aid,
+            variable   = var,
+            coder_id   = current_user.id
+        ).all()
 
         ## if there's more then one, delete them
         if len(a) > 0:
@@ -1247,11 +1217,6 @@ def addArticleCode(pn):
 
             db_session.commit()
 
-    ## if this is a 2nd comment pass comment and it is null, skip it
-    if var == 'comments' and pn == '2' and val == '':
-        return jsonify(result={"status": 200})
-
-    # try:
     db_session.add(p)
     db_session.add_all(aqs)
     db_session.commit()
