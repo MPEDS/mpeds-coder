@@ -11,13 +11,13 @@
       
       <div class="form-check">
         <label class="form-check-label">
-          <input class="form-check-input basic-info" type="radio" name="date-est" id="dummy-info_date-est" value="exact" {{ 'checked' if curr['date-est'] == 'exact' else '' }} /> No protests
+          <input class="form-check-input basic-info" type="checkbox" name="date-est" id="dummy-info_date-est" value="exact" {{ 'checked' if curr['date-est'] == 'exact' else '' }} /> No protests
         </label>
       </div>
 
       <div class="form-check">
         <label class="form-check-label">
-          <input class="form-check-input basic-info" type="radio" name="date-est" id="dummy-info_date-est" value="approximate" {{ 'checked' if curr['date-est'] == 'approximate' else '' }} /> Protest(s), but no black protests
+          <input class="form-check-input basic-info" type="checkbox" name="date-est" id="dummy-info_date-est" value="approximate" {{ 'checked' if curr['date-est'] == 'approximate' else '' }} /> Protest(s), but no black protests
         </label>
       </div>
 

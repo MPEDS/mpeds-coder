@@ -207,7 +207,52 @@ var generate_handler = function( v, type ) {
   };
 }
 
-/* Adds or deletes values for each variable based on checkboxes. */
+/* Adds or deletes values for each article variable based on checkboxes. */
+var selectArticleCheckbox = function(e) {
+  var el       = $(e.target);
+  var aid      = $(".article").attr("id").split("_")[1];  
+  var pn       = $('#pass_number').val();
+
+  var variable = el.attr("id").split("_")[1];
+  var val      = el.val();
+
+alert("In selectArticleCheckbox");
+  // for some of the basic info variables, id == val. change to 'yes'
+  if (variable == val) {
+    val = 'yes';
+  }
+
+  var is_checked = el.is(':checked');
+  var action = ''
+
+  // add this checkbox item
+  if (is_checked == true) {
+    action = 'add';
+  } else { // delete it
+    action = 'del';
+  }
+
+  req = $.ajax({
+    type: "GET",
+    url:  $SCRIPT_ROOT + '/_' + action + '_code/' + pn,
+    data: {
+      article:  aid,
+      variable: variable,
+      value:    val //,
+    }
+  });
+
+  req.done(function(e) {
+    $('#flash-error').hide();
+  });
+
+  req.fail(function(e) {
+    $("#flash-error").text("Error changing checkbox.");
+    $("#flash-error").show();
+  });
+}
+
+/* Adds or deletes values for each event variable based on checkboxes. */
 var selectCheckbox = function(e) {
   var el       = $(e.target);
   var aid      = $(".article").attr("id").split("_")[1];  

@@ -27,7 +27,7 @@ var modifyArticleAnnotations = function() {
     $('#XXXbasicinfo_block textarea').blur(storeText);
 
     // listeners for adding or deleting checkboxes
-    $(':checkbox').change(selectCheckbox);
+    $('#article-block :checkbox').change(selectArticleCheckbox);
   });
 
   req.fail(function(e) {
@@ -104,7 +104,8 @@ var modifyEvent = function(e) {
     $('#basicinfo_block textarea').blur(storeText);
 
     // listeners for adding or deleting checkboxes
-    $(':checkbox').change(selectCheckbox);
+    $('#yes-no_block :checkbox').change(selectCheckbox);
+    $('#preset_block :checkbox').change(selectCheckbox);
 
     // Get text select vars from DOM  
     $('.varblock').each(function() {
