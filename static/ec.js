@@ -63,6 +63,9 @@ var modifyEvent = function(e) {
     // $('#basicinfo_block :date').blur(storeText); // doesn't work in Firefox :(
 
     $('#basicinfo_block :text').blur(storeText);
+    $('#yes-no_block :text').blur(storeText);
+    $('#textselect_block :text').blur(storeText);
+
     $('#basicinfo_block textarea').blur(storeText);
 
     // listeners for adding or deleting checkboxes
