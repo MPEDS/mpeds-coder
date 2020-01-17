@@ -22,11 +22,11 @@ var modifyArticleAnnotations = function() {
     $('#yes-no_block :radio').change(selectRadio);
 
     // listeners for text fields
-    $('#article-block :text').blur(storeArticleTextInput);
-    $('#article-block textarea').blur(storeArticleTextInput);
+    $('#article-annotation-block :text').blur(storeArticleTextInput);
+    $('#article-annotation-block textarea').blur(storeArticleTextInput);
 
     // listeners for adding or deleting checkboxes
-    $('#article-block :checkbox').change(selectArticleCheckbox);
+    $('#article-annotation-block :checkbox').change(selectArticleCheckbox);
   });
 
   req.fail(function(e) {
