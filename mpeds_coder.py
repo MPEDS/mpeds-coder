@@ -60,19 +60,6 @@ from models import ArticleMetadata, ArticleQueue, CoderArticleAnnotation, \
 CodeFirstPass, CodeSecondPass, CodeEventCreator, \
 Event, EventCreatorQueue, SecondPassQueue, User
 
-# DEBUG BLOCK
-#errmsg = "Init!"
-#try:
-#    pass
-#    #from models import CoderArticleAnnotation
-#    from models import ArticleMetadata, ArticleQueue, CoderArticleAnnotation, \
-#    CodeFirstPass, CodeSecondPass, CodeEventCreator, \
-#    Event, EventCreatorQueue, SecondPassQueue, User
-#    errmsg = "import try!"
-#except:
-#    errmsg = "import except!"
-##    errmsg = string.join([str(i) for i in sys.exc_info()])
-
 # create our application
 app = Flask(__name__)
 app.config.from_pyfile('config.py')

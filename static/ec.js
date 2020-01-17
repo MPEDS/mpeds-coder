@@ -3,7 +3,6 @@ var modifyArticleAnnotations = function() {
   var aid  = $(".article").attr("id").split("_")[1];
   var pn   = $('#pass_number').val();
 
-  $('#article-annotation-blocks').html("In modifyArticle! <br />" + Date($.now())) // DEBUG
   req = $.ajax({
       type: "GET",
       url:  $SCRIPT_ROOT + '/_load_article_annotation_block',
