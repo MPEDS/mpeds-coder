@@ -1568,10 +1568,11 @@ def getEvents():
         elif pn =='ec':
             if len(rvar['desc']) > 0 and len(rvar['desc'][0]) > 0:
                 ev['repr'] = ", ".join(rvar['desc'])
-            elif len(rvar['article-desc']) > 0 and len(rvar['article-desc'][0]) > 0:
-                ev['repr'] = "(no event description): " + ", ".join(rvar['article-desc'])
+                ## No longer necessary with article-level description
+            #elif len(rvar['article-desc']) > 0 and len(rvar['article-desc'][0]) > 0:
+                #ev['repr'] = "(no event description): " + ", ".join(rvar['article-desc'])
             else:
-                ev['repr'] = "(no event or article description)"
+                ev['repr'] = "(no event description)"
 
         evs.append(ev)
 
