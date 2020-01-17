@@ -8,17 +8,57 @@
     </div>
     
     <div class="form-group">
-      <label>If this article was skipped, how come?</label>
+      <label>If no events were coded, why not?</label>
       
       <div class="form-check">
         <label class="form-check-label">
-          <input class="form-check-input basic-info" type="checkbox" name="date-est" id="dummy-info_date-est" value="exact" {{ 'checked' if curr['date-est'] == 'exact' else '' }} /> No protests
+          <input
+            class="form-check-input basic-info"
+            type="checkbox"
+            name="no-protests"
+            id="article_no-protests"
+            value="yes"
+            {{ 'checked' if 'yes' in curr['no-protests'] else '' }} />
+          No protests
         </label>
       </div>
 
       <div class="form-check">
         <label class="form-check-label">
-          <input class="form-check-input basic-info" type="checkbox" name="date-est" id="dummy-info_date-est" value="approximate" {{ 'checked' if curr['date-est'] == 'approximate' else '' }} /> Protest(s), but no black protests
+          <input
+            class="form-check-input basic-info"
+            type="checkbox"
+            name="no-black-protests"
+            id="article_no-black-protests"
+            value="yes"
+            {{ 'checked' if 'yes' in curr['no-black-protests'] else '' }} />
+          Protest(s), but no black protests
+        </label>
+      </div>
+
+      <div class="form-check">
+        <label class="form-check-label">
+          <input
+            class="form-check-input basic-info"
+            type="checkbox"
+            name="no-us-events"
+            id="article_no-us-events"
+            value="yes"
+            {{ 'checked' if 'yes' in curr['no-us-events'] else '' }} />
+          No events in the US
+        </label>
+      </div>
+
+      <div class="form-check">
+        <label class="form-check-label">
+          <input
+            class="form-check-input basic-info"
+            type="checkbox"
+            name="no-post-1990-events"
+            id="article_no-post-1990-events"
+            value="yes"
+            {{ 'checked' if 'yes' in curr['no-post-1990-events'] else '' }} />
+          No events after 1990
         </label>
       </div>
 
