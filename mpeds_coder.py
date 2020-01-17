@@ -1257,19 +1257,17 @@ def delArticleCode(pn):
 @login_required
 def changeArticleCode(pn):
     """ 
-        Changes a radio button by removing all prior values, adds one new one. 
-        Only implemented for event creator right now.
+        Changes a radio button or text input/area by removing all prior
+        values, adds one new one.
     """
     article  = request.args.get('article')
     variable = request.args.get('variable')
     value    = request.args.get('value')
-    event    = request.args.get('event')
 
     ## delete all prior values
-    a = db_session.query(CodeEventCreator).filter_by(
+    a = db_session.query(CoderArticleAnnotation).filter_by(
         article_id = article,
         variable   = variable,
-        event_id   = event,
         coder_id   = current_user.id
     ).all()
 
@@ -1278,9 +1276,9 @@ def changeArticleCode(pn):
     db_session.commit()
 
     ## add new value
-    ec = CodeEventCreator(article, event, variable, value, current_user.id) 
+    ac = CoderArticleAnnotation(article, variable, value, current_user.id)
 
-    db_session.add(ec)
+    db_session.add(ac)
     db_session.commit()
 
     return jsonify(result={"status": 200})

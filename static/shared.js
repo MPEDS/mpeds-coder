@@ -357,7 +357,7 @@ var storeArticleTextInput = function(e) {
   });
 
   req.fail(function(e) {
-    $("#flash-error").text("Error changing radio button.");
+    $("#flash-error").text("Error changing article text input.");
     $("#flash-error").show();
   });
 }

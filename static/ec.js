@@ -23,8 +23,8 @@ var modifyArticleAnnotations = function() {
     $('#yes-no_block :radio').change(selectRadio);
 
     // listeners for text fields
-    $('#article_block :text').blur(storeArticleTextInput);
-    $('#article_block textarea').blur(storeArticleTextInput);
+    $('#article-block :text').blur(storeArticleTextInput);
+    $('#article-block textarea').blur(storeArticleTextInput);
 
     // listeners for adding or deleting checkboxes
     $('#article-block :checkbox').change(selectArticleCheckbox);
