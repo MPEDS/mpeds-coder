@@ -29,7 +29,7 @@
           <label for="desc">Provide a short description of this event.</label>
           <textarea class="form-control form-control-sm" name="desc" id="info_desc">{{ curr['desc']|safe }}</textarea>
 	  
-          <label for="start-date">Start date</label>
+          <label for="start-date">Start date (yyyy-mm-dd)</label>
           <div id="start-date-picker" class="input-group date">
             <input class="form-control" type="text" name="start-date" id="info_start-date" value="{{ curr['start-date'] }}" />
             <span class="input-group-addon">
@@ -37,7 +37,7 @@
             </span>
           </div>
 
-          <label for="end-date">End date</label>
+          <label for="end-date">End date (yyyy-mm-dd)</label>
           <div id="end-date-picker" class="input-group date">
             <input class="form-control" type="text" name="end-date" id="info_end-date" value="{{ curr['end-date'] }}" />
             <span class="input-group-addon">
