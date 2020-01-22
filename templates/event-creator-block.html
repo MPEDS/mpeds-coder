@@ -45,6 +45,20 @@
               <input
                 class="form-check-input basic-info"
                 type="checkbox"
+                name="start-date-estimated"
+                id="info_start-date-estimated"
+                value="yes"
+                {{ 'checked' if 'yes' in curr['start-date-estimated'] else '' }}
+              />
+              Start date estimated
+            </label>
+          </div>
+
+          <div class="form-check">
+            <label class="form-check-label">
+              <input
+                class="form-check-input basic-info"
+                type="checkbox"
                 name="start-date-unspecified"
                 id="info_start-date-unspecified"
                 value="yes"
@@ -84,6 +98,20 @@
             <span class="input-group-addon">
               <span class="glyphicon glyphicon-calendar"></span>
             </span>
+          </div>
+
+          <div class="form-check">
+            <label class="form-check-label">
+              <input
+                class="form-check-input basic-info"
+                type="checkbox"
+                name="end-date-estimated"
+                id="info_end-date-estimated"
+                value="yes"
+                {{ 'checked' if 'yes' in curr['end-date-estimated'] else '' }}
+              />
+              End date estimated
+            </label>
           </div>
 
           <div class="form-check">
