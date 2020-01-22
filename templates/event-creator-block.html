@@ -45,6 +45,20 @@
               <input
                 class="form-check-input basic-info"
                 type="checkbox"
+                name="start-date-unspecified"
+                id="info_start-date-unspecified"
+                value="yes"
+                {{ 'checked' if 'yes' in curr['start-date-unspecified'] else '' }}
+              />
+              Start date unspecified
+            </label>
+          </div>
+
+          <div class="form-check">
+            <label class="form-check-label">
+              <input
+                class="form-check-input basic-info"
+                type="checkbox"
                 name="future-event"
                 id="info_future-event"
                 value="yes"
@@ -77,6 +91,20 @@
               <input
                 class="form-check-input basic-info"
                 type="checkbox"
+                name="end-date-unspecified"
+                id="info_end-date-unspecified"
+                value="yes"
+                {{ 'checked' if 'yes' in curr['end-date-unspecified'] else '' }}
+              />
+              End date unspecified
+            </label>
+          </div>
+
+          <div class="form-check">
+            <label class="form-check-label">
+              <input
+                class="form-check-input basic-info"
+                type="checkbox"
                 name="event-ongoing"
                 id="info_event-ongoing"
                 value="yes"
@@ -88,7 +116,7 @@
 
         </div>
 
-        <div class="form-group")
+        <div class="form-group">
 
           <label for="state">State/Province/Territory</label>
           <select class="form-control" name="state" id="info_state">
@@ -106,6 +134,20 @@
             id="info_city
             value="{{ curr['city'] }}"
           />
+
+          <div class="form-check">
+            <label class="form-check-label">
+              <input
+                class="form-check-input basic-info"
+                type="checkbox"
+                name="location-unspecified"
+                id="info_location-unspecified"
+                value="yes"
+                {{ 'checked' if 'yes' in curr['location-unspecified'] else '' }}
+              />
+              No location specified
+            </label>
+          </div>
 
         </div>
 
