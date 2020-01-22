@@ -19,7 +19,7 @@ var modifyArticleAnnotations = function() {
     $('#article-annotation-blocks').append(req.responseText);
 
     // listeners for info radio buttons
-    $('#yes-no_block :radio').change(selectRadio);
+    $('#article-annotation-block :radio').change(selectRadio);
 
     // listeners for text fields
     $('#article-annotation-block :text').blur(storeArticleTextInput);
@@ -109,6 +109,7 @@ var modifyEvent = function(e) {
     $('#basicinfo_block textarea').blur(storeText);
 
     // listeners for adding or deleting checkboxes
+    $('#basicinfo_block :checkbox').change(selectCheckbox);
     $('#yes-no_block :checkbox').change(selectCheckbox);
     $('#preset_block :checkbox').change(selectCheckbox);
 
