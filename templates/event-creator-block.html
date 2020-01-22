@@ -25,19 +25,55 @@
 	  
           <label for="start-date">Start date (yyyy-mm-dd)</label>
           <div id="start-date-picker" class="input-group date">
-            <input class="form-control" type="text" name="start-date" id="info_start-date" value="{{ curr['start-date'] }}" />
+            <input
+			  class="form-control"
+			  type="text"
+			  name="start-date"
+			  id="info_start-date"
+			  value="{{ curr['start-date'] }}" />
             <span class="input-group-addon">
               <span class="glyphicon glyphicon-calendar"></span>
             </span>
           </div>
 
+		  <div class="form-check">
+			<label class="form-check-label">
+			  <input
+				class="form-check-input basic-info"
+				type="checkbox"
+				name="future-event"
+				id="info_future-event"
+				value="yes"
+				{{ 'checked' if 'yes' in curr['future-event'] else '' }} />
+			  Article describes future event
+			</label>
+		  </div>
+
           <label for="end-date">End date (yyyy-mm-dd)</label>
           <div id="end-date-picker" class="input-group date">
-            <input class="form-control" type="text" name="end-date" id="info_end-date" value="{{ curr['end-date'] }}" />
+            <input 
+			  class="form-control"
+			  type="text"
+			  name="end-date"
+			  id="info_end-date"
+			  value="{{ curr['end-date'] }}" />
             <span class="input-group-addon">
               <span class="glyphicon glyphicon-calendar"></span>
             </span>
           </div>
+
+		  <div class="form-check">
+			<label class="form-check-label">
+			  <input
+				class="form-check-input basic-info"
+				type="checkbox"
+				name="event-ongoing"
+				id="info_event-ongoing"
+				value="yes"
+				{{ 'checked' if 'yes' in curr['event-ongoing'] else '' }} />
+			  Article describes ongoing event
+			</label>
+		  </div>
 
           <label for="state">State/Province/Territory</label>
           <select class="form-control" name="state" id="info_state">
