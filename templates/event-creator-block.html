@@ -26,6 +26,20 @@
           <label for="desc">Provide a short description of this event.</label>
           <textarea class="form-control form-control-sm" name="desc" id="info_desc">{{ curr['desc']|safe }}</textarea>
 	  
+          <div class="form-check">
+            <label class="form-check-label">
+              <input
+                class="form-check-input basic-info"
+                type="checkbox"
+                name="start-date-unspecified"
+                id="info_start-date-unspecified"
+                value="yes"
+                {{ 'checked' if 'yes' in curr['start-date-unspecified'] else '' }}
+              />
+              Start date unspecified
+            </label>
+          </div>
+
           <label for="start-date">Start date</label>
           <div id="start-date-picker" class="input-group date">
             <input class="form-control" type="text" name="start-date" id="info_start-date" value="{{ curr['start-date'] }}" />
