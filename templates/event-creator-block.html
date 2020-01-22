@@ -104,32 +104,6 @@
     
     <div class="tab-pane" id="yes-no_block">
       <form>
-	<div class="form-group">
-          <label>Is the start date exact or approximate?</label>
-          <div class="form-check">
-            <label class="form-check-label">
-              <input class="form-check-input basic-info" type="radio" name="date-est" id="info_date-est" value="exact" {{ 'checked' if curr['date-est'] == 'exact' else '' }} /> Exact
-            </label>
-          </div>
-	  
-          <div class="form-check">
-            <label class="form-check-label">
-              <input class="form-check-input basic-info" type="radio" name="date-est" id="info_date-est" value="approximate" {{ 'checked' if curr['date-est'] == 'approximate' else '' }} /> Approximate
-            </label>
-          </div>
-          <p></p>
-          <label>Does this event span one day or more than one day?</label>
-          <div class="form-check">
-            <label class="form-check-label">
-              <input class="form-check-input basic-info" type="radio" name="duration" id="info_duration" value="one" {{ 'checked' if curr['duration'] == 'one' else '' }} /> One
-            </label>              
-          </div>
-          <div class="form-check">
-            <label class="form-check-label">
-              <input class="form-check-input basic-info" type="radio" name="duration" id="info_duration" value="more-than-one" {{ 'checked' if curr['duration'] == 'more-than-one' else '' }} /> More than one
-            </label>            
-          </div>
-	</div>
 	{% for question, values in yes_no_vars.iteritems() %}
 	<div class="form-group">
           <label>{{ question|safe }}</label>
