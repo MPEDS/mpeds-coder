@@ -80,6 +80,9 @@
 
           <label for="location">Location (City, State/Province, Country)</label>
           <input class="form-control" type="text" name="location" id="info_location" value="{{ curr['location'] }}" />
+
+          <label for="basic-info-uncertain">Which if any of the "Basic Info" items needs special review?</label>
+          <input class="form-control" type="text" name="basic-info-uncertain" id="info_basic-info-uncertain" value="{{ curr['basic-info-uncertain'] }}" />
         </div>
       </form>
     </div>
@@ -124,6 +127,12 @@
           {% endfor %}
 	</div>
 	{% endfor %}
+
+    <div class="form-group">
+      <label for="yesno-uncertain">Which if any of the "Yes/No" items needs special review?</label>
+      <input class="form-control" type="text" name="yesno-uncertain" id="info_yesno-uncertain" value="{{ curr['yesno-uncertain'] }}" />
+    </div>
+
       </form>
     </div>
 
@@ -140,6 +149,12 @@
         <div id="list_{{ k }}" class="varlist"></div>
       </div>
       {% endfor %}
+
+        <div class="form-group">
+          <label for="textselect-uncertain">Which if any of the "Text Select" items needs special review?</label>
+          <input class="form-control" type="text" name="textselect-uncertain" id="info_textselect-uncertain" value="{{ curr['textselect-uncertain'] }}" />
+        </div>
+
     </div> <!-- tab-pane --> 
 
   </div> <!-- tab-content -->
