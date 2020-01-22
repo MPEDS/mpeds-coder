@@ -47,6 +47,21 @@
 
           <label for="location">Location (City, State/Province, Country)</label>
           <input class="form-control" type="text" name="location" id="info_location" value="{{ curr['location'] }}" />
+
+		  <div class="form-check">
+			<label>Duplicate event</label>
+			<label class="form-check-label">
+			  <input
+				class="form-check-input basic-info"
+				type="checkbox"
+				name="duplicate-event"
+				id="info_duplicate-event"
+				value="yes"
+				{{ 'checked' if 'yes' in curr['duplicate-event'] else '' }} />
+			  I have previously coded this exact event
+			</label>
+		  </div>
+
         </div>
       </form>
     </div>
