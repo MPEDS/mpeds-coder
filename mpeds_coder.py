@@ -142,6 +142,7 @@ state_and_territory_vals = ordered_load(open(app.config['WD'] + '/states.yaml', 
 
 ## mark the single-valued items
 event_creator_single_value = ['article-desc', 'desc', 'start-date', 'end-date', 
+    'article-uncertain',
     'location', 'duration', 'date-est',
     'state', 'city', 'other-location', 
     'basic-info-uncertain', 'yesno-uncertain', 'textselect-uncertain']
