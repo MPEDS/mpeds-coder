@@ -154,7 +154,7 @@ class ArticleMetadata(Base):
     seconds = relationship("CodeSecondPass", backref = backref("article_metadata", order_by = id))
     queue   = relationship("ArticleQueue",   backref = backref("article_metadata", order_by = id))
 
-    def __init__(self, filename, db_name = None, db_id = None, title = None):
+    def __init__(self, filename, db_name = None, db_id = None, title = None, pub_date = None):
         self.filename  = filename
         self.db_name   = db_name
         self.db_id     = db_id
