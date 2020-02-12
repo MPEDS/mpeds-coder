@@ -279,12 +279,18 @@ def generateSampleNumberForBins(num_per_coder, n, k):
         Generate the number of articles necessary to assign each coder * number
         of articles, given the bin size.
         Formula is: (n - 1)! / (k - 1)! (n - 1)!
+        DS: I don't understand the above.  Alternatively: Find how many
+        complete sets of bins can be assigned and return the total # of bins
+        in those sets.
     """
 
+    ## This is the number of articles assigned to each coder if
+    ## every bin is used exactly once (= num. of comb.s after first
+    ## coder has been assigned)
     a = factorial(n - 1) / ( factorial( k - 1 ) * factorial(n - k) )
 
-    ## the number per coder doesn't divide evenly into the number of appearances
-    ## subtract the remainder
+    ## If the number per coder doesn't divide evenly into the number of
+    ## appearances, subtract the remainder
     remainder = num_per_coder % a
     num_per_coder -= remainder
 
