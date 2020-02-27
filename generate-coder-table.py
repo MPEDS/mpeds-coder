@@ -45,13 +45,13 @@ def main():
     print("Query:")
     for i in range(0, 1000):
         if i % 50 == 0:
-            print("\t" + str(i) + "...")
+            print("  " + str(i) + "...")
         offset = i*1000
         query  = db_session.query(model, ArticleMetadata).\
                  join(ArticleMetadata).order_by(model.id).offset(offset).limit(1000).all()
 
         if len(query) <= 0:
-            print(str(i) + "...DONE")
+            print("  " + str(i) + "...DONE")
             break
         
         resultset.extend(query)
@@ -91,7 +91,7 @@ def main():
             ## AGW_AFP_ENG_20040104.0056
             pieces   = am.db_id.split("_")
             pub      = "-".join(pieces[0:3])
-            pub_date   = pieces[3].split('.')[0]
+            pub_date = pieces[3].split('.')[0]
             pub_date = dt.datetime.strptime(pub_date, '%Y%m%d').strftime('%Y-%m-%d')
         elif 'NYT' in am.db_id:
             ## e.g. 
@@ -104,14 +104,20 @@ def main():
             pieces   = am.db_id.split("_")
             pub      = pieces[0]
             pub_date = pieces[1]
+
+            ## remove T00:00:00Z from dates
+            ## e.g. 2013-03-19T00:00:00Z
+            if 'T' in pub_date:
+                pub_date = pub_date.split('T')[0]
+            
         to_print += ( pub, pub_date, solr_id )
 
         df = pd.DataFrame([to_print], columns = header)
-        df.to_csv(filename, mode = "a", header = False)
+        df.to_csv(filename, mode = "a", header = False, index = False)
 
         if i % 50000 == 0:
-            print("\t" + str(i) + "...")
-    print("\t" + str(i) + "...DONE")
+            print("  " + str(i) + "...")
+    print("  " + str(i) + "...DONE")
 
 if __name__ == '__main__':
     main()
