@@ -38,7 +38,7 @@ def main():
     cols  = [x.name for x in model.__table__.columns]
 
     resultset = []
-    filename = '/var/www/campus_protest/coder-table_%s.csv' % (dt.datetime.now().strftime('%Y-%m-%d'))
+    filename = '/var/www/campus_protest/coder-table_%s.csv' % (dt.datetime.now().strftime('%Y-%m-%d_%H%M%S'))
     
     query = db_session.query(func.max(model.id)).first()
     
