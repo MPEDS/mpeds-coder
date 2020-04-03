@@ -74,17 +74,6 @@ class Solr:
         ## add 100 to get everything for sure
         numFound += interval
 
-#        prev = 0
-#        data = {
-#            'q': q,
-#            'rows': interval,
-#            'start': prev,
-#            'wt': 'json'
-#        }
-#
-#        if fq:
-#            data['fq'] = fq
-#
         articles = []
         for i in range(0, numFound, interval):
             data = {
@@ -106,8 +95,6 @@ class Solr:
 
             if i % 1000 == 0:
                 print('%d documents collected.' % i)
-
-#            prev = i
 
         return articles
 
