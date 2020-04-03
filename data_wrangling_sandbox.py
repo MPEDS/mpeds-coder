@@ -47,8 +47,11 @@ print("Loading time:  %0.3fs" % test_time)
 
 df = pd.DataFrame(docs)
 
+#print df
+#print '\n'.join([doc[u'TITLE'] for doc in docs])
+
 output_counts['retrieved-articles-cleaned'] = df.shape[0]
-print("Articles after cleaning: %d" % df.shape[0])
+print("Article count: %d" % df.shape[0])
 
 ## Crossover testing
 # data = {
