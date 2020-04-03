@@ -69,7 +69,7 @@ class Solr:
 
         print("%d documents found." % numFound)
 
-        interval = 50
+        interval = 100
 
         ## add 100 to get everything for sure
         numFound += interval
@@ -97,8 +97,6 @@ class Solr:
             if fq:
                 data['fq'] = fq
 
-            print data
-
             data = urllib.urlencode(data)
             req  = urllib2.Request(self.solr_url, data)
             res  = urllib2.urlopen(req)
@@ -106,11 +104,10 @@ class Solr:
 
             articles.extend(res['response']['docs'])
 
-            print('i is %d, articles size is %d' % (i, len(articles)))
-
             if i % 1000 == 0:
                 print('%d documents collected.' % i)
 
 #            prev = i
 
         return articles
+
