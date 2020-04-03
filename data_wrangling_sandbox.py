@@ -22,43 +22,66 @@ mysql_engine = sqlalchemy.create_engine(
 sobj = data_wrangling.solr.Solr()
 sobj.setSolrURL('%s/select' % config.SOLR_ADDR)
 
-## MySQL testing
-user_df = pd.read_sql_table("user", con=mysql_engine)
-print user_df
+### MySQL testing
+#user_df = pd.read_sql_table("user", con=mysql_engine)
+#print user_df
+#
+### SOLR testing
+##SEARCH_STR = 'boycott* "press conference" "news conference" (protest* AND NOT protestant*) strik* rally ralli* riot* sit-in occupation mobiliz* blockage demonstrat* marchi* marche*'
+#
+#QUERY_STR = 'PUBLICATION:("Associated Press Worldstream, English Service" OR "New York Times Newswire Service" OR ' + \
+#        '"Los Angeles Times/Washington Post Newswire Service" OR "Washington Post/Bloomberg Newswire Service")'
+#FQ_STR = 'Wisconsin AND boycott'
+#
+#output_counts = {}
+#
+#output_counts['retrieved-articles'] = sobj.getResultsFound(QUERY_STR, FQ_STR)
+#
+#print("Retrieving %d articles..." % output_counts['retrieved-articles'])
+#
+#import time
+#t0    = time.time()
+#docs  = sobj.getDocuments(QUERY_STR, fq = FQ_STR)
+#test_time = time.time() - t0
+#print("Loading time:  %0.3fs" % test_time)
+#
+#solr_df = pd.DataFrame(docs)
+#
+##print df
+##print '\n'.join([doc[u'TITLE'] for doc in docs])
+#
+#output_counts['retrieved-articles-cleaned'] = solr_df.shape[0]
+#print("Article count: %d" % solr_df.shape[0])
 
-## SOLR testing
-#SEARCH_STR = 'boycott* "press conference" "news conference" (protest* AND NOT protestant*) strik* rally ralli* riot* sit-in occupation mobiliz* blockage demonstrat* marchi* marche*'
+## Crossover testing
 
-QUERY_STR = 'PUBLICATION:("Associated Press Worldstream, English Service" OR "New York Times Newswire Service" OR ' + \
-        '"Los Angeles Times/Washington Post Newswire Service" OR "Washington Post/Bloomberg Newswire Service")'
-FQ_STR = 'Wisconsin AND boycott'
+am_id_df = pd.read_sql("SELECT db_id FROM article_metadata", con=mysql_engine)
+
+## Put IDs from MySQL into a SOLR query string
+ids = am_id_df['db_id'].tolist()
+ids_qclause = '"' + '" OR "'.join(ids) + '"'
+ids_q = 'id: (' + ids_qclause + ')'
 
 output_counts = {}
 
-output_counts['retrieved-articles'] = sobj.getResultsFound(QUERY_STR, FQ_STR)
+output_counts['retrieved-articles'] = sobj.getResultsFound(ids_q)
 
 print("Retrieving %d articles..." % output_counts['retrieved-articles'])
 
 import time
 t0    = time.time()
-docs  = sobj.getDocuments(QUERY_STR, fq = FQ_STR)
+docs  = sobj.getDocuments(ids_q)
 test_time = time.time() - t0
 print("Loading time:  %0.3fs" % test_time)
 
-df = pd.DataFrame(docs)
+solr_df = pd.DataFrame(docs)
 
-#print df
+print '\n'.join([key + ':' + str(len(val))
+                    if isinstance(val, list) 
+                    else key + ':' + str(type(val)) 
+                    for key, val in docs[3].iteritems()])
+#print solr_df
 #print '\n'.join([doc[u'TITLE'] for doc in docs])
 
-output_counts['retrieved-articles-cleaned'] = df.shape[0]
-print("Article count: %d" % df.shape[0])
-
-## Crossover testing
-# data = {
-#     'PUBLICATION': '("Associated Press Worldstream, English Service" OR "New York Times Newswire Service" OR '+\
-#      '"Los Angeles Times/Washington Post Newswire Service" OR "Washington Post/Bloomberg Newswire Service")'
-# }
-
-## this is a bit buggy. DS 2020-03-26: why?
-#query = sobj.buildSolrQuery(data)
-
+output_counts['retrieved-articles-cleaned'] = solr_df.shape[0]
+print("Article count: %d" % solr_df.shape[0])
