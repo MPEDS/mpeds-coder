@@ -23,7 +23,7 @@ mysql_engine = sqlalchemy.create_engine(
 sobj = data_wrangling.solr.Solr()
 sobj.setSolrURL('%s/select' % config.SOLR_ADDR)
 
-## Crossover testing
+## Crossover query
 
 am_id_df = pd.read_sql("SELECT db_id FROM article_metadata", con=mysql_engine)
 
@@ -46,19 +46,39 @@ print("Loading time:  %0.3fs" % test_time)
 
 solr_df = pd.DataFrame(docs)
 
-#print '\n'.join([key + ':' + str(len(val))
-#                    if isinstance(val, list) 
-#                    else key + ':' + str(type(val)) 
-#                    for key, val in docs[3].iteritems()])
-print solr_df
-#print '\n'.join([doc[u'TITLE'] for doc in docs])
-
 output_counts['retrieved-articles-cleaned'] = solr_df.shape[0]
 print("Article count: %d" % solr_df.shape[0])
 
+
+## Output
+
 wd = '/home/skalinder' #config.WD
-filename = ('%s/exports/coder-table_%s.csv' 
+filename = ('%s/exports/solr_output_%s.csv' 
                 % (wd, 
                    datetime.datetime.now().strftime('%Y-%m-%d_%H%M%S')))
 
-solr_df.to_csv(filename, encoding = 'utf-8', index = False)
+#solr_df.to_csv(filename, encoding = 'utf-8', index = False)
+
+
+## Analysis
+
+def countobj(x):
+    if isinstance(x, list) or isinstance(x, dict):
+        return len(x)
+    else:
+        return 1
+
+maxentries = (solr_df
+            .applymap(countobj)
+            .apply(max)
+            )
+
+maxentries = (maxentries
+                # Don't know why this doesn't work
+                #.rename('cols')
+                #.where(cols == 1)
+                #.order()
+            )
+
+print '\n\nMaximum entries per cell in each column:'
+print maxentries
