@@ -56,6 +56,8 @@ print solr_df
 output_counts['retrieved-articles-cleaned'] = solr_df.shape[0]
 print("Article count: %d" % solr_df.shape[0])
 
-filename = ('%s/coder-table_%s.csv' % 
-                (config.WD, datetime.datetime.now().strftime('%Y-%m-%d')))
+filename = ('%s/exports/coder-table_%s.csv' 
+                % (config.WD, 
+                   datetime.datetime.now().strftime('%Y-%m-%d_%H%M%S')))
+
 print filename
