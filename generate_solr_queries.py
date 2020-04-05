@@ -71,14 +71,10 @@ def countobj(x):
 maxentries = (solr_df
             .applymap(countobj)
             .apply(max)
+            .to_frame('maxn')
+            .query('maxn > 1')
+            .sort_values('maxn', ascending=False)
             )
-
-maxentries = (maxentries
-                # Don't know why this doesn't work
-                #.rename('cols')
-                #.where(cols == 1)
-                #.order()
-            )
-
 print '\n\nMaximum entries per cell in each column:'
 print maxentries
+
