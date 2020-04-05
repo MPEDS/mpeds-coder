@@ -50,6 +50,21 @@ output_counts['retrieved-articles-cleaned'] = solr_df.shape[0]
 print("Article count: %d" % solr_df.shape[0])
 
 
+## Reorder columns
+
+knowngood = ['PUBLICATION', 
+             'SECTION', 
+             'BYLINE', 
+             'DATELINE', 
+             'DATE', 
+             'INTERNAL_ID',
+             'TITLE',
+             'TEXT']
+cols = ([c for c in solr_df.columns if c in knowngood]
+        + [c for c in solr_df.columns if c not in knowngood])
+solr_df = solr_df[cols]
+
+
 ## Output
 
 wd = '/home/skalinder' #config.WD
@@ -57,7 +72,7 @@ filename = ('%s/exports/solr_output_%s.csv'
                 % (wd, 
                    datetime.datetime.now().strftime('%Y-%m-%d_%H%M%S')))
 
-#solr_df.to_csv(filename, encoding = 'utf-8', index = False)
+solr_df.to_csv(filename, encoding = 'utf-8', index = False)
 
 
 ## Object count analysis
@@ -75,7 +90,7 @@ maxentries = (solr_df
                 .query('maxn > 1')
                 .sort_values('maxn', ascending=False)
                 )
-print '\n\nMaximum entries per cell in each column:'
+print '\n\nLargest multi-entry cell in each column:'
 print maxentries
 
 ## Nonempty analysis
@@ -84,4 +99,5 @@ nonmissing = (solr_df
                 .count()
                 .sort_values(ascending=False)
                 )
+print '\n\nNonmissing entries in each column:'
 print nonmissing
