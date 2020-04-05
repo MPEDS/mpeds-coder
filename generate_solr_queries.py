@@ -60,7 +60,7 @@ filename = ('%s/exports/solr_output_%s.csv'
 #solr_df.to_csv(filename, encoding = 'utf-8', index = False)
 
 
-## Analysis
+## Object count analysis
 
 def countobj(x):
     if isinstance(x, list) or isinstance(x, dict):
@@ -69,12 +69,19 @@ def countobj(x):
         return 1
 
 maxentries = (solr_df
-            .applymap(countobj)
-            .apply(max)
-            .to_frame('maxn')
-            .query('maxn > 1')
-            .sort_values('maxn', ascending=False)
-            )
+                .applymap(countobj)
+                .apply(max)
+                .to_frame('maxn')
+                .query('maxn > 1')
+                .sort_values('maxn', ascending=False)
+                )
 print '\n\nMaximum entries per cell in each column:'
 print maxentries
 
+## Nonempty analysis
+
+nonmissing = (solr_df
+                .count()
+                .sort_values(ascending=False)
+                )
+print nonmissing
