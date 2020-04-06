@@ -67,7 +67,7 @@ solr_df = solr_df[cols]
 
 ## Output
 
-wd = '/home/skalinder' #config.WD
+wd = config.WD
 filename = ('%s/exports/solr_output_%s.csv' 
                 % (wd, 
                    datetime.datetime.now().strftime('%Y-%m-%d_%H%M%S')))
@@ -88,7 +88,8 @@ maxentries = (solr_df
                 .apply(max)
                 .to_frame('maxn')
                 .query('maxn > 1')
-                .sort_values('maxn', ascending=False)
+                # sort changed to sort_values at pandas 0.17 or so
+                #.sort('maxn', ascending=False)
                 )
 print '\n\nLargest multi-entry cell in each column:'
 print maxentries
@@ -97,7 +98,8 @@ print maxentries
 
 nonmissing = (solr_df
                 .count()
-                .sort_values(ascending=False)
+                # sort changed to sort_values at pandas 0.17 or so
+                #.sort(ascending=False)
                 )
 print '\n\nNonmissing entries in each column:'
 print nonmissing
