@@ -413,14 +413,10 @@ def load_user(id):
 
 ## views
 @app.route('/')
+@app.route('/index')
 @login_required
 def index():
     return render_template("index.html")
-
-@app.route('/codebook')
-@login_required
-def codebook():
-    return render_template("codebook.html")
 
 #####
 ##### Coding pages
@@ -1180,7 +1176,7 @@ def generateCoderAudit():
         response.headers["mime-type"] = "text/csv"
         return response
     elif action == 'save':
-        filename = '%s/coder-table_%s.csv' % (app.config['WD'], dt.datetime.now().strftime('%Y-%m-%d'))
+        filename = '%s/exports/coder-table_%s.csv' % (app.config['WD'], dt.datetime.now().strftime('%Y-%m-%d_%H%M%S'))
         df.to_csv(filename, encoding = 'utf-8', index = False)
         return jsonify(result={"status": 200, "filename": filename})
     else:
