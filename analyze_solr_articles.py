@@ -14,7 +14,8 @@ mysql_engine = sqlalchemy.create_engine(
     'mysql://%s:%s@localhost/%s?unix_socket=%s&charset=%s' % 
         (config.MYSQL_USER, 
         config.MYSQL_PASS, 
-        config.MYSQL_DB, 
+        'bpp',
+        #config.MYSQL_DB, 
         config.MYSQL_SOCK, 
         'utf8'), 
     convert_unicode=True)
@@ -34,6 +35,7 @@ ids_q = 'id: (' + ids_qclause + ')'
 
 output_counts = {}
 
+print ids_q
 output_counts['retrieved-articles'] = sobj.getResultsFound(ids_q)
 
 print("Retrieving %d articles..." % output_counts['retrieved-articles'])
