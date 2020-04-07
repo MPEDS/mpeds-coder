@@ -30,25 +30,31 @@ am_id_df = pd.read_sql("SELECT db_id FROM article_metadata", con=mysql_engine)
 
 ## Put IDs from MySQL into a SOLR query string
 ids = am_id_df['db_id'].tolist()
-ids_qclause = '"' + '" OR "'.join(ids) + '"'
-ids_q = 'id: (' + ids_qclause + ')'
 
-output_counts = {}
+def getQueryChunk(ids):
+    ids_qclause = '"' + '" OR "'.join(ids) + '"'
+    ids_q = 'id: (' + ids_qclause + ')'
 
-print ids_q
-output_counts['retrieved-articles'] = sobj.getResultsFound(ids_q)
+    print("Retrieving %d articles..." % sobj.getResultsFound(ids_q))
 
-print("Retrieving %d articles..." % output_counts['retrieved-articles'])
+    import time
+    t0    = time.time()
+    docs  = sobj.getDocuments(ids_q)
+    test_time = time.time() - t0
+    print("Loading time:  %0.3fs" % test_time)
+    return docs
 
-import time
-t0    = time.time()
-docs  = sobj.getDocuments(ids_q)
-test_time = time.time() - t0
-print("Loading time:  %0.3fs" % test_time)
+# Chunk trick from https://stackoverflow.com/questions/312443/how-do-you-split-a-list-into-evenly-sized-chunks
+id_chunks = [ids[1:1 + 1024] for i in xrange(1, len(ids), 1024)]
+
+docs = list()
+# NB: making copies of this list will use up memory fast!
+for i in range(len(id_chunks)):
+    print("### Chunk %d of %d" % (i, len(id_chunks)))
+    docs.extend(getQueryChunk(id_chunks[i]))
 
 solr_df = pd.DataFrame(docs)
 
-output_counts['retrieved-articles-cleaned'] = solr_df.shape[0]
 print("Article count: %d" % solr_df.shape[0])
 
 
