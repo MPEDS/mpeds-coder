@@ -45,7 +45,7 @@ def getQueryChunk(ids):
     return docs
 
 # Chunk trick from https://stackoverflow.com/questions/312443/how-do-you-split-a-list-into-evenly-sized-chunks
-id_chunks = [ids[i:i + 1024] for i in xrange(1, len(ids), 1024)]
+id_chunks = [ids[i:i + 1024] for i in xrange(0, len(ids), 1024)]
 
 docs = list()
 # NB: making copies of this list will use up memory fast!
