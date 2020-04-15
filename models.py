@@ -143,21 +143,27 @@ class EventCreatorQueue(Base):
 
 class ArticleMetadata(Base):
     __tablename__ = 'article_metadata'
-    id        = Column(Integer, primary_key=True)
-    title     = Column(String(1024))
-    db_name   = Column(String(64))
-    db_id     = Column(String(255))
-    filename  = Column(String(255), nullable = False)
+    id                  = Column(Integer, primary_key=True)
+    title               = Column(String(1024))
+    db_name             = Column(String(64))
+    db_id               = Column(String(255))
+    filename            = Column(String(255), nullable = False)
+    pub_date            = Column(Date)
+    publication         = Column(String(511))
+    source_description  = Column(String(511))
 
     firsts  = relationship("CodeFirstPass",  backref = backref("article_metadata", order_by = id))
     seconds = relationship("CodeSecondPass", backref = backref("article_metadata", order_by = id))
     queue   = relationship("ArticleQueue",   backref = backref("article_metadata", order_by = id))
 
-    def __init__(self, filename, db_name = None, db_id = None, title = None):
-        self.filename  = filename
-        self.db_name   = db_name
-        self.db_id     = db_id
-        self.title     = title
+    def __init__(self, filename, db_name = None, db_id = None, title = None, pub_date = None, publication = None, source_description = None):
+        self.filename           = filename
+        self.db_name            = db_name
+        self.db_id              = db_id
+        self.title              = title
+        self.pub_date           = pub_date
+        self.publication        = publication
+        self.source_description = source_description
 
     def __repr__(self):
         return '<ArticleMetadata %r (%r)>' % (self.title, self.id)
