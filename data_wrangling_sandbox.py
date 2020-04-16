@@ -6,6 +6,7 @@ import sqlalchemy.orm
 
 import config
 import data_wrangling.solr
+import data_wrangling.wrangler
 import models
 
 ## MySQL setup
@@ -17,6 +18,11 @@ mysql_engine = sqlalchemy.create_engine(
         config.MYSQL_SOCK, 
         'utf8'), 
     convert_unicode=True)
+
+wglr = data_wrangling.wrangler.Wrangler()
+print wglr.test_db(mysql_engine)
+
+sys.exit()
 
 ## SOLR setup
 sobj = data_wrangling.solr.Solr()
