@@ -8,11 +8,23 @@ import solr
 
 class Wrangler:
     def __init__(self):
-        pass
+        self.solr = None
+
+    def set_solr(self, url):
+        self.solr = solr.Solr()
+        self.solr.setSolrURL(url)
 
     def test_db(self, con):
         user_df = pd.read_sql_table("user", con=con)
         return user_df
 
-    def test_solr(self):
-        pass
+    def test_solr(self, query_str, fq_str = None):
+        retrieved_articles = self.solr.getResultsFound(query_str, fq_str)
+        print("Retrieving %d articles..." % retrieved_articles)
+
+        docs  = self.solr.getDocuments(query_str, fq = fq_str)
+
+        solr_df = pd.DataFrame(docs)
+
+        return "Article count: %d" % solr_df.shape[0]
+

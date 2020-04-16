@@ -9,6 +9,8 @@ import data_wrangling.solr
 import data_wrangling.wrangler
 import models
 
+wglr = data_wrangling.wrangler.Wrangler()
+
 ## MySQL setup
 mysql_engine = sqlalchemy.create_engine(
     'mysql://%s:%s@localhost/%s?unix_socket=%s&charset=%s' % 
@@ -19,18 +21,14 @@ mysql_engine = sqlalchemy.create_engine(
         'utf8'), 
     convert_unicode=True)
 
-wglr = data_wrangling.wrangler.Wrangler()
-print wglr.test_db(mysql_engine)
-
-sys.exit()
-
 ## SOLR setup
-sobj = data_wrangling.solr.Solr()
-sobj.setSolrURL('%s/select' % config.SOLR_ADDR)
+#sobj = data_wrangling.solr.Solr()
+#sobj.setSolrURL('%s/select' % config.SOLR_ADDR)
+solr_url = '%s/select' % config.SOLR_ADDR
+wglr.set_solr(solr_url)
 
 ### MySQL testing
-user_df = pd.read_sql_table("user", con=mysql_engine)
-print user_df
+print wglr.test_db(mysql_engine)
 
 ## SOLR testing
 #SEARCH_STR = 'boycott* "press conference" "news conference" (protest* AND NOT protestant*) strik* rally ralli* riot* sit-in occupation mobiliz* blockage demonstrat* marchi* marche*'
@@ -38,6 +36,10 @@ print user_df
 QUERY_STR = 'PUBLICATION:("Associated Press Worldstream, English Service" OR "New York Times Newswire Service" OR ' + \
         '"Los Angeles Times/Washington Post Newswire Service" OR "Washington Post/Bloomberg Newswire Service")'
 FQ_STR = 'Wisconsin AND boycott'
+
+print wglr.test_solr(QUERY_STR, FQ_STR)
+
+sys.exit()
 
 output_counts = {}
 
