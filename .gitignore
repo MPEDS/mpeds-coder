@@ -34,3 +34,8 @@ config.py
 # emacs
 *~
 *#
+
+# vim
+*.swp
+*.swo
+
