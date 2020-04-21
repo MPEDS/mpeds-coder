@@ -4,9 +4,12 @@ import pandas as pd
 import sqlalchemy
 import sqlalchemy.orm
 
-import config
-import data_wrangling.solr
-import models
+from context import config
+import solr
+import wrangler
+#import models
+
+wglr = wrangler.Wrangler()
 
 ## MySQL setup
 mysql_engine = sqlalchemy.create_engine(
@@ -19,12 +22,13 @@ mysql_engine = sqlalchemy.create_engine(
     convert_unicode=True)
 
 ## SOLR setup
-sobj = data_wrangling.solr.Solr()
-sobj.setSolrURL('%s/select' % config.SOLR_ADDR)
+#sobj = data_wrangling.solr.Solr()
+#sobj.setSolrURL('%s/select' % config.SOLR_ADDR)
+solr_url = '%s/select' % config.SOLR_ADDR
+wglr.set_solr(solr_url)
 
 ### MySQL testing
-user_df = pd.read_sql_table("user", con=mysql_engine)
-print user_df
+print wglr.get_db_test(mysql_engine)
 
 ## SOLR testing
 #SEARCH_STR = 'boycott* "press conference" "news conference" (protest* AND NOT protestant*) strik* rally ralli* riot* sit-in occupation mobiliz* blockage demonstrat* marchi* marche*'
@@ -33,15 +37,19 @@ QUERY_STR = 'PUBLICATION:("Associated Press Worldstream, English Service" OR "Ne
         '"Los Angeles Times/Washington Post Newswire Service" OR "Washington Post/Bloomberg Newswire Service")'
 FQ_STR = 'Wisconsin AND boycott'
 
+print wglr.run_solr_test(QUERY_STR, FQ_STR)
+
+#sys.exit()
+
 output_counts = {}
 
-output_counts['retrieved-articles'] = sobj.getResultsFound(QUERY_STR, FQ_STR)
+output_counts['retrieved-articles'] = wglr.solr.getResultsFound(QUERY_STR, FQ_STR)
 
 print("Retrieving %d articles..." % output_counts['retrieved-articles'])
 
 import time
 t0    = time.time()
-docs  = sobj.getDocuments(QUERY_STR, fq = FQ_STR)
+docs  = wglr.solr.getDocuments(QUERY_STR, fq = FQ_STR)
 test_time = time.time() - t0
 print("Loading time:  %0.3fs" % test_time)
 
@@ -64,13 +72,13 @@ ids_q = 'id: (' + ids_qclause + ')'
 
 output_counts = {}
 
-output_counts['retrieved-articles'] = sobj.getResultsFound(ids_q)
+output_counts['retrieved-articles'] = wglr.solr.getResultsFound(ids_q)
 
 print("Retrieving %d articles..." % output_counts['retrieved-articles'])
 
 import time
 t0    = time.time()
-docs  = sobj.getDocuments(ids_q)
+docs  = wglr.solr.getDocuments(ids_q)
 test_time = time.time() - t0
 print("Loading time:  %0.3fs" % test_time)
 
