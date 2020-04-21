@@ -39,17 +39,17 @@ FQ_STR = 'Wisconsin AND boycott'
 
 print wglr.test_solr(QUERY_STR, FQ_STR)
 
-sys.exit()
+#sys.exit()
 
 output_counts = {}
 
-output_counts['retrieved-articles'] = sobj.getResultsFound(QUERY_STR, FQ_STR)
+output_counts['retrieved-articles'] = wglr.solr.getResultsFound(QUERY_STR, FQ_STR)
 
 print("Retrieving %d articles..." % output_counts['retrieved-articles'])
 
 import time
 t0    = time.time()
-docs  = sobj.getDocuments(QUERY_STR, fq = FQ_STR)
+docs  = wglr.solr.getDocuments(QUERY_STR, fq = FQ_STR)
 test_time = time.time() - t0
 print("Loading time:  %0.3fs" % test_time)
 
@@ -72,13 +72,13 @@ ids_q = 'id: (' + ids_qclause + ')'
 
 output_counts = {}
 
-output_counts['retrieved-articles'] = sobj.getResultsFound(ids_q)
+output_counts['retrieved-articles'] = wglr.solr.getResultsFound(ids_q)
 
 print("Retrieving %d articles..." % output_counts['retrieved-articles'])
 
 import time
 t0    = time.time()
-docs  = sobj.getDocuments(ids_q)
+docs  = wglr.solr.getDocuments(ids_q)
 test_time = time.time() - t0
 print("Loading time:  %0.3fs" % test_time)
 
