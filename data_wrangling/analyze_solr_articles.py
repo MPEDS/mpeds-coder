@@ -5,9 +5,8 @@ import pandas as pd
 import sqlalchemy
 import sqlalchemy.orm
 
-import config
-import data_wrangling.solr
-import models
+from context import config
+import solr
 
 ## MySQL setup
 mysql_engine = sqlalchemy.create_engine(
@@ -20,7 +19,7 @@ mysql_engine = sqlalchemy.create_engine(
     convert_unicode=True)
 
 ## SOLR setup
-sobj = data_wrangling.solr.Solr()
+sobj = solr.Solr()
 sobj.setSolrURL('%s/select' % config.SOLR_ADDR)
 
 ## Crossover query
