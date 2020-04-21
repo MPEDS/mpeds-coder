@@ -28,7 +28,7 @@ solr_url = '%s/select' % config.SOLR_ADDR
 wglr.set_solr(solr_url)
 
 ### MySQL testing
-print wglr.test_db(mysql_engine)
+print wglr.get_db_test(mysql_engine)
 
 ## SOLR testing
 #SEARCH_STR = 'boycott* "press conference" "news conference" (protest* AND NOT protestant*) strik* rally ralli* riot* sit-in occupation mobiliz* blockage demonstrat* marchi* marche*'
@@ -37,7 +37,7 @@ QUERY_STR = 'PUBLICATION:("Associated Press Worldstream, English Service" OR "Ne
         '"Los Angeles Times/Washington Post Newswire Service" OR "Washington Post/Bloomberg Newswire Service")'
 FQ_STR = 'Wisconsin AND boycott'
 
-print wglr.test_solr(QUERY_STR, FQ_STR)
+print wglr.run_solr_test(QUERY_STR, FQ_STR)
 
 #sys.exit()
 

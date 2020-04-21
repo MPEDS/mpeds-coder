@@ -14,11 +14,11 @@ class Wrangler:
         self.solr = solr.Solr()
         self.solr.setSolrURL(url)
 
-    def test_db(self, con):
+    def get_db_test(self, con):
         user_df = pd.read_sql_table("user", con=con)
         return user_df
 
-    def test_solr(self, query_str, fq_str = None):
+    def run_solr_test(self, query_str, fq_str = None):
         retrieved_articles = self.solr.getResultsFound(query_str, fq_str)
         print("Retrieving %d articles..." % retrieved_articles)
 
