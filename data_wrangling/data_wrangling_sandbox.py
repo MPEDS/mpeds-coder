@@ -4,12 +4,12 @@ import pandas as pd
 import sqlalchemy
 import sqlalchemy.orm
 
-import config
-import data_wrangling.solr
-import data_wrangling.wrangler
-import models
+from context import config
+import solr
+import wrangler
+#import models
 
-wglr = data_wrangling.wrangler.Wrangler()
+wglr = wrangler.Wrangler()
 
 ## MySQL setup
 mysql_engine = sqlalchemy.create_engine(
