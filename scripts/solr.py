@@ -16,6 +16,15 @@ class Solr:
         self.solr_url = url
 
 
+    def _getDocumentsFromIDChunk(self, ids):
+        ids_qclause = '"' + '" OR "'.join(ids) + '"'
+        ids_q = 'id: (' + ids_qclause + ')'
+        
+        docs  = self.getDocuments(ids_q)
+
+        return docs
+
+
     def buildSolrQuery(self, q_dict):
         ''' Build a query for a Solr request. '''
         q = []
@@ -93,8 +102,21 @@ class Solr:
 
             articles.extend(res['response']['docs'])
 
-            if i % 1000 == 0:
+            if i % 1000 == 0 and i > 0:
                 print('%d documents collected.' % i)
 
         return articles
+
+    def getDocumentsFromIDs(self, ids, maxclauses=1024):
+        # Chunk trick from https://stackoverflow.com/questions/312443/how-do-you-split-a-list-into-evenly-sized-chunks
+        id_chunks = [ids[i:i + maxclauses] for i
+                     in xrange(0, len(ids), maxclauses)]
+
+        docs = list()
+        # NB: making copies of this list will use up memory fast!
+        for i in range(len(id_chunks)):
+            print("### Chunk %d of %d" % (i + 1, len(id_chunks)))
+            docs.extend(self._getDocumentsFromIDChunk(id_chunks[i]))
+        
+        return docs
 
