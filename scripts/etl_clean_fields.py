@@ -50,13 +50,17 @@ etl_df.to_sql('temp_etl_table',
               dtype={'id': sqlalchemy.types.String(255),
                      'PUBLICATION': sqlalchemy.types.String(511),
                      'DOCSOURCE': sqlalchemy.types.String(511)})
-sys.exit()
+
 ## Update canonical table with new data
 updatecleaned = sqlalchemy.sql.text(
-    'UPDATE article_metadata AS new '
-        'INNER JOIN temp_etl_table AS old '
-        'ON new')
+    'UPDATE article_metadata AS dest'
+        ' LEFT JOIN temp_etl_table AS source'
+        ' ON dest.db_id = source.id'
+        ' SET dest.publication = source.PUBLICATION'
+        ', dest.source_description = source.DOCSOURCE')
+mysql_engine.execute(updatecleaned)
 
 ## Clean up
 droptemp = sqlalchemy.sql.text('DROP TABLE temp_etl_table')
 mysql_engine.execute(droptemp)
+
