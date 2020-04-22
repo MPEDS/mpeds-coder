@@ -21,15 +21,26 @@ mysql_engine = sqlalchemy.create_engine(
 sobj = solr.Solr()
 sobj.setSolrURL('%s/select' % config.SOLR_ADDR)
 
-am_id_df = pd.read_sql("SELECT db_id FROM article_metadata", con=mysql_engine)
+## Get article IDs
+am_id_df = pd.read_sql('SELECT db_id FROM article_metadata', con=mysql_engine)
 ids = am_id_df['db_id'].tolist()
 
+## Query SOLR for IDs
 docs = sobj.getDocumentsFromIDs(ids)
 solr_df = pd.DataFrame(docs)
 
+## Trim dataframe
 etl_df = (solr_df
-          .filter(['id', 'PUBLICATION', 'DOCSOURCE'])
-          )
+          .filter(['id', 'PUBLICATION', 'DOCSOURCE']))
 
-print etl_df
+## Write temporary DB table
+etl_df.to_sql('temp_etl_table',
+              mysql_engine,
+              if_exists='replace',
+              dtype={'id': sqlalchemy.types.String(255),
+                     'PUBLICATION': sqlalchemy.types.String(511),
+                     'DOCSOURCE': sqlalchemy.types.String(511)})
 
+## Clean up
+dropquery = sqlalchemy.sql.text('DROP TABLE temp_etl_table')
+mysql_engine.execute(dropquery)
