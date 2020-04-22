@@ -33,6 +33,16 @@ solr_df = pd.DataFrame(docs)
 etl_df = (solr_df
           .filter(['id', 'PUBLICATION', 'DOCSOURCE']))
 
+## Test for duplicate IDs
+#### Put in fake dupe to test
+#etl_df.iloc[5]['id'] = etl_df.iloc[6]['id']
+
+etl_df = (etl_df
+          .assign(dupe=etl_df['id'].duplicated())
+          )
+if not etl_df.query('dupe == True').empty:
+    sys.exit("Duplicate SOLR IDs found.  Aborting.")
+
 ## Write temporary DB table
 etl_df.to_sql('temp_etl_table',
               mysql_engine,
@@ -40,7 +50,13 @@ etl_df.to_sql('temp_etl_table',
               dtype={'id': sqlalchemy.types.String(255),
                      'PUBLICATION': sqlalchemy.types.String(511),
                      'DOCSOURCE': sqlalchemy.types.String(511)})
+sys.exit()
+## Update canonical table with new data
+updatecleaned = sqlalchemy.sql.text(
+    'UPDATE article_metadata AS new '
+        'INNER JOIN temp_etl_table AS old '
+        'ON new')
 
 ## Clean up
-dropquery = sqlalchemy.sql.text('DROP TABLE temp_etl_table')
-mysql_engine.execute(dropquery)
+droptemp = sqlalchemy.sql.text('DROP TABLE temp_etl_table')
+mysql_engine.execute(droptemp)
