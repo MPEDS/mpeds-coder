@@ -269,6 +269,9 @@ def prepText(article):
             if p0 == paras[1]:
                 del paras[0]
 
+    ## remove HTML from every paragraph
+    paras = [re.sub(r'<[^>]*>', '', x) for x in paras]
+             
     ## paste together paragraphs, give them an ID
     all_paras = ""
     for i, text in enumerate(paras):
