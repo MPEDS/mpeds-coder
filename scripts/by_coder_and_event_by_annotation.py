@@ -18,9 +18,15 @@ mysql_engine = sqlalchemy.create_engine(
         'utf8'), 
     convert_unicode=True)
 
-query = (database
+coder_event_q = (database
 				 .db_session
-         .query(models.CodeEventCreator, models.ArticleMetadata)
-         .join(models.ArticleMetadata)
+         .query(models.CodeEventCreator)
          )
-print pd.read_sql_query(query.statement, database.db_session.connection())
+eventdf = pd.read_sql_query(coder_event_q.statement, 
+                            coder_event_q.session.connection())
+print eventdf
+
+coder_article_q = (database
+                   .db_session
+                   .query(models.ArticleMetadata)
+                   )
