@@ -22,11 +22,18 @@ coder_event_q = (database
 				 .db_session
          .query(models.CodeEventCreator)
          )
-eventdf = pd.read_sql_query(coder_event_q.statement, 
-                            coder_event_q.session.connection())
-print eventdf
+eventdf = (pd
+           .read_sql_query(coder_event_q.statement, 
+                           coder_event_q.session.connection())
+           )
 
 coder_article_q = (database
                    .db_session
-                   .query(models.ArticleMetadata)
+                   .query(models.CoderArticleAnnotation)
                    )
+articledf = pd.read_sql_query(coder_article_q.statement, 
+                            coder_article_q.session.connection())
+
+print eventdf
+print articledf
+
