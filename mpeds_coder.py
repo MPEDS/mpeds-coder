@@ -118,7 +118,7 @@ vars.extend(v3[:])
 sv = ['comments', 'protest', 'multi', 'nous', 'ignore']
 
 ## yaml for yes/no variables
-yes_no_vars = yaml.load(open(app.config['WD'] + '/yes-no.yml', 'r'))
+yes_no_vars = yaml.load(open(app.config['WD'] + '/yes-no.yaml', 'r'))
 
 ## mark the single-valued items
 event_creator_single_value = ['article-desc', 'desc', 'start-date', 'end-date', 
