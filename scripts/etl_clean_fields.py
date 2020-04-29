@@ -24,7 +24,7 @@ sobj.setSolrURL('%s/select' % config.SOLR_ADDR)
 ## Get article IDs
 am_id_df = pd.read_sql('SELECT db_id FROM article_metadata', con=mysql_engine)
 am_id_df = (am_id_df
-            .assign(dupe=am_id_df['db_id'].duplicated(keep='first'))
+            .assign(dupe=am_id_df['db_id'].duplicated())
             .query('dupe == False')
             )
 ids = am_id_df['db_id'].tolist()
@@ -61,7 +61,9 @@ updatecleaned = sqlalchemy.sql.text(
         ' LEFT JOIN temp_etl_table AS source'
         ' ON dest.db_id = source.id'
         ' SET dest.publication = source.PUBLICATION'
-        ', dest.source_description = source.DOCSOURCE')
+        ', dest.source_description = source.DOCSOURCE'
+        ' WHERE dest.publication IS NULL'
+        ' AND dest.source_description IS NULL')
 mysql_engine.execute(updatecleaned)
 
 ## Clean up
