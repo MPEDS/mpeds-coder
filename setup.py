@@ -87,11 +87,10 @@ def addQueueExample():
 
 def main():
 	init_db()
-	addArticles('/home/ubuntu/article-metadata/black-newspapers-protest-wisconsin-dated-test.csv', 'black-newspapers')	
+	addArticles(config.DOC_ROOT + config.DOC_FILE, config.DOC_DBNAME)	
 	# addUsersExample()
 	# addQueueExample()
 	pass
-
 
 if __name__ == '__main__':
 	main()
