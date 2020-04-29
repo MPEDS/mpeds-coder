@@ -134,7 +134,7 @@ vars.extend(v3[:])
 sv = ['comments', 'protest', 'multi', 'nous', 'ignore']
 
 ## yaml for yes/no variables
-yes_no_vars = yaml.load(open(app.config['WD'] + '/yes-no.yml', 'r'))
+yes_no_vars = yaml.load(open(app.config['WD'] + '/yes-no.yaml', 'r'))
 
 ## yaml for states/provinces/territories
 state_and_territory_vals = ordered_load(open(app.config['WD'] + '/states.yaml', 'r'))
@@ -292,6 +292,9 @@ def prepText(article):
             if p0 == paras[1]:
                 del paras[0]
 
+    ## remove HTML from every paragraph
+    paras = [re.sub(r'<[^>]*>', '', x) for x in paras]
+             
     ## paste together paragraphs, give them an ID
     all_paras = ""
     for i, text in enumerate(paras):
