@@ -36,7 +36,11 @@ def addArticles(filename, db_name):
 			db_id = row[1]
 			if title == 'TITLE':
 				continue
-			articles.append( ArticleMetadata(filename = db_id, db_id = db_id, title = title, db_name = db_name) )
+			if len(row) > 2:
+				pub_date = row[2]
+			else:
+				pub_date = None
+			articles.append( ArticleMetadata(filename = db_id, db_id = db_id, title = title, db_name = db_name, pub_date = pub_date) )
 
 	db_session.add_all(articles)
 	db_session.commit()
@@ -87,7 +91,6 @@ def main():
 	# addUsersExample()
 	# addQueueExample()
 	pass
-
 
 if __name__ == '__main__':
 	main()
