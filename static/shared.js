@@ -299,6 +299,7 @@ var selectCheckbox = function(e) {
 }
 
 /* Adds or deletes values for each variable based on radio buttons selected. */
+/* Also handles select controls */
 var selectRadio = function(e) {
   var el       = $(e.target);
   var aid      = $(".article").attr("id").split("_")[1];  
@@ -325,7 +326,7 @@ var selectRadio = function(e) {
   });
 
   req.fail(function(e) {
-    $("#flash-error").text("Error changing radio button.");
+    $("#flash-error").text("Error changing radio button or drop-down.");
     $("#flash-error").show();
   });
 }
