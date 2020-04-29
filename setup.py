@@ -87,7 +87,7 @@ def addQueueExample():
 
 def main():
 	init_db()
-	addArticles('/home/ubuntu/article-metadata/mpeds_ec_uncoded_articles_2020-02-12-19-04-14_dated.csv', 'black-newspapers')	
+	addArticles(config.DOC_ROOT + config.DOC_FILE, config.DOC_DBNAME)	
 	# addUsersExample()
 	# addQueueExample()
 	pass
