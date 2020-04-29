@@ -61,7 +61,9 @@ updatecleaned = sqlalchemy.sql.text(
         ' LEFT JOIN temp_etl_table AS source'
         ' ON dest.db_id = source.id'
         ' SET dest.publication = source.PUBLICATION'
-        ', dest.source_description = source.DOCSOURCE')
+        ', dest.source_description = source.DOCSOURCE'
+        ' WHERE dest.publication IS NULL'
+        ' AND dest.source_description IS NULL')
 mysql_engine.execute(updatecleaned)
 
 ## Clean up
