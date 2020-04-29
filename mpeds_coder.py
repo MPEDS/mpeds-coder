@@ -55,10 +55,8 @@ from sqlite3 import dbapi2 as sqlite3
 
 ## app-specific
 from database import db_session
-
-from models import ArticleMetadata, ArticleQueue, CoderArticleAnnotation, \
-CodeFirstPass, CodeSecondPass, CodeEventCreator, \
-Event, EventCreatorQueue, SecondPassQueue, User
+from models import ArticleMetadata, ArticleQueue, CodeFirstPass, CodeSecondPass, CodeEventCreator, \
+    Event, EventCreatorQueue, SecondPassQueue, User
 
 # create our application
 app = Flask(__name__)
@@ -1168,108 +1166,6 @@ def generateCoderAudit():
 ##### Internal calls
 #####
 
-@app.route('/_add_article_code/<pn>')
-@login_required
-def addArticleCode(pn):
-    """ Adds a record to article coding table. """
-    aid  = int(request.args.get('article'))
-    var  = request.args.get('variable')
-    val  = request.args.get('value')
-    text = request.args.get('text')
-    aqs  = []
-    now  = dt.datetime.now(tz = central).replace(tzinfo = None)
-
-    if pn == 'ec':
-        model = CoderArticleAnnotation
-        p     = CoderArticleAnnotation(aid, var, val, current_user.id, text)
-
-        for aq in db_session.query(EventCreatorQueue).filter_by(article_id = aid, coder_id = current_user.id).all():
-            aq.coded_dt = now
-            aqs.append(aq)
-    else:
-        return make_response("Invalid model", 404)
-
-    ## variables which only have one value per article
-    if var in sv:
-        a = db_session.query(model).filter_by(
-            article_id = aid,
-            variable   = var,
-            coder_id   = current_user.id
-        ).all()
-
-        ## if there's more then one, delete them
-        if len(a) > 0:
-            for o in a:
-                db_session.delete(o);
-
-            db_session.commit()
-
-    db_session.add(p)
-    db_session.add_all(aqs)
-    db_session.commit()
-    return make_response("", 200)
-
-
-@app.route('/_del_article_code/<pn>')
-@login_required
-def delArticleCode(pn):
-    """ Deletes a record from article coding table. """
-    article  = request.args.get('article')
-    variable = request.args.get('variable')
-    value    = request.args.get('value')
-
-    if pn == 'ec':
-        a = db_session.query(CoderArticleAnnotation).filter_by(
-            article_id = article,
-            variable   = variable,
-            value      = value,
-            coder_id   = current_user.id
-        ).all()
-    else:
-        return make_response("Invalid model", 404)
-
-    if len(a) > 0:
-        for o in a:
-            db_session.delete(o)
-
-        db_session.commit()
-
-        return jsonify(result={"status": 200})
-    else:
-        return make_response("", 404)
-
-
-@app.route('/_change_article_code/<pn>')
-@login_required
-def changeArticleCode(pn):
-    """ 
-        Changes a radio button or text input/area by removing all prior
-        values, adds one new one.
-    """
-    article  = request.args.get('article')
-    variable = request.args.get('variable')
-    value    = request.args.get('value')
-
-    ## delete all prior values
-    a = db_session.query(CoderArticleAnnotation).filter_by(
-        article_id = article,
-        variable   = variable,
-        coder_id   = current_user.id
-    ).all()
-
-    for o in a:
-        db_session.delete(o)
-    db_session.commit()
-
-    ## add new value
-    ac = CoderArticleAnnotation(article, variable, value, current_user.id)
-
-    db_session.add(ac)
-    db_session.commit()
-
-    return jsonify(result={"status": 200})
-
-
 @app.route('/_add_code/<pn>')
 @login_required
 def addCode(pn):
@@ -1344,6 +1240,32 @@ def addCode(pn):
     db_session.add_all(aqs)
     db_session.commit()
     return make_response("", 200)
+
+
+@app.route('/_del_event')
+@login_required
+def delEvent():
+    """ Delete an event. """
+    # if current_user.authlevel < 2:
+    #     return redirect(url_for('index'))
+
+    eid = int(request.args.get('event'))
+    pn  = request.args.get('pn');
+
+    model = None
+    if pn == '2':
+        model = CodeSecondPass
+    elif pn == 'ec':
+        model = CodeEventCreator
+    else:
+        return make_response("Invalid model.", 404)
+
+    db_session.query(model).filter_by(event_id = eid).delete()
+    db_session.query(Event).filter_by(id = eid).delete()
+
+    db_session.commit()
+
+    return make_response("Delete succeeded.", 200)
 
 
 @app.route('/_del_code/<pn>')
@@ -1425,32 +1347,6 @@ def changeCode(pn):
     db_session.commit()
 
     return jsonify(result={"status": 200})
-
-
-@app.route('/_del_event')
-@login_required
-def delEvent():
-    """ Delete an event. """
-    # if current_user.authlevel < 2:
-    #     return redirect(url_for('index'))
-
-    eid = int(request.args.get('event'))
-    pn  = request.args.get('pn');
-
-    model = None
-    if pn == '2':
-        model = CodeSecondPass
-    elif pn == 'ec':
-        model = CodeEventCreator
-    else:
-        return make_response("Invalid model.", 404)
-
-    db_session.query(model).filter_by(event_id = eid).delete()
-    db_session.query(Event).filter_by(id = eid).delete()
-
-    db_session.commit()
-
-    return make_response("Delete succeeded.", 200)
 
 
 @app.route('/_mark_ec_done')
@@ -1554,11 +1450,10 @@ def getEvents():
         elif pn =='ec':
             if len(rvar['desc']) > 0 and len(rvar['desc'][0]) > 0:
                 ev['repr'] = ", ".join(rvar['desc'])
-                ## No longer necessary with article-level description
-            #elif len(rvar['article-desc']) > 0 and len(rvar['article-desc'][0]) > 0:
-                #ev['repr'] = "(no event description): " + ", ".join(rvar['article-desc'])
+            elif len(rvar['article-desc']) > 0 and len(rvar['article-desc'][0]) > 0:
+                ev['repr'] = "(no event description): " + ", ".join(rvar['article-desc'])
             else:
-                ev['repr'] = "(no event description)"
+                ev['repr'] = "(no article description)"
 
         evs.append(ev)
 
@@ -1611,37 +1506,6 @@ def getCodes():
 
     return jsonify(cd)
 
-
-@app.route('/_load_article_annotation_block')
-@login_required
-def modifyArticleAnnotations():
-    aid  = int(request.args.get('article_id'))
-    pn   = request.args.get('pn')
-    curr = {}
-
-    model = None
-    if pn == 'ec':
-        model = CoderArticleAnnotation
-        template = 'article-annotation-block.html'
-    else:
-        return make_response("Not a valid model.", 404)
-
-    ## get the current values
-    for annotation in db_session.query(model).filter_by(article_id = aid, coder_id = current_user.id).all():
-        if annotation.variable in sv or annotation.variable in event_creator_single_value:
-            curr[annotation.variable] = annotation.value
-        else:
-            ## stash in array
-            if annotation.variable not in curr:
-                curr[annotation.variable] = []
-
-            ## loads the items which do not have text, which means
-            ## everything but text selects
-            if annotation.text is None:
-                curr[annotation.variable].append(annotation.value)
-
-    return render_template(template, 
-            curr = curr)
 
 @app.route('/_load_event_block')
 @login_required
