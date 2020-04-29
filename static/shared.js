@@ -253,7 +253,7 @@ var selectCheckbox = function(e) {
   });
 }
 
-/* Adds or deletes values for each variable based on radio buttons selected. */
+/* Adds or deletes values for each variable based free-form text. */
 /* Also handles select controls */
 var selectRadio = function(e) {
   var el       = $(e.target);
