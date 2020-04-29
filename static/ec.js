@@ -294,8 +294,8 @@ $(function(){
   // add event listener
   $('#add-event').click(modifyEvent);
 
-  // test code for article block
-  modifyArticleAnnotations()
+  // We don't need this for the campus event project.
+  // modifyArticleAnnotations()
 
   // mark done handler
   $('#mark-done').each(function() {
