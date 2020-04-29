@@ -286,7 +286,7 @@ var selectRadio = function(e) {
   });
 }
 
-/* Adds or deletes values for each variable based on radio buttons selected. */
+/* Adds or deletes values for free-form text. */
 var storeText = function(e) {
   var el       = $(e.target);
   var aid      = $(".article").attr("id").split("_")[1];  

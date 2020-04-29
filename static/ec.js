@@ -62,11 +62,12 @@ var modifyEvent = function(e) {
     // listeners for select drop-downs
     $('#basicinfo_block select').change(selectRadio);
 
-    // listeners for text fields
-    // $('#basicinfo_block :date').blur(storeText); // doesn't work in Firefox :(
-
+    // listeners for text fields on basic info block
     $('#basicinfo_block :text').blur(storeText);
     $('#basicinfo_block textarea').blur(storeText);
+
+    // listener for actors-freeform
+    $('#textselect_block textarea').blur(storeText);
 
     // listeners for adding or deleting checkboxes
     $(':checkbox').change(selectCheckbox);
