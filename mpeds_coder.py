@@ -122,7 +122,7 @@ yes_no_vars = yaml.load(open(app.config['WD'] + '/yes-no.yaml', 'r'))
 
 ## mark the single-valued items
 event_creator_single_value = ['article-desc', 'desc', 'start-date', 'end-date', 
-    'location', 'duration', 'date-est']
+                              'location', 'duration', 'date-est', 'actors-freeform']
 
 event_creator_single_value.extend([[x[0] for x in v] for k, v in yes_no_vars.iteritems()])
 
