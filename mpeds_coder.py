@@ -120,7 +120,7 @@ vars.extend(v3[:])
 sv = ['comments', 'protest', 'multi', 'nous', 'ignore']
 
 ## yaml for yes/no variables
-yes_no_vars = yaml.load(open(app.config['WD'] + '/yes-no.yml', 'r'))
+yes_no_vars = yaml.load(open(app.config['WD'] + '/yes-no.yaml', 'r'))
 
 ## mark the single-valued items
 event_creator_single_value = ['article-desc', 'desc', 'start-date', 'end-date', 
@@ -271,6 +271,9 @@ def prepText(article):
             if p0 == paras[1]:
                 del paras[0]
 
+    ## remove HTML from every paragraph
+    paras = [re.sub(r'<[^>]*>', '', x) for x in paras]
+             
     ## paste together paragraphs, give them an ID
     all_paras = ""
     for i, text in enumerate(paras):
@@ -392,14 +395,10 @@ def load_user(id):
 
 ## views
 @app.route('/')
+@app.route('/index')
 @login_required
 def index():
     return render_template("index.html")
-
-@app.route('/codebook')
-@login_required
-def codebook():
-    return render_template("codebook.html")
 
 #####
 ##### Coding pages
