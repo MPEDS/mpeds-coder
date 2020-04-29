@@ -24,7 +24,7 @@ sobj.setSolrURL('%s/select' % config.SOLR_ADDR)
 ## Get article IDs
 am_id_df = pd.read_sql('SELECT db_id FROM article_metadata', con=mysql_engine)
 am_id_df = (am_id_df
-            .assign(dupe=am_id_df['db_id'].duplicated(keep='first'))
+            .assign(dupe=am_id_df['db_id'].duplicated())
             .query('dupe == False')
             )
 ids = am_id_df['db_id'].tolist()
