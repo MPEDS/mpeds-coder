@@ -1,4 +1,4 @@
-from sqlalchemy import Boolean, Column, DateTime, Integer, String, Unicode, ForeignKey, UniqueConstraint, Text
+from sqlalchemy import Boolean, Column, DateTime, Integer, String, Unicode, ForeignKey, UniqueConstraint, Text, Date
 from sqlalchemy.orm import relationship, backref
 from flask_login import UserMixin
 from database import Base
@@ -169,16 +169,18 @@ class ArticleMetadata(Base):
     db_name   = Column(String(64))
     db_id     = Column(String(255))
     filename  = Column(String(255), nullable = False)
+    pub_date  = Column(Date)
 
     firsts  = relationship("CodeFirstPass",  backref = backref("article_metadata", order_by = id))
     seconds = relationship("CodeSecondPass", backref = backref("article_metadata", order_by = id))
     queue   = relationship("ArticleQueue",   backref = backref("article_metadata", order_by = id))
 
-    def __init__(self, filename, db_name = None, db_id = None, title = None):
+    def __init__(self, filename, db_name = None, db_id = None, title = None, pub_date = None):
         self.filename  = filename
         self.db_name   = db_name
         self.db_id     = db_id
         self.title     = title
+        self.pub_date  = pub_date
 
     def __repr__(self):
         return '<ArticleMetadata %r (%r)>' % (self.title, self.id)
