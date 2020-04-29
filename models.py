@@ -1,4 +1,4 @@
-from sqlalchemy import Boolean, Column, DateTime, Integer, String, Unicode, ForeignKey, UniqueConstraint, Text, Date
+from sqlalchemy import Boolean, Column, DateTime, Integer, String, Unicode, ForeignKey, UniqueConstraint, Text
 from sqlalchemy.orm import relationship, backref
 from flask_login import UserMixin
 from database import Base
@@ -7,27 +7,6 @@ import pytz
 from pytz import timezone
 
 central = timezone('US/Central')
-
-class CoderArticleAnnotation(Base):
-    __tablename__ = 'coder_article_annotation'
-    id         = Column(Integer, primary_key=True)
-    article_id = Column(Integer, ForeignKey('article_metadata.id'), nullable = False)
-    variable   = Column(String(100), nullable = False)
-    value      = Column(String(2000), nullable = False)
-    text       = Column(Unicode(2000))
-    coder_id   = Column(Integer, ForeignKey('user.id'))
-    timestamp  = Column(DateTime)
-
-    def __init__(self, article_id, variable, value, coder_id, text = None):
-        self.article_id = article_id
-        self.variable   = variable
-        self.value      = value
-        self.text       = text
-        self.coder_id   = coder_id
-        self.timestamp  = dt.datetime.now(tz = central).replace(tzinfo = None)
-
-    def __repr__(self):
-        return '<CoderArticleAnnotation %r>' % (self.id)
 
 class CodeFirstPass(Base):
     __tablename__ = 'coder_first_pass'
@@ -169,18 +148,16 @@ class ArticleMetadata(Base):
     db_name   = Column(String(64))
     db_id     = Column(String(255))
     filename  = Column(String(255), nullable = False)
-    pub_date  = Column(Date)
 
     firsts  = relationship("CodeFirstPass",  backref = backref("article_metadata", order_by = id))
     seconds = relationship("CodeSecondPass", backref = backref("article_metadata", order_by = id))
     queue   = relationship("ArticleQueue",   backref = backref("article_metadata", order_by = id))
 
-    def __init__(self, filename, db_name = None, db_id = None, title = None, pub_date = None):
+    def __init__(self, filename, db_name = None, db_id = None, title = None):
         self.filename  = filename
         self.db_name   = db_name
         self.db_id     = db_id
         self.title     = title
-        self.pub_date  = pub_date
 
     def __repr__(self):
         return '<ArticleMetadata %r (%r)>' % (self.title, self.id)
