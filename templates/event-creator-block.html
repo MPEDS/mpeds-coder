@@ -23,6 +23,9 @@
     <div class="tab-pane" id="basicinfo_block">
       <form> 
         <div class="form-group">
+          <label for="article-desc">Provide a short description of this article.</label>
+          <textarea class="form-control form-control-sm" name="article-desc" id="info_article-desc">{{ curr['article-desc']|safe }}</textarea>
+	  
           <label for="desc">Provide a short description of this event.</label>
           <textarea class="form-control form-control-sm" name="desc" id="info_desc">{{ curr['desc']|safe }}</textarea>
 	  
@@ -104,6 +107,11 @@
         <div id="list_{{ k }}" class="varlist"></div>
       </div>
       {% endfor %}
+
+      <label for="actors-freeform">Actors Freeform</label>
+      <textarea class="form-control form-control-sm" name="actors-freeform"
+		id="info_actors-freeform"
+		placeholder="e.g. Name1 / Title1 / Institution1">{{ curr['actors-freeform']|safe }}</textarea>
     </div> <!-- tab-pane --> 
 
     <div class="tab-pane" id="preset_block">
