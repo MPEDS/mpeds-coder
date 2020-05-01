@@ -168,6 +168,11 @@ div.vartitle {
 	color: #777;
 }
 
+.preset-scrollable {
+    height: 350px;
+    overflow-y:auto;
+}
+
 label.form-check-label {
 	color: #777;
 	font-weight: normal;
