@@ -55,9 +55,10 @@ e_time = (eventdf
           .dropna()
           .groupby(['coder_id', 'article_id', 'event_id'])
           .agg(['min', 'max'])
-          #.set_index(['coder_id', 'article_id', 'event_id', 'variable'])
-          #.unstack()
           )
+
+## Merge event tables
+event_wide = e_val.join([e_text, e_time])
 
 print "***** Event df *****"
 print eventdf
@@ -69,3 +70,5 @@ print "***** Event text df *****"
 print e_text
 print "***** Event time df *****"
 print e_time
+print "***** Event merged wide df *****"
+print event_wide
