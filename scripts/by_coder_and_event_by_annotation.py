@@ -34,6 +34,19 @@ coder_article_q = (database
 articledf = pd.read_sql_query(coder_article_q.statement, 
                             coder_article_q.session.connection())
 
-print eventdf
-print articledf
+e_val = (eventdf
+         .filter(['coder_id', 'article_id', 'event_id', 'variable', 'value'])
+         .dropna()
+         .assign(length=lambda x: x.value.astype("str").str.len())
+         .query('length > 0')
+         .drop('length', axis=1)
+         .set_index(['coder_id', 'article_id', 'event_id', 'variable'])
+         .unstack()
+         )
 
+print "***** Event df *****"
+print eventdf
+print "***** Article df *****"
+print articledf
+print "***** Event value df *****"
+print e_val
