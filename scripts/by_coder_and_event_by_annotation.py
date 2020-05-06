@@ -21,7 +21,7 @@ event_long = pd.read_sql_query(event_q.statement,
 
 u_q = (database
        .db_session
-       .query(models.User)
+       .query(models.User.id.label('coder_id'), models.User.username)
        )
 user = pd.read_sql_query(u_q.statement, 
                          # Old pandas fears real connections
@@ -128,14 +128,37 @@ ca_time = (ca_long
            .agg(['min', 'max'])
            )
 
-## Merge tables
-e_wide = e_val.join(e_text, how='outer').reset_index('event_id')
-ca_wide = ca_val.join(ca_text, how='outer')
-all_wide = ca_wide.join(e_wide, how='outer')
+## Merge events and rename columns
+e_wide = (e_val
+          .join(e_text, how='outer')
+          .join(e_time, how='outer')
+          .reset_index()
+          .swaplevel(0, 1, axis=1)
+          )
+e_wide.columns = ['event_' + '_'.join(col).strip('_') 
+                  for col in e_wide.columns.values]
+
+## Merge article annotations and rename columns
+ca_wide = (ca_val
+           .join(ca_text, how='outer')
+           .reset_index()
+           .swaplevel(0, 1, axis=1)
+           )
+ca_wide.columns = ['article_' + '_'.join(col).strip('_') 
+                  for col in ca_wide.columns.values]
+
+all_wide = (ca_wide
+            #.merge(e_wide, how='outer', 
+            #       on=['article_article_id', 'event_coder_id'])
+            #.reset_index()
+            #.merge(user, how='outer', left_on='coder_id', right_on='coder_id')
+            #.reset_index()
+            #.merge(am, how='outer', left_on='article_id', right_on='id')
+            )
 
 ## Clean up
-print '***** Event df *****'
-print event_long
+#print '***** Event df *****'
+#print event_long
 #print '***** Event value df *****'
 #print e_val
 #print '***** Event text df *****'
@@ -144,8 +167,8 @@ print event_long
 #print e_time
 print '***** Event merged wide df *****'
 print e_wide
-print '***** Article df *****'
-print ca_long
+#print '***** Article df *****'
+#print ca_long
 #print '***** Article value df *****'
 #print ca_val
 #print '***** Article text df *****'
@@ -154,6 +177,10 @@ print ca_long
 #print ca_time
 print '***** Article merged wide df *****'
 print ca_wide
+#print '***** Users *****'
+#print user
+#print '***** Article Metadata *****'
+#print am
 print '***** Grand unified wide df *****'
 print all_wide
 
