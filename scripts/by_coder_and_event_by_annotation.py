@@ -23,19 +23,19 @@ u_q = (database
        .db_session
        .query(models.User)
        )
-u_long = pd.read_sql_query(u_q.statement, 
-                           # Old pandas fears real connections
-                           #u_q.session.connection())
-                           u_q.session.get_bind())
+user = pd.read_sql_query(u_q.statement, 
+                         # Old pandas fears real connections
+                         #u_q.session.connection())
+                         u_q.session.get_bind())
 
 am_q = (database
         .db_session
         .query(models.ArticleMetadata)
         )
-am_long = pd.read_sql_query(am_q.statement, 
-                            # Old pandas fears real connections
-                            #am_q.session.connection())
-                            am_q.session.get_bind())
+am = pd.read_sql_query(am_q.statement, 
+                       # Old pandas fears real connections
+                       #am_q.session.connection())
+                       am_q.session.get_bind())
 
 ca_q = (database
         .db_session
@@ -49,11 +49,13 @@ ca_long = pd.read_sql_query(ca_q.statement,
 ## Number duplicated variables
 ## I can't figure out how to assign this in an ungrouped pipeline, alas
 event_long['varocc'] = (event_long
-                        .groupby(['coder_id', 'article_id', 'event_id', 'variable'])
+                        .groupby(['coder_id', 'article_id', 
+                                  'event_id', 'variable'])
                         .cumcount() + 1
                         )
 ca_long['varocc'] = (ca_long
-                     .groupby(['coder_id', 'article_id', 'variable'])
+                     .groupby(['coder_id', 'article_id', 
+                               'variable'])
                      .cumcount() + 1
                      )
 event_long = (event_long
