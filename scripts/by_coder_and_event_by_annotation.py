@@ -1,4 +1,5 @@
 import sys
+import datetime as dt
 
 import pandas as pd
 import sqlalchemy
@@ -108,8 +109,9 @@ a_time = (articledf
           )
 
 ## Merge tables
-event_wide = e_val.join(e_text, how='outer')
+event_wide = e_val.join(e_text, how='outer').reset_index('event_id')
 article_wide = a_val.join(a_text, how='outer')
+all_wide = article_wide.join(event_wide, how='outer')
 
 print '***** Event df *****'
 print eventdf
@@ -131,3 +133,9 @@ print articledf
 #print a_time
 print '***** Article merged wide df *****'
 print article_wide
+print '***** Grand unified wide df *****'
+print all_wide
+
+filename = '%s/exports/by_coder_and_event_by_annotation_%s.csv' % (config.WD, dt.datetime.now().strftime('%Y-%m-%d_%H%M%S'))
+
+all_wide.to_csv(filename)
