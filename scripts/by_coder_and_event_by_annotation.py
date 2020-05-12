@@ -1,3 +1,4 @@
+## Script to output wide-format CSV of content by coder and event by annotation
 import sys
 import datetime as dt
 
@@ -150,6 +151,16 @@ times_wide = (times
               )
 times_wide.columns = ['article_' + '_'.join(col).strip('_') 
                       for col in times_wide.columns.values]
+
+## Create df of counts by coder and article
+counts_by_coder_and_event = (
+    e_wide
+    .filter(['event_coder_id', 'event_article_id', 'event_event_id'])
+    .groupby(['event_coder_id', 'event_article_id'])
+    .agg(['count'])
+    .reset_index()
+    )
+counts_by_coder_and_event.columns = ['coder_id', 'article_id', 'events']
 
 ## Grand Unified Merge
 all_wide = (user
