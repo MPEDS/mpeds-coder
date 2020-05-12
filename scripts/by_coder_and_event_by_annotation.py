@@ -147,16 +147,6 @@ def genByCoderAndEventByAnnotation(
     times_wide.columns = ['article_' + '_'.join(col).strip('_') 
                           for col in times_wide.columns.values]
 
-    ## Create df of counts by coder and article
-    counts_by_coder_and_event = (
-        e_wide
-        .filter(['event_coder_id', 'event_article_id', 'event_event_id'])
-        .groupby(['event_coder_id', 'event_article_id'])
-        .agg(['count'])
-        .reset_index()
-        )
-    counts_by_coder_and_event.columns = ['coder_id', 'article_id', 'events']
-
     ## Grand Unified Merge
     all_wide = (user
                 .merge(ca_wide, how='outer', 
@@ -168,6 +158,7 @@ def genByCoderAndEventByAnnotation(
                        left_on=['coder_id', 'article_id'],
                        right_on=['event_coder_id', 'event_article_id'])
                 .drop(['event_coder_id', 'event_article_id'], axis=1)
+                .rename(columns={'event_event_id': 'event_id'})
                 .merge(am, how='left', left_on='article_id', right_on='id')
                 .drop(['id'], axis=1)
                 )
@@ -180,7 +171,18 @@ ting = genByCoderAndEventByAnnotation(
     coder_article_table=models.CoderArticleAnnotation,
     user_table=models.User,
     article_metadata_table=models.ArticleMetadata)
-print ting
+
+## Create df of counts by coder and article
+counts_by_coder_and_event = (
+    ting
+    .filter(['coder_id', 'article_id', 'event_id'])
+    .groupby(['coder_id', 'article_id'])
+    .agg(['count'])
+    .reset_index()
+    )
+counts_by_coder_and_event.columns = ['coder_id', 'article_id', 'events']
+
+print counts_by_coder_and_event
 
 filename = '%s/exports/by_coder_and_event_by_annotation_%s.csv' % (config.WD, dt.datetime.now().strftime('%Y-%m-%d_%H%M%S'))
 
