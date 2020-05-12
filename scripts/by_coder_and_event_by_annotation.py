@@ -162,7 +162,7 @@ all_wide = (user
                    left_on=['coder_id', 'article_id'],
                    right_on=['event_coder_id', 'event_article_id'])
             .drop(['event_coder_id', 'event_article_id'], axis=1)
-            .merge(am, how='outer', left_on='article_id', right_on='id')
+            .merge(am, how='left', left_on='article_id', right_on='id')
             .drop(['id'], axis=1)
             )
 
