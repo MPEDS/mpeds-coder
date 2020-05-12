@@ -92,13 +92,6 @@ e_text = (event_long
           .unstack()
           )
 
-e_time = (event_long
-          .filter(['coder_id', 'article_id', 'event_id', 'timestamp'])
-          .dropna()
-          .groupby(['coder_id', 'article_id', 'event_id'])
-          .agg(['min', 'max'])
-          )
-
 ca_val = (ca_long
           .filter(['coder_id', 'article_id', 'variable', 'value'])
           .dropna()
@@ -121,17 +114,28 @@ ca_text = (ca_long
            .unstack()
            )
 
-ca_time = (ca_long
-           .filter(['coder_id', 'article_id', 'timestamp'])
-           .dropna()
-           .groupby(['coder_id', 'article_id'])
-           .agg(['min', 'max'])
-           )
+## Create df with max and min timestamps from both levels
+ea_times = (event_long
+            .filter(['coder_id', 'article_id', 'timestamp'])
+            )
+
+ca_times = (ca_long
+            .filter(['coder_id', 'article_id', 'timestamp'])
+            )
+
+times = pd.concat([ea_times, ca_times])
+times_wide = (times
+              .dropna()
+              .groupby(['coder_id', 'article_id'])
+              .agg(['min', 'max'])
+              .swaplevel(0, 1, axis=1)
+              )
+times_wide.columns = ['article_' + '_'.join(col).strip('_') 
+                      for col in times_wide.columns.values]
 
 ## Merge events and rename columns
 e_wide = (e_val
           .join(e_text, how='outer')
-          .join(e_time, how='outer')
           .reset_index()
           .swaplevel(0, 1, axis=1)
           )
@@ -163,20 +167,16 @@ all_wide = (ca_wide
 #print e_val
 #print '***** Event text df *****'
 #print e_text
-#print '***** Event time df *****'
-#print e_time
-print '***** Event merged wide df *****'
-print e_wide
+#print '***** Event merged wide df *****'
+#print e_wide
 #print '***** Article df *****'
 #print ca_long
 #print '***** Article value df *****'
 #print ca_val
 #print '***** Article text df *****'
 #print ca_text
-#print '***** Article time df *****'
-#print ca_time
-print '***** Article merged wide df *****'
-print ca_wide
+#print '***** Article merged wide df *****'
+#print ca_wide
 #print '***** Users *****'
 #print user
 #print '***** Article Metadata *****'
