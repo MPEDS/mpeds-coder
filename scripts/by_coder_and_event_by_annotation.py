@@ -114,6 +114,24 @@ ca_text = (ca_long
            .unstack()
            )
 
+## Merge events and rename columns
+e_wide = (e_val
+          .join(e_text, how='outer')
+          .reset_index()
+          .swaplevel(0, 1, axis=1)
+          )
+e_wide.columns = ['event_' + '_'.join(col).strip('_') 
+                  for col in e_wide.columns.values]
+
+## Merge article annotations and rename columns
+ca_wide = (ca_val
+           .join(ca_text, how='outer')
+           .reset_index()
+           .swaplevel(0, 1, axis=1)
+           )
+ca_wide.columns = ['article_' + '_'.join(col).strip('_') 
+                  for col in ca_wide.columns.values]
+
 ## Create df with max and min timestamps from both levels
 ea_times = (event_long
             .filter(['coder_id', 'article_id', 'timestamp'])
@@ -133,54 +151,22 @@ times_wide = (times
 times_wide.columns = ['article_' + '_'.join(col).strip('_') 
                       for col in times_wide.columns.values]
 
-## Merge events and rename columns
-e_wide = (e_val
-          .join(e_text, how='outer')
-          .reset_index()
-          .swaplevel(0, 1, axis=1)
-          )
-e_wide.columns = ['event_' + '_'.join(col).strip('_') 
-                  for col in e_wide.columns.values]
-
-## Merge article annotations and rename columns
-ca_wide = (ca_val
-           .join(ca_text, how='outer')
-           .reset_index()
-           .swaplevel(0, 1, axis=1)
-           )
-ca_wide.columns = ['article_' + '_'.join(col).strip('_') 
-                  for col in ca_wide.columns.values]
-
-all_wide = (ca_wide
-            #.merge(e_wide, how='outer', 
-            #       on=['article_article_id', 'event_coder_id'])
-            #.reset_index()
-            #.merge(user, how='outer', left_on='coder_id', right_on='coder_id')
-            #.reset_index()
-            #.merge(am, how='outer', left_on='article_id', right_on='id')
+## Grand Unified Merge
+all_wide = (user
+            .merge(ca_wide, how='outer', 
+                   left_on=['coder_id'],
+                   right_on=['article_coder_id'])
+            .drop(['article_coder_id'], axis=1)
+            .rename(columns={'article_article_id': 'article_id'})
+            .merge(e_wide, how='outer', 
+                   left_on=['coder_id', 'article_id'],
+                   right_on=['event_coder_id', 'event_article_id'])
+            .drop(['event_coder_id', 'event_article_id'], axis=1)
+            .merge(am, how='outer', left_on='article_id', right_on='id')
+            .drop(['id'], axis=1)
             )
 
 ## Clean up
-#print '***** Event df *****'
-#print event_long
-#print '***** Event value df *****'
-#print e_val
-#print '***** Event text df *****'
-#print e_text
-#print '***** Event merged wide df *****'
-#print e_wide
-#print '***** Article df *****'
-#print ca_long
-#print '***** Article value df *****'
-#print ca_val
-#print '***** Article text df *****'
-#print ca_text
-#print '***** Article merged wide df *****'
-#print ca_wide
-#print '***** Users *****'
-#print user
-#print '***** Article Metadata *****'
-#print am
 print '***** Grand unified wide df *****'
 print all_wide
 
