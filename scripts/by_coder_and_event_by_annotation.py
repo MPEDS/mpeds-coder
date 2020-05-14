@@ -165,7 +165,7 @@ def genByCoderAndEventByAnnotation(
 
     return all_wide
 
-ting = genByCoderAndEventByAnnotation(
+export = genByCoderAndEventByAnnotation(
     session=database.db_session,
     coder_event_table=models.CodeEventCreator,
     coder_article_table=models.CoderArticleAnnotation,
@@ -174,7 +174,7 @@ ting = genByCoderAndEventByAnnotation(
 
 ## Create df of counts by coder and article
 counts_by_coder_and_event = (
-    ting
+    export
     .filter(['coder_id', 'article_id', 'event_id'])
     .groupby(['coder_id', 'article_id'])
     .agg(['count'])
@@ -186,4 +186,4 @@ print counts_by_coder_and_event
 
 filename = '%s/exports/by_coder_and_event_by_annotation_%s.csv' % (config.WD, dt.datetime.now().strftime('%Y-%m-%d_%H%M%S'))
 
-#all_wide.to_csv(filename)
+export.to_csv(filename)
