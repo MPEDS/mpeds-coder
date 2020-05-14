@@ -15,7 +15,7 @@ def unstackWithoutMissings(df, indexlist, valuecol):
              .filter(keepers)
              .dropna()
              # Next block should remove both empty strings and missings
-             .assign(length=lambda x: x[valuecol].astype('str').str.len())
+             .assign(length=lambda x: x[valuecol].astype('unicode').str.len())
              .query('length > 0')
              .drop('length', axis=1)
              .set_index(indexlist)
