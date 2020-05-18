@@ -182,8 +182,10 @@ counts_by_coder_and_event = (
     )
 counts_by_coder_and_event.columns = ['coder_id', 'article_id', 'events']
 
-print counts_by_coder_and_event
+#print counts_by_coder_and_event
 
 filename = '%s/exports/by_coder_and_event_by_annotation_%s.csv' % (config.WD, dt.datetime.now().strftime('%Y-%m-%d_%H%M%S'))
 
-export.to_csv(filename, index=False, encoding='utf8')
+print export.head()
+
+#export.to_csv(filename, index=False, encoding='utf8')
