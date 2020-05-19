@@ -27,7 +27,7 @@ def catDuplicatedVariables(df, groupbylist, valcollist):
     df = (df
           .filter(groupbylist + valcollist)
           .groupby(groupbylist)
-          .agg(lambda x: '|||'.join(x.astype('unicode')))
+          .agg(lambda x: '|||'.join(x.fillna('').astype('unicode')))
           .reset_index()
           )
     return df
@@ -208,6 +208,4 @@ counts_by_coder_and_event.columns = ['coder_id', 'article_id', 'events']
 
 filename = '%s/exports/by_coder_and_event_by_annotation_%s.csv' % (config.WD, dt.datetime.now().strftime('%Y-%m-%d_%H%M%S'))
 
-print export
-
-#export.to_csv(filename, index=False, encoding='utf8')
+export.to_csv(filename, index=False, encoding='utf8')
