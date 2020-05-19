@@ -23,6 +23,15 @@ def unstackWithoutMissings(df, indexlist, valuecol):
              )
     return widedf
 
+def catDuplicatedVariables(df, groupbylist, valcollist):
+    df = (df
+          .filter(groupbylist + valcollist)
+          .groupby(groupbylist)
+          .agg(lambda x: '|||'.join(x.fillna('').astype('unicode')))
+          .reset_index()
+          )
+    return df
+
 def numberDuplicatedVariables(df, groupbylist, varcol):
     ## I can't figure out how to assign this in an ungrouped pipeline, alas
     df['varocc'] = (df
@@ -76,37 +85,50 @@ def genByCoderAndEventByAnnotation(
                            #am_q.session.connection())
                            am_q.session.get_bind())
 
-    ## Number duplicated variables
-    event_long = numberDuplicatedVariables(
+#    ## Number duplicated variables
+#    event_long = numberDuplicatedVariables(
+#                     df=event_long,
+#                     groupbylist=['coder_id', 'article_id', 
+#                                 'event_id', 'variable'],
+#                     varcol='variable')
+#
+#    ca_long = numberDuplicatedVariables(
+#                     df=ca_long,
+#                     groupbylist=['coder_id', 'article_id', 
+#                                 'variable'],
+#                     varcol='variable')
+#
+    ## Concatenate duplicated variables
+    event_catted = catDuplicatedVariables(
                      df=event_long,
                      groupbylist=['coder_id', 'article_id', 
                                  'event_id', 'variable'],
-                     varcol='variable')
+                     valcollist=['value', 'text'])
 
-    ca_long = numberDuplicatedVariables(
+    ca_catted = catDuplicatedVariables(
                      df=ca_long,
                      groupbylist=['coder_id', 'article_id', 
                                  'variable'],
-                     varcol='variable')
+                     valcollist=['value', 'text'])
 
     ## Reshape tables
     e_val = unstackWithoutMissings(
-        df=event_long,
+        df=event_catted,
         indexlist=['coder_id', 'article_id', 'event_id', 'variable'],
         valuecol='value')
 
     e_text = unstackWithoutMissings(
-         df=event_long,
+         df=event_catted,
          indexlist=['coder_id', 'article_id', 'event_id', 'variable'],
          valuecol='text')
 
     ca_val = unstackWithoutMissings(
-         df=ca_long,
+         df=ca_catted,
          indexlist=['coder_id', 'article_id', 'variable'],
          valuecol='value')
 
     ca_text = unstackWithoutMissings(
-          df=ca_long,
+          df=ca_catted,
           indexlist=['coder_id', 'article_id', 'variable'],
           valuecol='text')
 
@@ -182,7 +204,7 @@ counts_by_coder_and_event = (
     )
 counts_by_coder_and_event.columns = ['coder_id', 'article_id', 'events']
 
-print counts_by_coder_and_event
+#print counts_by_coder_and_event
 
 filename = '%s/exports/by_coder_and_event_by_annotation_%s.csv' % (config.WD, dt.datetime.now().strftime('%Y-%m-%d_%H%M%S'))
 
