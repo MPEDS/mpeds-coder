@@ -171,7 +171,7 @@ def genByCoderAndEventByAnnotation(
 
     ## Grand Unified Merge
     all_wide = (user
-                .merge(ca_wide, how='outer', 
+                .merge(ca_wide, how='right', 
                        left_on=['coder_id'],
                        right_on=['article_coder_id'])
                 .drop(['article_coder_id'], axis=1)
