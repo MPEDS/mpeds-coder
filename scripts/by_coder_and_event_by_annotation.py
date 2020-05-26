@@ -151,11 +151,11 @@ def genByCoderAndEventByAnnotation(
                   .dropna()
                   .groupby(['coder_id', 'article_id'])
                   .agg(['min', 'max'])
+                  .reset_index()
                   .swaplevel(0, 1, axis=1)
                   )
     times_wide.columns = ['article_' + '_'.join(col).strip('_') 
                           for col in times_wide.columns.values]
-
     ## Grand Unified Merge
     all_wide = (user
                 .merge(ca_wide, how='right', 
@@ -170,6 +170,10 @@ def genByCoderAndEventByAnnotation(
                 .rename(columns={'event_event_id': 'event_id'})
                 .merge(am, how='left', left_on='article_id', right_on='id')
                 .drop(['id'], axis=1)
+                .merge(times_wide, how='outer', 
+                       left_on=['coder_id', 'article_id'],
+                       right_on=['article_coder_id', 'article_article_id'])
+                .drop(['article_coder_id', 'article_article_id'], axis=1)
                 )
 
     return all_wide
