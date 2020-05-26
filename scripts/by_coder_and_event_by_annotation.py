@@ -85,19 +85,6 @@ def genByCoderAndEventByAnnotation(
                            #am_q.session.connection())
                            am_q.session.get_bind())
 
-#    ## Number duplicated variables
-#    event_long = numberDuplicatedVariables(
-#                     df=event_long,
-#                     groupbylist=['coder_id', 'article_id', 
-#                                 'event_id', 'variable'],
-#                     varcol='variable')
-#
-#    ca_long = numberDuplicatedVariables(
-#                     df=ca_long,
-#                     groupbylist=['coder_id', 'article_id', 
-#                                 'variable'],
-#                     varcol='variable')
-#
     ## Concatenate duplicated variables
     event_catted = catDuplicatedVariables(
                      df=event_long,
