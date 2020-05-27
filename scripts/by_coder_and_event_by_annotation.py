@@ -156,25 +156,33 @@ def genByCoderAndEventByAnnotation(
                   )
     times_wide.columns = ['article_' + '_'.join(col).strip('_') 
                           for col in times_wide.columns.values]
+
+    ## Align join key names
+    ca_wide = (ca_wide
+               .rename(columns={'article_coder_id': 'coder_id'})
+               .rename(columns={'article_article_id': 'article_id'})
+               )
+    e_wide = (e_wide
+              .rename(columns={'event_coder_id': 'coder_id'})
+              .rename(columns={'event_article_id': 'article_id'})
+              .rename(columns={'event_event_id': 'event_id'})
+              )
+    times_wide = (times_wide
+                  .rename(columns={'article_coder_id': 'coder_id'})
+                  .rename(columns={'article_article_id': 'article_id'})
+                  )
+    am = (am
+          .rename(columns={'id': 'article_id'})
+          )
+
     ## Grand Unified Merge
-    all_wide = (user
-                .merge(ca_wide, how='right', 
-                       left_on=['coder_id'],
-                       right_on=['article_coder_id'])
-                .drop(['article_coder_id'], axis=1)
-                .rename(columns={'article_article_id': 'article_id'})
-                .merge(e_wide, how='outer', 
-                       left_on=['coder_id', 'article_id'],
-                       right_on=['event_coder_id', 'event_article_id'])
-                .drop(['event_coder_id', 'event_article_id'], axis=1)
-                .rename(columns={'event_event_id': 'event_id'})
-                .merge(am, how='left', left_on='article_id', right_on='id')
-                .drop(['id'], axis=1)
-                .merge(times_wide, how='outer', 
-                       left_on=['coder_id', 'article_id'],
-                       right_on=['article_coder_id', 'article_article_id'])
-                .drop(['article_coder_id', 'article_article_id'], axis=1)
-                )
+    all_wide = (
+        ca_wide
+        .merge(e_wide, how='outer', on=['coder_id', 'article_id'])
+        .merge(times_wide, how='outer', on=['coder_id', 'article_id'])
+        .merge(user, how='left', on=['coder_id'])
+        .merge(am, how='left', on='article_id')
+        )
 
     return all_wide
 
