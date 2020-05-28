@@ -74,8 +74,9 @@ solr_df = solr_df[cols]
 ## Output
 
 wd = config.WD
-filename = ('%s/exports/solr_output_%s.csv' 
+filename = ('%s/exports/%s_solr_output_%s.csv' 
                 % (wd, 
+                   config.MYSQL_DB,
                    datetime.datetime.now().strftime('%Y-%m-%d_%H%M%S')))
 
 solr_df.to_csv(filename, encoding = 'utf-8', index = False)
