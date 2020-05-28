@@ -57,6 +57,16 @@ solr_df = pd.DataFrame(docs)
 print("Article count: %d" % solr_df.shape[0])
 
 
+## Clean list columns
+
+def clean_lists(listcell):
+    if isinstance(listcell, list):
+        listcell = '|||'.join(unicode(v) for v in listcell)
+    return listcell
+
+solr_df = solr_df.applymap(clean_lists)
+
+
 ## Reorder columns
 
 knowngood = ['PUBLICATION', 
