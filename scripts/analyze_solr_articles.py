@@ -24,7 +24,8 @@ sobj.setSolrURL('%s/select' % config.SOLR_ADDR)
 
 ## Crossover query
 
-am_id_df = pd.read_sql("SELECT db_id FROM article_metadata", con=mysql_engine)
+am_id_df = pd.read_sql("SELECT DISTINCT db_id FROM article_metadata",
+                       con=mysql_engine)
 
 ## Put IDs from MySQL into a SOLR query string
 ids = am_id_df['db_id'].tolist()
