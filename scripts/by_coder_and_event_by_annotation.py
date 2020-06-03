@@ -55,6 +55,7 @@ def genByCoderAndEventByAnnotation(
     ## Get tables into data frames
     event_q = (session
                .query(coder_event_table)
+               .order_by('id')
                )
     event_long = pd.read_sql_query(event_q.statement, 
                                    # Old pandas fears real connections
@@ -63,6 +64,7 @@ def genByCoderAndEventByAnnotation(
 
     ca_q = (session
             .query(coder_article_table)
+            .order_by('id')
             )
     ca_long = pd.read_sql_query(ca_q.statement, 
                                 # Old pandas fears real connections
