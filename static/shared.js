@@ -133,7 +133,7 @@ var deleteCode = function(e) {
   });
 
   req.fail(function() {
-    $("#flash-error").text("Error deleting item.");
+    $("#flash-error").text("Error deleting item." + req.responseText);
     $("#flash-error").show();
   });
 }
