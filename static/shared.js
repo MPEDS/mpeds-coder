@@ -105,7 +105,7 @@ var addSelectedText = function(e, v) {
 }
 
 var deleteCode = function(e) {
-  var r = confirm("Are you sure you want to delete this item?");
+  var r = confirm("Are you sure you want to delete this item?\n(Note: due to bug, duplicates will not be deleted)");
   if (r == false) {
     return
   }
