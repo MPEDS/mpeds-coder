@@ -1414,7 +1414,7 @@ def delCode(pn):
     else:
         return make_response("Invalid model", 404)
 
-    if len(a) == 0:
+    if len(a) == 1:
         for o in a:
             db_session.delete(o)
 
