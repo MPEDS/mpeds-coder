@@ -1302,13 +1302,15 @@ def delCode(pn):
     else:
         return make_response("Invalid model", 404)
 
-    if len(a) > 0:
+    if len(a) == 1:
         for o in a:
             db_session.delete(o)
 
         db_session.commit()
 
         return jsonify(result={"status": 200})
+    elif len(a) > 1:
+        return make_response(" Leave duplicates in so we can collect data on this bug.", 500)
     else:
         return make_response("", 404)
 
