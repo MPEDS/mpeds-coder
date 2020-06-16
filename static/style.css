@@ -7,7 +7,7 @@
 .sticky { width:250px; }
 
 .control-panel {
-	max-height: calc(100vh - 120px);
+	max-height: calc(100vh - 80px);
 	overflow-y: auto;
 }
 
