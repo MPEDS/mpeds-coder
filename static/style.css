@@ -4,8 +4,6 @@
                   border: 1px solid #AACBE2; }
 .error          { background: #F0D6D6; padding: 0.5em; }
 
-.sticky { width:250px; }
-
 label, select, option, input {
 	font-size: 0.85em;
 }
