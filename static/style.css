@@ -6,6 +6,15 @@
 
 .sticky { width:250px; }
 
+.control-panel {
+	position: -webkit-sticky; /* Safari */
+	position: sticky;
+	top: 0;
+	max-height: calc(100vh - 120px);
+	overflow-y: auto;
+	background: red;
+}
+
 label, select, option, input {
 	font-size: 0.85em;
 }
