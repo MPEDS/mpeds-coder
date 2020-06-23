@@ -1439,7 +1439,6 @@ def changeCode(pn):
 
     for o in a:
         db_session.delete(o)
-    db_session.commit()
 
     ## add new value
     ec = CodeEventCreator(article, event, variable, value, current_user.id) 
