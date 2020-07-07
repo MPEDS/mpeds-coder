@@ -1318,7 +1318,7 @@ def delCode(pn):
         return make_response("", 404)
 
 
-@app.route('/_change_code/<pn>')
+@app.route('/_change_code/<pn>', methods=['GET', 'POST'])
 @login_required
 def changeCode(pn):
     """ 
