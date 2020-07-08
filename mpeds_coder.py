@@ -1325,10 +1325,10 @@ def changeCode(pn):
         Changes a radio button by removing all prior values, adds one new one. 
         Only implemented for event creator right now.
     """
-    article  = request.args.get('article')
-    variable = request.args.get('variable')
-    value    = request.args.get('value')
-    event    = request.args.get('event')
+    article  = request.form['article']
+    variable = request.form['variable']
+    value    = request.form['value']
+    event    = request.form['event']
 
     ## delete all prior values
     a = db_session.query(CodeEventCreator).filter_by(
