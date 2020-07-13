@@ -1166,14 +1166,14 @@ def generateCoderAudit():
 ##### Internal calls
 #####
 
-@app.route('/_add_code/<pn>')
+@app.route('/_add_code/<pn>', methods=['GET', 'POST'])
 @login_required
 def addCode(pn):
-    aid  = int(request.args.get('article'))
-    var  = request.args.get('variable')
-    val  = request.args.get('value')
-    ev   = request.args.get('event')
-    text = request.args.get('text')
+    aid  = int(request.form['article'])
+    var  = request.form['variable']
+    val  = request.form['value']
+    ev   = request.form['event']
+    text = request.form['text']
     aqs  = []
     now  = dt.datetime.now(tz = central).replace(tzinfo = None)
 
