@@ -116,7 +116,7 @@ var deleteCode = function(e) {
   var ev  = $(e.target).closest('div.event-block').attr('id').split("_")[1];
 
   req = $.ajax({
-    type: "GET",
+    type: "POST",
     url:  $SCRIPT_ROOT + '/_del_code/' + pn,
     data: {
       article:  aid[1],

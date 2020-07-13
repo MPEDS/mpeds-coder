@@ -1268,14 +1268,14 @@ def delEvent():
     return make_response("Delete succeeded.", 200)
 
 
-@app.route('/_del_code/<pn>')
+@app.route('/_del_code/<pn>', methods=['POST'])
 @login_required
 def delCode(pn):
     """ Deletes a record from coding tables. """
-    article  = request.args.get('article')
-    variable = request.args.get('variable')
-    value    = request.args.get('value')
-    event    = request.args.get('event')
+    article  = request.form['article']
+    variable = request.form['variable']
+    value    = request.form['value']
+    event    = request.form['event']
 
     if False:
         pass
