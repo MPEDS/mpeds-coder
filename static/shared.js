@@ -80,7 +80,7 @@ var addSelectedText = function(e, v) {
   }
 
   req = $.ajax({
-    type: "GET",
+    type: "POST",
     url:  $SCRIPT_ROOT + '/_add_code/' + pn,
     data: {
       article:  aid[1],
@@ -162,7 +162,7 @@ var addCode = function(e) {
   }
 
   req = $.ajax({
-    type: "GET",
+    type: "POST",
     url:  $SCRIPT_ROOT + '/_add_code/' + pn,
     data: {
       article:  aid,
