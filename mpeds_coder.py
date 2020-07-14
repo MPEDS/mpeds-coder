@@ -1242,15 +1242,15 @@ def addCode(pn):
     return make_response("", 200)
 
 
-@app.route('/_del_event')
+@app.route('/_del_event', methods=['POST'])
 @login_required
 def delEvent():
     """ Delete an event. """
     # if current_user.authlevel < 2:
     #     return redirect(url_for('index'))
 
-    eid = int(request.args.get('event'))
-    pn  = request.args.get('pn');
+    eid = int(request.form['event'])
+    pn  = request.form['pn'];
 
     model = None
     if pn == '2':
