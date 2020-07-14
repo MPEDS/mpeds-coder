@@ -266,7 +266,7 @@ var selectRadio = function(e) {
 
   // change code
   req = $.ajax({
-    type: "GET",
+    type: "POST",
     url:  $SCRIPT_ROOT + '/_change_code/' + pn,
     data: {
       article:  aid,
@@ -298,7 +298,7 @@ var storeText = function(e) {
 
   // change code
   req = $.ajax({
-    type: "GET",
+    type: "POST",
     url:  $SCRIPT_ROOT + '/_change_code/' + pn,
     data: {
       article:  aid,
