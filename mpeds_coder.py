@@ -1368,13 +1368,13 @@ def markECDone():
     return jsonify(result={"status": 200})
 
 
-@app.route('/_mark_sp_done')
+@app.route('/_mark_sp_done', methods=['POST'])
 @login_required
 def markSPDone():
     if current_user.authlevel < 2:
         return redirect(url_for('index'))
 
-    article_id = request.args.get('article_id')
+    article_id = request.form['article_id']
     coder_id   = current_user.id
     now        = dt.datetime.now(tz = central).replace(tzinfo = None)
 
