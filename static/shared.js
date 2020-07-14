@@ -233,7 +233,7 @@ var selectCheckbox = function(e) {
   }
 
   req = $.ajax({
-    type: "GET",
+    type: "POST",
     url:  $SCRIPT_ROOT + '/_' + action + '_code/' + pn,
     data: {
       article:  aid,
