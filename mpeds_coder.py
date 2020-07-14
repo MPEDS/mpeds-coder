@@ -1351,10 +1351,10 @@ def changeCode(pn):
     return jsonify(result={"status": 200})
 
 
-@app.route('/_mark_ec_done')
+@app.route('/_mark_ec_done', methods=['POST'])
 @login_required
 def markECDone():
-    article_id = request.args.get('article_id')
+    article_id = request.form['article_id']
     coder_id   = current_user.id
     now        = dt.datetime.now(tz = central).replace(tzinfo = None)
 

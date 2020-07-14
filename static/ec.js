@@ -259,7 +259,7 @@ $(function(){
   $('#mark-done').each(function() {
     $(this).click(function() {
       var req = $.ajax({
-          type: "GET",
+          type: "POST",
           url:  $SCRIPT_ROOT + '/_mark_ec_done',
           data: {
             article_id: aid
