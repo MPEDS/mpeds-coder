@@ -1895,15 +1895,15 @@ def assignArticles():
     return make_response('%d articles assigned successfully.' % n_added, 200)
 
 
-@app.route('/_transfer_articles')
+@app.route('/_transfer_articles', methods=['POST'])
 @login_required
 def transferArticles():
     if current_user.authlevel < 3:
         return redirect(url_for('index'))
 
-    num        = request.args.get('num')
-    from_users = request.args.get('from_users')
-    to_users   = request.args.get('to_users')
+    num        = request.form['num']
+    from_users = request.form['from_users']
+    to_users   = request.form['to_users']
 
     try:
         num = int(num)

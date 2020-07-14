@@ -101,7 +101,7 @@ var transferArticles = function(e) {
     });
 
     req = $.ajax({
-      type: "GET",
+      type: "POST",
       url:  $SCRIPT_ROOT + '/_transfer_articles',
       data: {
         'num': num,
