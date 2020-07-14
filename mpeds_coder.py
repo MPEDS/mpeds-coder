@@ -1079,14 +1079,14 @@ def userArticleListAdmin(coder_id, is_coded, pn, page = 1):
 
 
 ## generate report CSV file and store locally/download
-@app.route('/_generate_coder_stats')
+@app.route('/_generate_coder_stats', methods=['POST'])
 @login_required
 def generateCoderAudit():
     if current_user.authlevel < 3:
         return redirect(url_for('index'))
 
-    pn = request.args.get('pn')
-    action = request.args.get('action')
+    pn = request.form['pn']
+    action = request.form['action']
 
     # last_month = dt.datetime.now(tz = central) - dt.timedelta(weeks=4)
     users = {u.id: u.username for u in db_session.query(User).all()}
