@@ -113,7 +113,7 @@ var deleteCode1 = function(e) {
   var aid = $(".article").attr("id").split("_");
 
   req = $.ajax({
-    type: "GET",
+    type: "POST",
     url:  $SCRIPT_ROOT + '/_del_code/1',
     data: {
       article:  aid[1],
@@ -336,7 +336,7 @@ $(function(){ // document ready
     }
 
     req = $.ajax({
-      type: "GET",
+      type: "POST",
       url:  $SCRIPT_ROOT + '/_del_code/1',
       data: {
         article:  aid[1],
