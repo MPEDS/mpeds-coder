@@ -60,7 +60,7 @@ var assignArticles = function(e) {
     });
 
     req = $.ajax({
-      type: "GET",
+      type: "POST",
       url:  $SCRIPT_ROOT + '/_assign_articles',
       data: {
         'num':        num,

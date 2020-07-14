@@ -1787,19 +1787,19 @@ def addUser():
     return jsonify(result={"status": 200, "password": password})
 
 
-@app.route('/_assign_articles')
+@app.route('/_assign_articles', methods=['POST'])
 @login_required
 def assignArticles():
     if current_user.authlevel < 3:
         return redirect(url_for('index'))
 
-    num     = request.args.get('num')
-    db_name = request.args.get('db')
-    pub     = request.args.get('pub')
-    ids     = request.args.get('ids')
-    users   = request.args.get('users')
-    same    = request.args.get('same')
-    group_size = request.args.get('group_size')
+    num     = request.form['num']
+    db_name = request.form['db']
+    pub     = request.form['pub']
+    ids     = request.form['ids']
+    users   = request.form['users']
+    same    = request.form['same']
+    group_size = request.form['group_size']
     
     ## input validations
     if num == '' and ids == '':
