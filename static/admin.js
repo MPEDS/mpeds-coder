@@ -19,7 +19,7 @@ var changeTab = function(e) {
 var addUser = function(e) {
     var username = $('#username').val();
     req = $.ajax({
-      type: "GET",
+      type: "POST",
       url:  $SCRIPT_ROOT + '/_add_user',
       data: {
         'username': username

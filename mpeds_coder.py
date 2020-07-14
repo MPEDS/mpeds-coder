@@ -1758,13 +1758,13 @@ def highlightVar():
 ##### ADMIN TOOLS
 #####
 
-@app.route('/_add_user')
+@app.route('/_add_user', methods=['POST'])
 @login_required
 def addUser():
     if current_user.authlevel < 3:
         return redirect(url_for('index'))
 
-    username = request.args.get('username')
+    username = request.form['username']
 
     ## validate
     if not re.match(r'[A-Za-z0-9_]+', username):
