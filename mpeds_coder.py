@@ -1210,13 +1210,13 @@ def addArticleCode(pn):
     return make_response("", 200)
 
 
-@app.route('/_del_article_code/<pn>')
+@app.route('/_del_article_code/<pn>', methods=['POST'])
 @login_required
 def delArticleCode(pn):
     """ Deletes a record from article coding table. """
-    article  = request.args.get('article')
-    variable = request.args.get('variable')
-    value    = request.args.get('value')
+    article  = request.form['article']
+    variable = request.form['variable']
+    value    = request.form['value']
 
     if pn == 'ec':
         a = db_session.query(CoderArticleAnnotation).filter_by(
