@@ -343,7 +343,7 @@ var storeArticleTextInput = function(e) {
 
   // change code
   req = $.ajax({
-    type: "GET",
+    type: "POST",
     url:  $SCRIPT_ROOT + '/_change_article_code/' + pn,
     data: {
       article:  aid,

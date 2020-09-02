@@ -1239,16 +1239,16 @@ def delArticleCode(pn):
         return make_response("", 404)
 
 
-@app.route('/_change_article_code/<pn>')
+@app.route('/_change_article_code/<pn>', methods=['POST'])
 @login_required
 def changeArticleCode(pn):
     """ 
         Changes a radio button or text input/area by removing all prior
         values, adds one new one.
     """
-    article  = request.args.get('article')
-    variable = request.args.get('variable')
-    value    = request.args.get('value')
+    article  = request.form['article']
+    variable = request.form['variable']
+    value    = request.form['value']
 
     ## delete all prior values
     a = db_session.query(CoderArticleAnnotation).filter_by(
