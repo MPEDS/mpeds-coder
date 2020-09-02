@@ -80,7 +80,7 @@ var addSelectedText = function(e, v) {
   }
 
   req = $.ajax({
-    type: "GET",
+    type: "POST",
     url:  $SCRIPT_ROOT + '/_add_code/' + pn,
     data: {
       article:  aid[1],
@@ -116,7 +116,7 @@ var deleteCode = function(e) {
   var ev  = $(e.target).closest('div.event-block').attr('id').split("_")[1];
 
   req = $.ajax({
-    type: "GET",
+    type: "POST",
     url:  $SCRIPT_ROOT + '/_del_code/' + pn,
     data: {
       article:  aid[1],
@@ -163,7 +163,7 @@ var addCode = function(e) {
   }
 
   req = $.ajax({
-    type: "GET",
+    type: "POST",
     url:  $SCRIPT_ROOT + '/_add_code/' + pn,
     data: {
       article:  aid,
@@ -233,7 +233,7 @@ var selectArticleCheckbox = function(e) {
   }
 
   req = $.ajax({
-    type: "GET",
+    type: "POST",
     url:  $SCRIPT_ROOT + '/_' + action + '_article_code/' + pn,
     data: {
       article:  aid,
@@ -278,7 +278,7 @@ var selectCheckbox = function(e) {
   }
 
   req = $.ajax({
-    type: "GET",
+    type: "POST",
     url:  $SCRIPT_ROOT + '/_' + action + '_code/' + pn,
     data: {
       article:  aid,
@@ -311,7 +311,7 @@ var selectRadio = function(e) {
 
   // change code
   req = $.ajax({
-    type: "GET",
+    type: "POST",
     url:  $SCRIPT_ROOT + '/_change_code/' + pn,
     data: {
       article:  aid,
@@ -343,7 +343,7 @@ var storeArticleTextInput = function(e) {
 
   // change code
   req = $.ajax({
-    type: "GET",
+    type: "POST",
     url:  $SCRIPT_ROOT + '/_change_article_code/' + pn,
     data: {
       article:  aid,
@@ -375,7 +375,7 @@ var storeText = function(e) {
 
   // change code
   req = $.ajax({
-    type: "GET",
+    type: "POST",
     url:  $SCRIPT_ROOT + '/_change_code/' + pn,
     data: {
       article:  aid,

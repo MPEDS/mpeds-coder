@@ -1112,14 +1112,14 @@ def userArticleListAdmin(coder_id, is_coded, pn, page = 1):
 
 
 ## generate report CSV file and store locally/download
-@app.route('/_generate_coder_stats')
+@app.route('/_generate_coder_stats', methods=['POST'])
 @login_required
 def generateCoderAudit():
     if current_user.authlevel < 3:
         return redirect(url_for('index'))
 
-    pn = request.args.get('pn')
-    action = request.args.get('action')
+    pn = request.form['pn']
+    action = request.form['action']
 
     # last_month = dt.datetime.now(tz = central) - dt.timedelta(weeks=4)
     users = {u.id: u.username for u in db_session.query(User).all()}
@@ -1199,14 +1199,14 @@ def generateCoderAudit():
 ##### Internal calls
 #####
 
-@app.route('/_add_article_code/<pn>')
+@app.route('/_add_article_code/<pn>', methods=['POST'])
 @login_required
 def addArticleCode(pn):
     """ Adds a record to article coding table. """
-    aid  = int(request.args.get('article'))
-    var  = request.args.get('variable')
-    val  = request.args.get('value')
-    text = request.args.get('text')
+    aid  = int(request.form['article'])
+    var  = request.form['variable']
+    val  = request.form['value']
+    text = request.form.get('text')
     aqs  = []
     now  = dt.datetime.now(tz = central).replace(tzinfo = None)
 
@@ -1241,13 +1241,13 @@ def addArticleCode(pn):
     return make_response("", 200)
 
 
-@app.route('/_del_article_code/<pn>')
+@app.route('/_del_article_code/<pn>', methods=['POST'])
 @login_required
 def delArticleCode(pn):
     """ Deletes a record from article coding table. """
-    article  = request.args.get('article')
-    variable = request.args.get('variable')
-    value    = request.args.get('value')
+    article  = request.form['article']
+    variable = request.form['variable']
+    value    = request.form['value']
 
     if pn == 'ec':
         a = db_session.query(CoderArticleAnnotation).filter_by(
@@ -1270,16 +1270,16 @@ def delArticleCode(pn):
         return make_response("", 404)
 
 
-@app.route('/_change_article_code/<pn>')
+@app.route('/_change_article_code/<pn>', methods=['POST'])
 @login_required
 def changeArticleCode(pn):
     """ 
         Changes a radio button or text input/area by removing all prior
         values, adds one new one.
     """
-    article  = request.args.get('article')
-    variable = request.args.get('variable')
-    value    = request.args.get('value')
+    article  = request.form['article']
+    variable = request.form['variable']
+    value    = request.form['value']
 
     ## delete all prior values
     a = db_session.query(CoderArticleAnnotation).filter_by(
@@ -1301,14 +1301,14 @@ def changeArticleCode(pn):
     return jsonify(result={"status": 200})
 
 
-@app.route('/_add_code/<pn>')
+@app.route('/_add_code/<pn>', methods=['POST'])
 @login_required
 def addCode(pn):
-    aid  = int(request.args.get('article'))
-    var  = request.args.get('variable')
-    val  = request.args.get('value')
-    ev   = request.args.get('event')
-    text = request.args.get('text')
+    aid  = int(request.form['article'])
+    var  = request.form['variable']
+    val  = request.form['value']
+    ev   = request.form['event']
+    text = request.form.get('text')
     aqs  = []
     now  = dt.datetime.now(tz = central).replace(tzinfo = None)
 
@@ -1377,14 +1377,40 @@ def addCode(pn):
     return make_response("", 200)
 
 
-@app.route('/_del_code/<pn>')
+@app.route('/_del_event', methods=['POST'])
+@login_required
+def delEvent():
+    """ Delete an event. """
+    # if current_user.authlevel < 2:
+    #     return redirect(url_for('index'))
+
+    eid = int(request.form['event'])
+    pn  = request.form['pn'];
+
+    model = None
+    if pn == '2':
+        model = CodeSecondPass
+    elif pn == 'ec':
+        model = CodeEventCreator
+    else:
+        return make_response("Invalid model.", 404)
+
+    db_session.query(model).filter_by(event_id = eid).delete()
+    db_session.query(Event).filter_by(id = eid).delete()
+
+    db_session.commit()
+
+    return make_response("Delete succeeded.", 200)
+
+
+@app.route('/_del_code/<pn>', methods=['POST'])
 @login_required
 def delCode(pn):
     """ Deletes a record from coding tables. """
-    article  = request.args.get('article')
-    variable = request.args.get('variable')
-    value    = request.args.get('value')
-    event    = request.args.get('event')
+    article  = request.form['article']
+    variable = request.form['variable']
+    value    = request.form['value']
+    event    = request.form['event']
 
     if False:
         pass
@@ -1427,17 +1453,17 @@ def delCode(pn):
         return make_response("", 404)
 
 
-@app.route('/_change_code/<pn>')
+@app.route('/_change_code/<pn>', methods=['POST'])
 @login_required
 def changeCode(pn):
     """ 
         Changes a radio button by removing all prior values, adds one new one. 
         Only implemented for event creator right now.
     """
-    article  = request.args.get('article')
-    variable = request.args.get('variable')
-    value    = request.args.get('value')
-    event    = request.args.get('event')
+    article  = request.form['article']
+    variable = request.form['variable']
+    value    = request.form['value']
+    event    = request.form['event']
 
     ## delete all prior values
     a = db_session.query(CodeEventCreator).filter_by(
@@ -1460,36 +1486,10 @@ def changeCode(pn):
     return jsonify(result={"status": 200})
 
 
-@app.route('/_del_event')
-@login_required
-def delEvent():
-    """ Delete an event. """
-    # if current_user.authlevel < 2:
-    #     return redirect(url_for('index'))
-
-    eid = int(request.args.get('event'))
-    pn  = request.args.get('pn');
-
-    model = None
-    if pn == '2':
-        model = CodeSecondPass
-    elif pn == 'ec':
-        model = CodeEventCreator
-    else:
-        return make_response("Invalid model.", 404)
-
-    db_session.query(model).filter_by(event_id = eid).delete()
-    db_session.query(Event).filter_by(id = eid).delete()
-
-    db_session.commit()
-
-    return make_response("Delete succeeded.", 200)
-
-
-@app.route('/_mark_ec_done')
+@app.route('/_mark_ec_done', methods=['POST'])
 @login_required
 def markECDone():
-    article_id = request.args.get('article_id')
+    article_id = request.form['article_id']
     coder_id   = current_user.id
     now        = dt.datetime.now(tz = central).replace(tzinfo = None)
 
@@ -1503,13 +1503,13 @@ def markECDone():
     return jsonify(result={"status": 200})
 
 
-@app.route('/_mark_sp_done')
+@app.route('/_mark_sp_done', methods=['POST'])
 @login_required
 def markSPDone():
     if current_user.authlevel < 2:
         return redirect(url_for('index'))
 
-    article_id = request.args.get('article_id')
+    article_id = request.form['article_id']
     coder_id   = current_user.id
     now        = dt.datetime.now(tz = central).replace(tzinfo = None)
 
@@ -1588,8 +1588,8 @@ def getEvents():
             if len(rvar['desc']) > 0 and len(rvar['desc'][0]) > 0:
                 ev['repr'] = ", ".join(rvar['desc'])
                 ## No longer necessary with article-level description
-            #elif len(rvar['article-desc']) > 0 and len(rvar['article-desc'][0]) > 0:
-                #ev['repr'] = "(no event description): " + ", ".join(rvar['article-desc'])
+            elif len(rvar['article-desc']) > 0 and len(rvar['article-desc'][0]) > 0:
+                ev['repr'] = "(no event description): " + ", ".join(rvar['article-desc'])
             else:
                 ev['repr'] = "(no event description)"
 
@@ -1926,13 +1926,13 @@ def highlightVar():
 ##### ADMIN TOOLS
 #####
 
-@app.route('/_add_user')
+@app.route('/_add_user', methods=['POST'])
 @login_required
 def addUser():
     if current_user.authlevel < 3:
         return redirect(url_for('index'))
 
-    username = request.args.get('username')
+    username = request.form['username']
 
     ## validate
     if not re.match(r'[A-Za-z0-9_]+', username):
@@ -1955,19 +1955,19 @@ def addUser():
     return jsonify(result={"status": 200, "password": password})
 
 
-@app.route('/_assign_articles')
+@app.route('/_assign_articles', methods=['POST'])
 @login_required
 def assignArticles():
     if current_user.authlevel < 3:
         return redirect(url_for('index'))
 
-    num     = request.args.get('num')
-    db_name = request.args.get('db')
-    pub     = request.args.get('pub')
-    ids     = request.args.get('ids')
-    users   = request.args.get('users')
-    same    = request.args.get('same')
-    group_size = request.args.get('group_size')
+    num     = request.form['num']
+    db_name = request.form['db']
+    pub     = request.form['pub']
+    ids     = request.form['ids']
+    users   = request.form['users']
+    same    = request.form['same']
+    group_size = request.form['group_size']
     
     ## input validations
     if num == '' and ids == '':
@@ -2063,15 +2063,15 @@ def assignArticles():
     return make_response('%d articles assigned successfully.' % n_added, 200)
 
 
-@app.route('/_transfer_articles')
+@app.route('/_transfer_articles', methods=['POST'])
 @login_required
 def transferArticles():
     if current_user.authlevel < 3:
         return redirect(url_for('index'))
 
-    num        = request.args.get('num')
-    from_users = request.args.get('from_users')
-    to_users   = request.args.get('to_users')
+    num        = request.form['num']
+    from_users = request.form['from_users']
+    to_users   = request.form['to_users']
 
     try:
         num = int(num)
