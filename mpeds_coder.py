@@ -1173,7 +1173,7 @@ def addCode(pn):
     var  = request.form['variable']
     val  = request.form['value']
     ev   = request.form['event']
-    text = request.form['text']
+    text = request.form.get('text')
     aqs  = []
     now  = dt.datetime.now(tz = central).replace(tzinfo = None)
 
