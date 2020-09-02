@@ -1168,14 +1168,14 @@ def generateCoderAudit():
 ##### Internal calls
 #####
 
-@app.route('/_add_article_code/<pn>')
+@app.route('/_add_article_code/<pn>', methods=['POST'])
 @login_required
 def addArticleCode(pn):
     """ Adds a record to article coding table. """
-    aid  = int(request.args.get('article'))
-    var  = request.args.get('variable')
-    val  = request.args.get('value')
-    text = request.args.get('text')
+    aid  = int(request.form['article'])
+    var  = request.form['variable']
+    val  = request.form['value']
+    text = request.form.get('text')
     aqs  = []
     now  = dt.datetime.now(tz = central).replace(tzinfo = None)
 

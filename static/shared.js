@@ -233,7 +233,7 @@ var selectArticleCheckbox = function(e) {
   }
 
   req = $.ajax({
-    type: "GET",
+    type: "POST",
     url:  $SCRIPT_ROOT + '/_' + action + '_article_code/' + pn,
     data: {
       article:  aid,
