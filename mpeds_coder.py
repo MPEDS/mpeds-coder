@@ -1301,7 +1301,7 @@ def changeArticleCode(pn):
     return jsonify(result={"status": 200})
 
 
-@app.route('/_add_code/<pn>', methods=['POST'])
+@app.route('/_add_code/<pn>', methods=['GET', 'POST'])
 @login_required
 def addCode(pn):
     aid  = int(request.form['article'])
@@ -1453,7 +1453,7 @@ def delCode(pn):
         return make_response("", 404)
 
 
-@app.route('/_change_code/<pn>', methods=['POST'])
+@app.route('/_change_code/<pn>', methods=['GET', 'POST'])
 @login_required
 def changeCode(pn):
     """ 

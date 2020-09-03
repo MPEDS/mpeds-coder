@@ -390,7 +390,7 @@ var storeText = function(e) {
   });
 
   req.fail(function(e) {
-    $("#flash-error").text("Error changing radio button.");
+    $("#flash-error").text("Error changing text field.");
     $("#flash-error").show();
   });
 }
