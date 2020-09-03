@@ -13,8 +13,8 @@ class CoderArticleAnnotation(Base):
     id         = Column(Integer, primary_key=True)
     article_id = Column(Integer, ForeignKey('article_metadata.id'), nullable = False)
     variable   = Column(String(100), nullable = False)
-    value      = Column(String(2000), nullable = False)
-    text       = Column(Unicode(2000))
+    value      = Column(Text, nullable = False)
+    text       = Column(UnicodeText)
     coder_id   = Column(Integer, ForeignKey('user.id'))
     timestamp  = Column(DateTime)
 
