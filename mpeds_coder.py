@@ -1036,16 +1036,6 @@ ORDER BY to_be_coded DESC, total DESC
     return render_template("publications.html", pub_list = rows)
 
     
-@app.route('/exports')
-@login_required
-def exports():
-    if current_user.authlevel < 3:
-        return redirect(url_for('index'))
-
-    return render_template(
-        "exports.html"
-    )
-
 @app.route('/userarticlelist/<pn>')
 @app.route('/userarticlelist/<pn>/<int:page>')
 @login_required
