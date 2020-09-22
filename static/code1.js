@@ -79,7 +79,7 @@ var addCode = function(e, v) {
   }
 
   req = $.ajax({
-    type: "GET",
+    type: "POST",
     url:  $SCRIPT_ROOT + '/_add_code/1',
     data: {
       article:  aid[1],
@@ -113,7 +113,7 @@ var deleteCode1 = function(e) {
   var aid = $(".article").attr("id").split("_");
 
   req = $.ajax({
-    type: "GET",
+    type: "POST",
     url:  $SCRIPT_ROOT + '/_del_code/1',
     data: {
       article:  aid[1],
@@ -154,7 +154,7 @@ function generate_dd_listener(dd) {
   return function(e) {
     var v = $('#' + dd).val();
     req = $.ajax({
-      type: "GET",
+      type: "POST",
       url:  $SCRIPT_ROOT + '/_add_code/1',
       data: {
         article:  aid[1],
@@ -258,7 +258,7 @@ $(function(){ // document ready
   // listen for comments and commit to DB
   $('#savecomments').click(function() {
     req = $.ajax({
-      type: "GET",
+      type: "POST",
       url:  $SCRIPT_ROOT + '/_add_code/1',
       data: {
         article:  aid[1],
@@ -304,7 +304,7 @@ $(function(){ // document ready
     }
 
     req = $.ajax({
-      type: "GET",
+      type: "POST",
       url:  $SCRIPT_ROOT + '/_add_code/1',
       data: {
         article:  aid[1],
@@ -336,7 +336,7 @@ $(function(){ // document ready
     }
 
     req = $.ajax({
-      type: "GET",
+      type: "POST",
       url:  $SCRIPT_ROOT + '/_del_code/1',
       data: {
         article:  aid[1],
