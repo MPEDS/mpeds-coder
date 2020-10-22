@@ -109,9 +109,10 @@
       {% endfor %}
 
       <label for="persons-freeform">Persons Freeform</label>
-      <textarea class="form-control form-control-sm" name="persons-freeform"
-		id="info_persons-freeform"
-		placeholder="e.g. Name1 / Title1 [at|of] Inst1; Title2 [at|of] Inst2">{{ curr['persons-freeform']|safe }}</textarea>
+      <label class="form-check-label">e.g. Name1 / Title1 [at|of] Inst1; Title2 [at|of] Inst2</label>
+      <textarea class="form-control form-control-sm" name="persons-freeform" id="info_persons-freeform">
+	{{ curr['persons-freeform']|safe }}
+      </textarea>
     </div> <!-- tab-pane --> 
 
     <div class="tab-pane" id="preset_block">
