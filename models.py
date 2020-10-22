@@ -58,8 +58,8 @@ class CodeEventCreator(Base):
     article_id = Column(Integer, ForeignKey('article_metadata.id'), nullable = False)
     event_id   = Column(Integer, ForeignKey('event.id'), nullable = False)
     variable   = Column(String(100), nullable = False)
-    value      = Column(Text, nullable = False)
-    text       = Column(Unicode)
+    value      = Column(String(2000), nullable = False)
+    text       = Column(Unicode(2000))
     coder_id   = Column(Integer, ForeignKey('user.id'))
     timestamp  = Column(DateTime)
 
