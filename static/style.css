@@ -174,9 +174,9 @@ div.vartitle {
 }
 
 label.form-check-label {
-	color: #777;
-	font-weight: normal;
-	margin: 0px;
+    color: #777;
+    font-weight: normal;
+    margin: 0px;
 }
 
 .varblock p:hover {
@@ -213,6 +213,14 @@ table.coder-stats {
 
 .vartitle {
 	text-align: right;
+}
+
+div.sublabel {
+    color: #777;
+    font-size: 0.8em;
+    font-weight: normal;
+    display: block;
+    text-align: right;
 }
 
 div.event-item {
