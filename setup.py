@@ -82,12 +82,9 @@ def addQueueExample():
 
 
 def main():
-	init_db()
-	addArticles(config.DOC_ROOT + config.DOC_FILE, config.DOC_DBNAME)	
-	# addUsersExample()
-	# addQueueExample()
-	pass
-
+        init_db()
+	#addArticles(config.DOC_ROOT + config.DOC_FILE, config.DOC_DBNAME)
+        addArticles("uwire2016-18_haystack_us-canada.csv", "uwire2016-18")
 
 if __name__ == '__main__':
 	main()
