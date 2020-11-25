@@ -7,6 +7,12 @@ import sqlalchemy
 from context import config
 import solr
 
+## Confirm that we want to go through with destructive operation
+print("This will overwrite MAI's article metadata table with contents from Solr.  If you really want to do this, type the word 'yes'.")
+confirmation = raw_input()
+if confirmation != "yes":
+    sys.exit(0)
+
 ## MySQL setup
 mysql_engine = sqlalchemy.create_engine(
     'mysql://%s:%s@localhost/%s?unix_socket=%s&charset=%s' % 
