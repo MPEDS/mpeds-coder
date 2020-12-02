@@ -1,5 +1,6 @@
 import sys
 import datetime
+import urllib
 
 import pandas as pd
 import sqlalchemy
@@ -29,6 +30,20 @@ am_id_df = pd.read_sql("SELECT DISTINCT db_id FROM article_metadata",
 
 ## Put IDs from MySQL into a SOLR query string
 ids = am_id_df['db_id'].tolist()
+
+def testURLEncoding(id):
+    data = {
+        'q':     id,
+        'start': 0,
+        'rows':  10,
+        'wt':    'json'
+        }
+    try:
+        urllib.urlencode(data)
+    except UnicodeEncodeError:
+        print("#### Bad encoding: %s" % id)
+
+[testURLEncoding(id) for id in ids]
 
 def getQueryChunk(ids):
     ids_qclause = '"' + '" OR "'.join(ids) + '"'
