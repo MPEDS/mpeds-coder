@@ -41,7 +41,7 @@ solr_df = pd.DataFrame(docs)
 
 ## Trim dataframe
 etl_df = (solr_df
-          .filter(['id', 'PUBLICATION', 'DOCSOURCE']))
+          .filter(['id', 'PUBLICATION', 'DOCSOURCE', 'TEXT']))
 
 ## Test for duplicate IDs
 #### Put in fake dupe to test
@@ -59,7 +59,8 @@ etl_df.to_sql('temp_etl_table',
               if_exists='replace',
               dtype={'id': sqlalchemy.types.String(255),
                      'PUBLICATION': sqlalchemy.types.String(511),
-                     'DOCSOURCE': sqlalchemy.types.String(511)})
+                     'DOCSOURCE': sqlalchemy.types.String(511),
+                     'TEXT': sqlalchemy.types.UnicodeText(16777200)})
 
 ## Update canonical table with new data
 updatecleaned = sqlalchemy.sql.text(
@@ -68,8 +69,10 @@ updatecleaned = sqlalchemy.sql.text(
         ' ON dest.db_id = source.id'
         ' SET dest.publication = source.PUBLICATION'
         ', dest.source_description = source.DOCSOURCE'
+        ', dest.text = source.TEXT'
         ' WHERE dest.publication IS NULL'
-        ' AND dest.source_description IS NULL')
+        ' AND dest.source_description IS NULL'
+        ' AND dest.text IS NULL')
 mysql_engine.execute(updatecleaned)
 
 ## Clean up
