@@ -1,4 +1,4 @@
-from sqlalchemy import Boolean, Column, DateTime, Integer, String, Unicode, ForeignKey, UniqueConstraint, Text, Date
+from sqlalchemy import Boolean, Column, DateTime, Integer, String, Unicode, ForeignKey, UniqueConstraint, Text, Date, UnicodeText
 from sqlalchemy.orm import relationship, backref
 from flask_login import UserMixin
 from database import Base
@@ -151,6 +151,7 @@ class ArticleMetadata(Base):
     pub_date            = Column(Date)
     publication         = Column(String(511))
     source_description  = Column(String(511))
+    text                = Column(UnicodeText(16777200))
 
     firsts  = relationship("CodeFirstPass",  backref = backref("article_metadata", order_by = id))
     seconds = relationship("CodeSecondPass", backref = backref("article_metadata", order_by = id))
