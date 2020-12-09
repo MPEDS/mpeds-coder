@@ -54,6 +54,8 @@ if not dupe_check_df.query('dupe == True').empty:
     sys.exit("Duplicate SOLR IDs found.  Aborting.")
 
 ## Manually create temp table with correct column specs
+droptemp = sqlalchemy.sql.text('DROP TABLE IF EXISTS temp_etl_table')
+mysql_engine.execute(droptemp)
 createtemp = sqlalchemy.sql.text(
     'CREATE TABLE temp_etl_table ('
         'id varchar(255) DEFAULT NULL'
@@ -94,6 +96,5 @@ updatecleaned = sqlalchemy.sql.text(
 mysql_engine.execute(updatecleaned)
 
 ## Clean up
-droptemp = sqlalchemy.sql.text('DROP TABLE temp_etl_table')
 mysql_engine.execute(droptemp)
 
