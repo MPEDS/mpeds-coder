@@ -30,7 +30,9 @@ am_id_df = (am_id_df
 ids = am_id_df['db_id'].tolist()
 
 ## Query SOLR for IDs
-docs = sobj.getDocumentsFromIDs(ids)
+#docs = sobj.getDocumentsFromIDs(ids)
+# TESTING VERSION
+docs = sobj.getDocumentsFromIDs(ids[1:10])
 solr_df = pd.DataFrame(docs)
 
 ## Trim dataframe and clean up dates
