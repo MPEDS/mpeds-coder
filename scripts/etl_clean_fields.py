@@ -32,16 +32,25 @@ ids = am_id_df['db_id'].tolist()
 ## Query SOLR for IDs
 #docs = sobj.getDocumentsFromIDs(ids)
 # TESTING VERSION
-docs = sobj.getDocumentsFromIDs(ids[1:10])
+docs = sobj.getDocumentsFromIDs(ids[2533:2534])
 solr_df = pd.DataFrame(docs)
 
-## Trim dataframe and clean up dates
+## Trim and clean dataframe
 etl_df = (
     solr_df
     .filter(['id', 'DATE', 'PUBLICATION', 'DOCSOURCE', 'TEXT'])
     .assign(DATE=pd.to_datetime(solr_df['DATE'].str.get(0),
                                 format='%Y-%m-%dT%H:%M:%SZ'))
+    .assign(TEXT=solr_df['TEXT'].str.encode("utf8"))
     )
+print docs[0]['TEXT'][700:800]
+updatecleaned = sqlalchemy.sql.text(
+    "UPDATE article_metadata AS dest"
+        " SET dest.text = '%s'"
+        " WHERE dest.id = 2534" % (docs[0]['TEXT'][700:800])
+        )
+mysql_engine.execute(updatecleaned)
+sys.exit()
 
 ## Test for duplicate IDs
 #### Put in fake dupe to test
