@@ -36,7 +36,7 @@ solr_df = pd.DataFrame(docs)
 ## Trim dataframe and clean up dates
 etl_df = (
     solr_df
-    .filter(['id', 'DATE', 'PUBLICATION', 'DOCSOURCE'])
+    .filter(['id', 'DATE', 'PUBLICATION', 'DOCSOURCE', 'TEXT'])
     .assign(DATE=pd.to_datetime(solr_df['DATE'].str.get(0),
                                 format='%Y-%m-%dT%H:%M:%SZ'))
     )
@@ -58,8 +58,8 @@ etl_df.to_sql('temp_etl_table',
               dtype={'id': sqlalchemy.types.String(255),
                      'DATE': sqlalchemy.types.Date,
                      'PUBLICATION': sqlalchemy.types.String(511),
-                     'DOCSOURCE': sqlalchemy.types.String(511)#,
-                     #'TEXT': sqlalchemy.types.UnicodeText(16777200)
+                     'DOCSOURCE': sqlalchemy.types.String(511),
+                     'TEXT': sqlalchemy.types.UnicodeText(16777200)
                      })
 
 ## Update canonical table with new data
@@ -70,11 +70,11 @@ updatecleaned = sqlalchemy.sql.text(
         ' SET dest.pub_date = source.DATE'
         ', dest.publication = source.PUBLICATION'
         ', dest.source_description = source.DOCSOURCE'
-        #', dest.text = source.TEXT'
+        ', dest.text = source.TEXT'
         ' WHERE dest.pub_date IS NULL'
         ' AND dest.publication IS NULL'
         ' AND dest.source_description IS NULL'
-        #' AND dest.text IS NULL'
+        ' AND dest.text IS NULL'
         )
 mysql_engine.execute(updatecleaned)
 
