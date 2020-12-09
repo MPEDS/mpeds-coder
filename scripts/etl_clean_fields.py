@@ -41,31 +41,35 @@ etl_df = (
     .filter(['id', 'DATE', 'PUBLICATION', 'DOCSOURCE', 'TEXT'])
     .assign(DATE=pd.to_datetime(solr_df['DATE'].str.get(0),
                                 format='%Y-%m-%dT%H:%M:%SZ'))
-    .assign(TEXT=solr_df['TEXT'].str.encode("utf8"))
     )
-print docs[0]['TEXT'][700:800]
-updatecleaned = sqlalchemy.sql.text(
-    "UPDATE article_metadata AS dest"
-        " SET dest.text = '%s'"
-        " WHERE dest.id = 2534" % (docs[0]['TEXT'][700:800])
-        )
-mysql_engine.execute(updatecleaned)
-sys.exit()
 
 ## Test for duplicate IDs
 #### Put in fake dupe to test
 #etl_df.iloc[5]['id'] = etl_df.iloc[6]['id']
 
-etl_df = (etl_df
-          .assign(dupe=etl_df['id'].duplicated())
-          )
-if not etl_df.query('dupe == True').empty:
+dupe_check_df = (etl_df
+                 .assign(dupe=etl_df['id'].duplicated())
+                 )
+if not dupe_check_df.query('dupe == True').empty:
     sys.exit("Duplicate SOLR IDs found.  Aborting.")
+
+## Manually create temp table with correct column specs
+createtemp = sqlalchemy.sql.text(
+    'CREATE TABLE temp_etl_table ('
+        'id varchar(255) DEFAULT NULL'
+        ', DATE date DEFAULT NULL'
+        ', PUBLICATION varchar(511) DEFAULT NULL'
+        ', DOCSOURCE varchar(511) DEFAULT NULL'
+        ', TEXT mediumtext CHARACTER SET utf8mb4'
+        ')'
+        )
+mysql_engine.execute(createtemp)
 
 ## Write temporary DB table
 etl_df.to_sql('temp_etl_table',
               mysql_engine,
-              if_exists='replace',
+              if_exists='append',
+              index=False,
               dtype={'id': sqlalchemy.types.String(255),
                      'DATE': sqlalchemy.types.Date,
                      'PUBLICATION': sqlalchemy.types.String(511),
