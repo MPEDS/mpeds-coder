@@ -151,7 +151,7 @@ class ArticleMetadata(Base):
     pub_date            = Column(Date)
     publication         = Column(String(511))
     source_description  = Column(String(511))
-    text                = Column(UnicodeText(16777200))
+    text                = Column(UnicodeText(16777200, collation='utf8_unicode_ci'))
 
     firsts  = relationship("CodeFirstPass",  backref = backref("article_metadata", order_by = id))
     seconds = relationship("CodeSecondPass", backref = backref("article_metadata", order_by = id))
