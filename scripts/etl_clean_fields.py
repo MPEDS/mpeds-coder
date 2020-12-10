@@ -30,9 +30,7 @@ am_id_df = (am_id_df
 ids = am_id_df['db_id'].tolist()
 
 ## Query SOLR for IDs
-#docs = sobj.getDocumentsFromIDs(ids)
-# TESTING VERSION
-docs = sobj.getDocumentsFromIDs(ids[2533:2534])
+docs = sobj.getDocumentsFromIDs(ids)
 solr_df = pd.DataFrame(docs)
 
 ## Trim and clean dataframe
@@ -67,17 +65,21 @@ createtemp = sqlalchemy.sql.text(
         )
 mysql_engine.execute(createtemp)
 
-## Write temporary DB table
-etl_df.to_sql('temp_etl_table',
-              mysql_engine,
-              if_exists='append',
-              index=False,
-              dtype={'id': sqlalchemy.types.String(255),
-                     'DATE': sqlalchemy.types.Date,
-                     'PUBLICATION': sqlalchemy.types.String(511),
-                     'DOCSOURCE': sqlalchemy.types.String(511),
-                     'TEXT': sqlalchemy.types.UnicodeText(16777200)
-                     })
+## Split to keep query packets small
+etl_dfs = [etl_df[i:i+100] for i in range(0, len(etl_df), 100)]
+
+for df in etl_dfs:
+  ## Write temporary DB table
+  df.to_sql('temp_etl_table',
+            mysql_engine,
+            if_exists='append',
+            index=False,
+            dtype={'id': sqlalchemy.types.String(255),
+                   'DATE': sqlalchemy.types.Date,
+                   'PUBLICATION': sqlalchemy.types.String(511),
+                   'DOCSOURCE': sqlalchemy.types.String(511),
+                   'TEXT': sqlalchemy.types.UnicodeText(16777200)
+                   })
 
 ## Update canonical table with new data
 updatecleaned = sqlalchemy.sql.text(
