@@ -87,13 +87,31 @@ updatecleaned = sqlalchemy.sql.text(
         ' LEFT JOIN temp_etl_table AS source'
         ' ON dest.db_id = source.id'
         ' SET dest.pub_date = source.DATE'
-        ', dest.publication = source.PUBLICATION'
-        ', dest.source_description = source.DOCSOURCE'
-        ', dest.text = source.TEXT'
         ' WHERE dest.pub_date IS NULL'
-        ' AND dest.publication IS NULL'
-        ' AND dest.source_description IS NULL'
-        ' AND dest.text IS NULL'
+        )
+mysql_engine.execute(updatecleaned)
+updatecleaned = sqlalchemy.sql.text(
+    'UPDATE article_metadata AS dest'
+        ' LEFT JOIN temp_etl_table AS source'
+        ' ON dest.db_id = source.id'
+        ' SET dest.publication = source.PUBLICATION'
+        ' WHERE dest.publication IS NULL'
+        )
+mysql_engine.execute(updatecleaned)
+updatecleaned = sqlalchemy.sql.text(
+    'UPDATE article_metadata AS dest'
+        ' LEFT JOIN temp_etl_table AS source'
+        ' ON dest.db_id = source.id'
+        ' SET dest.source_description = source.DOCSOURCE'
+        ' WHERE dest.source_description IS NULL'
+        )
+mysql_engine.execute(updatecleaned)
+updatecleaned = sqlalchemy.sql.text(
+    'UPDATE article_metadata AS dest'
+        ' LEFT JOIN temp_etl_table AS source'
+        ' ON dest.db_id = source.id'
+        ' SET dest.text = source.TEXT'
+        ' WHERE dest.text IS NULL'
         )
 mysql_engine.execute(updatecleaned)
 
