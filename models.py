@@ -165,6 +165,7 @@ class ArticleMetadata(Base):
         self.pub_date           = pub_date
         self.publication        = publication
         self.source_description = source_description
+        self.text               = text
 
     def __repr__(self):
         return '<ArticleMetadata %r (%r)>' % (self.title, self.id)
