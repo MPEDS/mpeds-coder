@@ -182,8 +182,12 @@ def loadSolr(solr_id):
 
 ## prep any article for display
 def prepText(article):
-    fn    = article.filename
-    db_id = article.db_id
+    fn                 = article.filename
+    db_id              = article.db_id
+    atitle             = article.title
+    pub_date           = article.pub_date
+    publication        = article.publication
+    fulltext           = article.text
 
     metawords = ['DATE', 'PUBLICATION', 'LANGUAGE', 'DATELINE', 'SECTION',
     'EDITION', 'LENGTH', 'DATE', 'SEARCH_ID', 'Published', 'By', 'AP', 'UPI']
@@ -197,7 +201,11 @@ def prepText(article):
 
     filename = str('INTERNAL_ID: %s' % fn)
 
-    if app.config['SOLR'] == True:
+    if app.config['STORE_ARTICLES_INTERNALLY'] == True:
+      title = atitle
+      meta = [publication, pub_date, db_id]
+      paras = fulltext.split('<br/>')
+    elif app.config['SOLR'] == True:
         title, meta, paras = loadSolr(db_id)
         if title == 0:
             title = "Cannot find article in Solr."
