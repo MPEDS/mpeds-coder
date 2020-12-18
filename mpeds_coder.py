@@ -857,7 +857,12 @@ def admin():
     pubs  = []
 
     ## get the available publications
-    if app.config['SOLR']:
+    if app.config['STORE_ARTICLES_INTERNALLY']:
+        pubquery = db_session.query(ArticleMetadata.publication).\
+                   distinct().\
+                   order_by(ArticleMetadata.publication)
+        pubs = [row.publication for row in pubquery]
+    elif app.config['SOLR']:
         url = '{}/select?q=Database:"University%20Wire"&rows=0&wt=json'.format(app.config['SOLR_ADDR'])
         fparams = 'facet=true&facet.field=PUBLICATION&facet.limit=1000'
 
