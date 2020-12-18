@@ -202,9 +202,9 @@ def prepText(article):
     filename = str('INTERNAL_ID: %s' % fn)
 
     if app.config['STORE_ARTICLES_INTERNALLY'] == True:
-      title = atitle
-      meta = [publication, pub_date, db_id]
-      paras = fulltext.split('<br/>')
+        title = atitle
+        meta = [publication, pub_date, db_id]
+        paras = fulltext.split('<br/>')
     elif app.config['SOLR'] == True:
         title, meta, paras = loadSolr(db_id)
         if title == 0:
