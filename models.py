@@ -186,7 +186,7 @@ class ArticleMetadata(Base):
                  pub_date = None,
                  publication = None,
                  source_description = None,
-                 self.text = None):
+                 text = None):
         self.filename           = filename
         self.db_name            = db_name
         self.db_id              = db_id
