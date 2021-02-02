@@ -2,6 +2,7 @@ from database import db_session, init_db
 from models import User, ArticleMetadata, CodeFirstPass, CodeSecondPass, CodeEventCreator, \
 	ArticleQueue, SecondPassQueue, EventCreatorQueue, Event
 from sqlalchemy import func
+from sqlalchemy.exc import IntegrityError
 
 import csv
 import random
@@ -29,21 +30,33 @@ def addArticlesExample(db_name = 'test'):
 
 def addArticles(filename, db_name):
 	articles = []
-	with open(filename) as csvfile:
-		reader = csv.reader(csvfile)
+	with open(filename, "rb") as csvfile:
+		reader = csv.DictReader(csvfile)
 		for row in reader:
-			title = row[0]
-			db_id = row[1]
-			if title == 'TITLE':
+			row = {k:v.decode("utf8") for k, v in row.items()}
+			title = row['title']
+			db_id = row['db_id']
+			pub_date = row['pub_date']
+			publication = row['publication']
+			source_description = row.get('source_description')
+			text = row['text']
+			try:
+				db_session.add(
+					ArticleMetadata(
+						title = title,
+						db_name = db_name,
+						db_id = db_id,
+						filename = db_id,
+						pub_date = pub_date,
+						publication = publication,
+						source_description = source_description,
+						text = text)
+					)
+				db_session.commit()
+			except IntegrityError as detail:
+				print(detail)
+				db_session.rollback()
 				continue
-			if len(row) > 2:
-				pub_date = row[2]
-			else:
-				pub_date = None
-			articles.append( ArticleMetadata(filename = db_id, db_id = db_id, title = title, db_name = db_name, pub_date = pub_date) )
-
-	db_session.add_all(articles)
-	db_session.commit()
 
 
 def addUsersExample():
@@ -87,7 +100,7 @@ def addQueueExample():
 
 def main():
 	init_db()
-	addArticles(config.DOC_ROOT + config.DOC_FILE, config.DOC_DBNAME)	
+	addArticles(config.DOC_ROOT + config.DOC_FILE, config.DOC_DBNAME)
 	# addUsersExample()
 	# addQueueExample()
 	pass

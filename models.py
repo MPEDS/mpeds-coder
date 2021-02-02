@@ -1,4 +1,4 @@
-from sqlalchemy import Boolean, Column, DateTime, Integer, String, Unicode, ForeignKey, UniqueConstraint, Text, UnicodeText, Date
+from sqlalchemy import Boolean, Column, DateTime, Integer, String, Unicode, ForeignKey, UniqueConstraint, Text, Date, UnicodeText
 from sqlalchemy.orm import relationship, backref
 from flask_login import UserMixin
 from database import Base
@@ -172,12 +172,23 @@ class ArticleMetadata(Base):
     pub_date            = Column(Date)
     publication         = Column(String(511))
     source_description  = Column(String(511))
+    ## FIXME: Collation arg may will break anything but MySQL 5.7
+    text                = Column(UnicodeText(4194300,
+                                 collation='utf8mb4_general_ci'))
 
     firsts  = relationship("CodeFirstPass",  backref = backref("article_metadata", order_by = id))
     seconds = relationship("CodeSecondPass", backref = backref("article_metadata", order_by = id))
     queue   = relationship("ArticleQueue",   backref = backref("article_metadata", order_by = id))
 
-    def __init__(self, filename, db_name = None, db_id = None, title = None, pub_date = None, publication = None, source_description = None):
+    def __init__(self,
+                 filename,
+                 db_name = None,
+                 db_id = None,
+                 title = None,
+                 pub_date = None,
+                 publication = None,
+                 source_description = None,
+                 text = None):
         self.filename           = filename
         self.db_name            = db_name
         self.db_id              = db_id
@@ -185,6 +196,7 @@ class ArticleMetadata(Base):
         self.pub_date           = pub_date
         self.publication        = publication
         self.source_description = source_description
+        self.text               = text
 
     def __repr__(self):
         return '<ArticleMetadata %r (%r)>' % (self.title, self.id)
