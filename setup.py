@@ -31,27 +31,27 @@ def addArticlesExample(db_name = 'test'):
 def addArticles(filename, db_name):
 	articles = []
 	with open(filename, "rb") as csvfile:
-		reader = csv.reader(csvfile)
+		reader = csv.DictReader(csvfile)
 		for row in reader:
-			row = [entry.decode("utf8") for entry in row]
-			title = row[0]
-			db_id = row[1]
-			if title == 'TITLE':
-				continue
-			if len(row) > 2:
-				pub_date = row[2]
-				publication = row[3]
-			else:
-				pub_date = None
+			row = {k:v.decode("utf8") for k, v in row.items()}
+			title = row['title']
+			db_id = row['db_id']
+			pub_date = row['pub_date']
+			publication = row['publication']
+			source_description = row.get('source_description')
+			text = row['text']
 			try:
 				db_session.add(
-					ArticleMetadata(filename = db_id,
-							db_id = db_id,
-							title = title,
-							db_name = db_name,
-							pub_date = pub_date,
-							publication = publication)
-				)
+					ArticleMetadata(
+						title = title,
+						db_name = db_name,
+						db_id = db_id,
+						filename = db_id,
+						pub_date = pub_date,
+						publication = publication,
+						source_description = source_description,
+						text = text)
+					)
 				db_session.commit()
 			except IntegrityError as detail:
 				print(detail)
@@ -100,7 +100,7 @@ def addQueueExample():
 
 def main():
 	init_db()
-  addArticles(config.DOC_ROOT + config.DOC_FILE, config.DOC_DBNAME)
+	addArticles(config.DOC_ROOT + config.DOC_FILE, config.DOC_DBNAME)
 	# addUsersExample()
 	# addQueueExample()
 	pass
