@@ -2,6 +2,7 @@ from database import db_session, init_db
 from models import User, ArticleMetadata, CodeFirstPass, CodeSecondPass, CodeEventCreator, \
 	ArticleQueue, SecondPassQueue, EventCreatorQueue, Event
 from sqlalchemy import func
+from sqlalchemy.exc import IntegrityError
 
 import csv
 import random
@@ -29,17 +30,33 @@ def addArticlesExample(db_name = 'test'):
 
 def addArticles(filename, db_name):
 	articles = []
-	with open(filename) as csvfile:
+	with open(filename, "rb") as csvfile:
 		reader = csv.reader(csvfile)
 		for row in reader:
+                        row = [entry.decode("utf8") for entry in row]
 			title = row[0]
 			db_id = row[1]
 			if title == 'TITLE':
 				continue
-			articles.append( ArticleMetadata(filename = db_id, db_id = db_id, title = title, db_name = db_name) )
-
-	db_session.add_all(articles)
-	db_session.commit()
+			if len(row) > 2:
+				pub_date = row[2]
+                                publication = row[3]
+			else:
+				pub_date = None
+                        try:
+			        db_session.add(
+                                        ArticleMetadata(filename = db_id,
+                                                        db_id = db_id,
+                                                        title = title,
+                                                        db_name = db_name,
+                                                        pub_date = pub_date,
+                                                        publication = publication)
+                                )
+                                db_session.commit()
+                        except IntegrityError as detail:
+                                print(detail)
+                                db_session.rollback()
+                                continue
 
 
 def addUsersExample():
@@ -83,11 +100,10 @@ def addQueueExample():
 
 def main():
 	init_db()
-	addArticles(config.DOC_ROOT + config.DOC_FILE, config.DOC_DBNAME)	
+  addArticles(config.DOC_ROOT + config.DOC_FILE, config.DOC_DBNAME)
 	# addUsersExample()
 	# addQueueExample()
 	pass
-
 
 if __name__ == '__main__':
 	main()
