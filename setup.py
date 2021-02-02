@@ -33,30 +33,30 @@ def addArticles(filename, db_name):
 	with open(filename, "rb") as csvfile:
 		reader = csv.reader(csvfile)
 		for row in reader:
-                        row = [entry.decode("utf8") for entry in row]
+			row = [entry.decode("utf8") for entry in row]
 			title = row[0]
 			db_id = row[1]
 			if title == 'TITLE':
 				continue
 			if len(row) > 2:
 				pub_date = row[2]
-                                publication = row[3]
+				publication = row[3]
 			else:
 				pub_date = None
-                        try:
-			        db_session.add(
-                                        ArticleMetadata(filename = db_id,
-                                                        db_id = db_id,
-                                                        title = title,
-                                                        db_name = db_name,
-                                                        pub_date = pub_date,
-                                                        publication = publication)
-                                )
-                                db_session.commit()
-                        except IntegrityError as detail:
-                                print(detail)
-                                db_session.rollback()
-                                continue
+			try:
+				db_session.add(
+					ArticleMetadata(filename = db_id,
+							db_id = db_id,
+							title = title,
+							db_name = db_name,
+							pub_date = pub_date,
+							publication = publication)
+				)
+				db_session.commit()
+			except IntegrityError as detail:
+				print(detail)
+				db_session.rollback()
+				continue
 
 
 def addUsersExample():
