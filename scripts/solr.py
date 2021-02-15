@@ -17,6 +17,7 @@ class Solr:
 
 
     def _getDocumentsFromIDChunk(self, ids):
+        ids = [x.encode('utf8') for x in ids]
         ids_qclause = '"' + '" OR "'.join(ids) + '"'
         ids_q = 'id: (' + ids_qclause + ')'
         
