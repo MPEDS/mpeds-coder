@@ -122,7 +122,7 @@ yes_no_vars = yaml.load(open(app.config['WD'] + '/yes-no.yaml', 'r'))
 
 ## mark the single-valued items
 event_creator_single_value = ['article-desc', 'desc', 'start-date', 'end-date', 
-                              'location', 'duration', 'date-est', 'persons-freeform']
+    'location', 'duration', 'date-est']
 
 event_creator_single_value.extend([[x[0] for x in v] for k, v in yes_no_vars.iteritems()])
 
@@ -182,8 +182,12 @@ def loadSolr(solr_id):
 
 ## prep any article for display
 def prepText(article):
-    fn    = article.filename
-    db_id = article.db_id
+    fn                 = article.filename
+    db_id              = article.db_id
+    atitle             = article.title
+    pub_date           = article.pub_date
+    publication        = article.publication
+    fulltext           = article.text
 
     metawords = ['DATE', 'PUBLICATION', 'LANGUAGE', 'DATELINE', 'SECTION',
     'EDITION', 'LENGTH', 'DATE', 'SEARCH_ID', 'Published', 'By', 'AP', 'UPI']
@@ -197,7 +201,11 @@ def prepText(article):
 
     filename = str('INTERNAL_ID: %s' % fn)
 
-    if app.config['SOLR'] == True:
+    if app.config['STORE_ARTICLES_INTERNALLY'] == True:
+        title = atitle
+        meta = [publication, pub_date, db_id]
+        paras = fulltext.split('<br/>')
+    elif app.config['SOLR'] == True:
         title, meta, paras = loadSolr(db_id)
         if title == 0:
             title = "Cannot find article in Solr."
@@ -849,7 +857,12 @@ def admin():
     pubs  = []
 
     ## get the available publications
-    if app.config['SOLR']:
+    if app.config['STORE_ARTICLES_INTERNALLY']:
+        pubquery = db_session.query(ArticleMetadata.publication).\
+                   distinct().\
+                   order_by(ArticleMetadata.publication)
+        pubs = [row.publication for row in pubquery]
+    elif app.config['SOLR']:
         url = '{}/select?q=Database:"University%20Wire"&rows=0&wt=json'.format(app.config['SOLR_ADDR'])
         fparams = 'facet=true&facet.field=PUBLICATION&facet.limit=1000'
 
@@ -974,15 +987,18 @@ def coderStats():
         coded_once = coded_once
     )
 
-@app.route('/publications/<db>')
+@app.route('/publications')
+@app.route('/publications/<sort>')
 @login_required
-def publications(db):
+def publications(sort = 'tbc'):
     """
       Geenerate list of all publications and all articles remaining. 
     """
     if current_user.authlevel < 3:
         return redirect(url_for('index'))
 
+    ## TK: Write code to sort by selected attribute
+    
     query = """
     SELECT REPLACE(REPLACE(dem.publication, '-', ' '), '   ', ' - ') as publication, 
     COALESCE(num.in_queue,0) as in_queue, 
@@ -992,18 +1008,18 @@ def publications(db):
     (
     SELECT SUBSTRING_INDEX(am.db_id, '_', 1) as publication, COUNT(*) AS in_queue
     FROM article_metadata am
-    WHERE am.db_name = '%s' AND am.id IN (SELECT article_id FROM event_creator_queue)
+    WHERE am.db_name = 'uwire' AND am.id IN (SELECT article_id FROM event_creator_queue)
     GROUP BY 1
 ) num RIGHT JOIN
 (
     SELECT SUBSTRING_INDEX(am.db_id, '_', 1) as publication, COUNT(*) AS total
     FROM article_metadata am
-    WHERE db_name = '%s'
+    WHERE db_name = 'uwire'
     GROUP BY 1
 ) dem ON num.publication = dem.publication
 ORDER BY to_be_coded DESC, total DESC
-    """ % (db, db)
-
+    """
+    
     result = db_session.execute(query)
     rows = [(row[0], row[1], row[2], row[3]) for row in result]
 
@@ -1153,7 +1169,7 @@ def generateCoderAudit():
         response.headers["mime-type"] = "text/csv"
         return response
     elif action == 'save':
-        filename = '%s/coder-table_%s.csv' % (app.config['WD'], dt.datetime.now().strftime('%Y-%m-%d'))
+        filename = '%s/exports/coder-table_%s.csv' % (app.config['WD'], dt.datetime.now().strftime('%Y-%m-%d_%H%M%S'))
         df.to_csv(filename, encoding = 'utf-8', index = False)
         return jsonify(result={"status": 200, "filename": filename})
     else:
