@@ -14,7 +14,7 @@ mysql_engine = sqlalchemy.create_engine(
         config.MYSQL_PASS, 
         config.MYSQL_DB, 
         config.MYSQL_SOCK, 
-        'utf8'), 
+        'utf8mb4'), 
     convert_unicode=True)
 
 ## SOLR setup
@@ -61,7 +61,7 @@ createtemp = sqlalchemy.sql.text(
         ', PUBLICATION varchar(511) DEFAULT NULL'
         ', DOCSOURCE varchar(511) DEFAULT NULL'
         ', TEXT mediumtext CHARACTER SET utf8mb4'
-        ')'
+        ') DEFAULT CHARSET=utf8mb4 COLLATE utf8mb4_unicode_ci'
         )
 mysql_engine.execute(createtemp)
 
