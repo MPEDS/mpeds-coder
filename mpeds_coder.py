@@ -199,7 +199,7 @@ def prepText(article):
     paras = []
     path  = app.config['DOC_ROOT'] + fn
 
-    filename = str('INTERNAL_ID: %s' % fn)
+    filename = str('INTERNAL_ID: %s' % fn.encode('utf8'))
 
     if app.config['STORE_ARTICLES_INTERNALLY'] == True:
         title = atitle
