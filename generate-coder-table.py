@@ -101,9 +101,16 @@ def main():
         else:
             ## e.g. 
             ## Caribbean-Today;-Miami_1996-12-31_26b696eae2887c8cf71735a33eb39771
+            ## HOWEVER
+            ## North-Carolina-A-_-T-State-University_The-A_T-Register_2018-03-21T00:00:00Z_96c6bc5e6701f8b1ccbba7a318cc50ad
+            
             pieces   = am.db_id.split("_")
-            pub      = pieces[0]
-            pub_date = pieces[1]
+            if len(pieces) > 3:
+                pub = '_'.join(pieces[0:-2])
+            else:
+                pub = pieces[0]
+            
+            pub_date = pieces[-2]
 
             ## remove T00:00:00Z from dates
             ## e.g. 2013-03-19T00:00:00Z
