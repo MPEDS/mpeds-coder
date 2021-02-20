@@ -174,6 +174,11 @@ label.form-check-label {
 	margin: 0px;
 }
 
+.preset-scrollable {
+    height: 350px;
+    overflow-y:auto;
+}
+
 .varblock p:hover {
 	background-color: #eee;
 }
