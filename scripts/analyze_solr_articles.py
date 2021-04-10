@@ -124,8 +124,8 @@ maxentries = (solr_df
                 # sort changed to sort_values at pandas 0.17 or so
                 #.sort('maxn', ascending=False)
                 )
-print '\n\nLargest multi-entry cell in each column:'
-print maxentries
+print('\n\nLargest multi-entry cell in each column:')
+print(maxentries)
 
 ## Nonempty analysis
 
@@ -134,5 +134,5 @@ nonmissing = (solr_df
                 # sort changed to sort_values at pandas 0.17 or so
                 #.sort(ascending=False)
                 )
-print '\n\nNonmissing entries in each column:'
-print nonmissing
+print('\n\nNonmissing entries in each column:')
+print(nonmissing)
