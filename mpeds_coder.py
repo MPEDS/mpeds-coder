@@ -40,7 +40,7 @@ from flask import Flask, request, session, g, redirect, url_for, abort, make_res
 from flask_login import LoginManager, login_user, logout_user, current_user, login_required
 
 ## article assignment library
-import assign_lib
+from . import assign_lib
 
 ## db
 from sqlalchemy.exc import OperationalError
@@ -50,8 +50,8 @@ from sqlalchemy.schema import Table
 from sqlite3 import dbapi2 as sqlite3
 
 ## app-specific
-from database import db_session
-from models import ArticleMetadata, ArticleQueue, CodeFirstPass, CodeSecondPass, CodeEventCreator, \
+from .database import db_session
+from .models import ArticleMetadata, ArticleQueue, CodeFirstPass, CodeSecondPass, CodeEventCreator, \
     Event, EventCreatorQueue, SecondPassQueue, User
 
 # create our application
@@ -120,7 +120,7 @@ yes_no_vars = yaml.load(open(app.config['WD'] + '/yes-no.yaml', 'r'))
 event_creator_single_value = ['article-desc', 'desc', 'start-date', 'end-date', 
     'location', 'duration', 'date-est']
 
-event_creator_single_value.extend([[x[0] for x in v] for k, v in yes_no_vars.iteritems()])
+event_creator_single_value.extend([[x[0] for x in v] for k, v in yes_no_vars.items()])
 
 ## metadata for Solr
 meta_solr = ['PUBLICATION', 'SECTION', 'BYLINE', 'DATELINE', 'DATE', 'INTERNAL_ID']
@@ -131,7 +131,7 @@ meta_solr = ['PUBLICATION', 'SECTION', 'BYLINE', 'DATELINE', 'DATE', 'INTERNAL_I
 
 ##### load text from Solr database
 def loadSolr(solr_id):
-    solr_id    = urllib.quote(solr_id)
+    solr_id    = urllib.parse.quote(solr_id)
     url        = '%s/select?q=id:"%s"&wt=json' % (app.config['SOLR_ADDR'], solr_id)
     not_found  = (0, [], [])
     no_connect = (-1, [], [])
@@ -139,8 +139,8 @@ def loadSolr(solr_id):
     try:
         if (sys.version_info < (3, 0)):
             ## Python 2
-            req  = urllib2.Request(url)
-            res  = urllib2.urlopen(req)
+            req  = urllib.request.Request(url)
+            res  = urllib.request.urlopen(req)
         else:
             ## Python 3
             res = urllib.request.urlopen(url)
@@ -283,7 +283,7 @@ def prepText(article):
     all_paras = all_paras.strip()
 
     html  = "<h4>%s</h4>\n" % title
-    html += "<p class='meta' id='meta'>%s</p>\n" % " | ".join(map(lambda x: "%s" % x, meta)).strip()
+    html += "<p class='meta' id='meta'>%s</p>\n" % " | ".join(["%s" % x for x in meta]).strip()
     html += "<div class='bodytext' id='bodytext'>\n%s\n</div>" % all_paras
 
     ## plain-text
@@ -297,7 +297,7 @@ def prepText(article):
 def validate( x ):
     """ replace newlines, returns, and tabs with blank space """
     if x:
-        if type(x) == unicode:
+        if type(x) == str:
             x = string.replace(x, "\n", " ")
             x = string.replace(x, "\r", " ")
             x = string.replace(x, "\t", " ")
@@ -706,7 +706,7 @@ def code2queue(sort, sort_dir, page = 1):
         cfp_order.append(cfp.article_id)
 
     ## add metadata and delete all nos
-    for article_id, v in cfp_dict.items():
+    for article_id, v in list(cfp_dict.items()):
         to_del = True
         for coder, decision in v["coder_value"]:
             ## not sure why this would be null, but it is
@@ -731,9 +731,9 @@ def code2queue(sort, sort_dir, page = 1):
 
     ## sort by different variables
     if sort == 'coder_value':
-        cfp_order = [x[0] for x in sorted(cfp_dict.items(), key = lambda x: len(x[1][sort]), reverse = True if sort_dir == 'desc' else False)]
+        cfp_order = [x[0] for x in sorted(list(cfp_dict.items()), key = lambda x: len(x[1][sort]), reverse = True if sort_dir == 'desc' else False)]
     else:
-        cfp_order = [x[0] for x in sorted(cfp_dict.items(), key = lambda x: x[1][sort], reverse = True if sort_dir == 'desc' else False)]
+        cfp_order = [x[0] for x in sorted(list(cfp_dict.items()), key = lambda x: x[1][sort], reverse = True if sort_dir == 'desc' else False)]
 
     return render_template(
         "code2queue.html",
@@ -848,7 +848,7 @@ def admin():
         return redirect(url_for('index'))
 
     ura   = {u.id: u.username for u in db_session.query(User).filter(User.authlevel == 1).all()}
-    coded = {user: {} for user in ura.keys()}
+    coded = {user: {} for user in list(ura.keys())}
     dbs   = [x[0] for x in db_session.query(ArticleMetadata.db_name).distinct()]
     pubs  = []
 
@@ -871,11 +871,11 @@ def admin():
 
     ## get user stats for EC
     for count, user in db_session.query(func.count(EventCreatorQueue.id), User.id).\
-        join(User).group_by(User.id).filter(EventCreatorQueue.coded_dt == None, User.id.in_(ura.keys())).all():
+        join(User).group_by(User.id).filter(EventCreatorQueue.coded_dt == None, User.id.in_(list(ura.keys()))).all():
         coded[user]['remaining'] = count
 
     for count, user in db_session.query(func.count(EventCreatorQueue.id), User.id).\
-        join(User).group_by(User.id).filter(EventCreatorQueue.coded_dt != None, User.id.in_(ura.keys())).all():
+        join(User).group_by(User.id).filter(EventCreatorQueue.coded_dt != None, User.id.in_(list(ura.keys()))).all():
         coded[user]['completed'] = count
 
     ## get number of unassigned articles
@@ -1445,7 +1445,7 @@ def getEvents():
 
         ## get the fields in rvar
         for code in codes:
-            if code.variable in rvar.keys():
+            if code.variable in list(rvar.keys()):
                 ## otherwise, just use the value
                 rvar[code.variable].append(code.value)
         
@@ -1577,8 +1577,8 @@ def modifyEvents():
                 opts[ o.variable ].append(o.value)
 
     ## filter out repeated items and sort
-    for k,v in opts.items():
-        opts[k] = list( set( map(lambda x: x.strip(" .,"), opts[k]) ) )
+    for k,v in list(opts.items()):
+        opts[k] = list( set( [x.strip(" .,") for x in opts[k]] ) )
         opts[k].sort()
 
     return render_template(template, 
@@ -1695,12 +1695,12 @@ def highlightVar():
         bounds[p][end].append('end')
 
     ## based on the depth of highlighting, mark with the correct class
-    for p_key, para in paras.items():
+    for p_key, para in list(paras.items()):
         state  = 0
         last_i = 0
         r_para = ""
 
-        keys = bounds[p_key].keys()
+        keys = list(bounds[p_key].keys())
         if len(keys) > 0:
             ## sort so we can go in order
             keys = sorted(keys)
@@ -1840,7 +1840,7 @@ def assignArticles():
     if users == '':
         return make_response('Please select some users.', 500)
 
-    user_ids = map(lambda x: int(x), users.split(','))
+    user_ids = [int(x) for x in users.split(',')]
 
     if group_size != '':
         try:
@@ -1888,7 +1888,7 @@ def assignArticles():
             ## can't assign by ID because of the factorial math
             return make_response('Cannot assign articles by ID with bins.', 500)
 
-        ids = map(lambda x: int(x), ids.strip().split('\n'))
+        ids = [int(x) for x in ids.strip().split('\n')]
         if same == 'same':
             n_added = assign_lib.assignmentToCoders(ids, user_ids, 'ec')
         elif same == 'different':
@@ -1912,8 +1912,8 @@ def transferArticles():
     except:
         return make_response('Please enter a valid number.', 500)
    
-    from_users = map(lambda x: int(x), from_users.split(','))
-    to_users = map(lambda x: int(x), to_users.split(','))
+    from_users = [int(x) for x in from_users.split(',')]
+    to_users = [int(x) for x in to_users.split(',')]
 
     n = assign_lib.transferCoderToCoder(from_users, to_users, 'ec', num)
 

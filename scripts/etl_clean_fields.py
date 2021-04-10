@@ -4,8 +4,8 @@ import pandas as pd
 import sqlalchemy
 #import sqlalchemy.orm
 
-from context import config
-import solr
+from .context import config
+from . import solr
 
 ## MySQL setup
 mysql_engine = sqlalchemy.create_engine(

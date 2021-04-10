@@ -1,5 +1,5 @@
-from database import db_session
-from models import User, ArticleMetadata, CodeFirstPass, CodeSecondPass, CodeEventCreator, ArticleQueue, SecondPassQueue, EventCreatorQueue, Event
+from .database import db_session
+from .models import User, ArticleMetadata, CodeFirstPass, CodeSecondPass, CodeEventCreator, ArticleQueue, SecondPassQueue, EventCreatorQueue, Event
 from sqlalchemy import func, or_, distinct, desc
 from datetime import datetime
 from itertools import combinations
@@ -289,7 +289,7 @@ def generateSampleNumberForBins(num_per_coder, n, k):
     num_per_coder -= remainder
 
     ## get number of bins
-    num_bins = len(list(combinations(range(0,n), k)))
+    num_bins = len(list(combinations(list(range(0,n)), k)))
 
     return int(num_bins * num_per_coder / a)
 
@@ -333,7 +333,7 @@ def distributeDupes(coder1, coder2_list):
     existing = {coder_id: [x[0] for x in db_session.query(distinct(SecondPassQueue.article_id)).filter(SecondPassQueue.coder_id == coder_id).all()] for coder_id in coder2_list}
 
     to_del = []
-    to_add = {x: [] for x in existing.keys()}
+    to_add = {x: [] for x in list(existing.keys())}
     nope   = []
     for article_id, old_coder_id, _ in dupes:
         reassigned = False
@@ -351,7 +351,7 @@ def distributeDupes(coder1, coder2_list):
 
         ## go through a random list of the other coders.
         ## if article is not in their queue, add it.
-        coders = existing.keys()
+        coders = list(existing.keys())
         random.shuffle(coders)
 
         for coder_id in coders:
@@ -371,7 +371,7 @@ def distributeDupes(coder1, coder2_list):
     ## commit
     for aq in to_del:
         db_session.delete(aq)
-    for k in to_add.keys():
+    for k in list(to_add.keys()):
         db_session.add_all(to_add[k])
     db_session.commit()
 

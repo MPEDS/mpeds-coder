@@ -29,7 +29,7 @@ class Solr:
     def buildSolrQuery(self, q_dict):
         ''' Build a query for a Solr request. '''
         q = []
-        for k, v in q_dict.iteritems():
+        for k, v in q_dict.items():
             sub_q = '%s:"%s"' % (k, v)
             q.append(sub_q)
 
@@ -49,9 +49,9 @@ class Solr:
         if fq:
             data['fq'] = fq
 
-        data = urllib.urlencode(data)
-        req  = urllib2.Request(self.solr_url, data)
-        res  = urllib2.urlopen(req)
+        data = urllib.parse.urlencode(data)
+        req  = urllib.request.Request(self.solr_url, data)
+        res  = urllib.request.urlopen(req)
         res  = json.loads(res.read())
 
         return res['response']['numFound']
@@ -70,9 +70,9 @@ class Solr:
         if fq:
             data['fq'] = fq
 
-        data = urllib.urlencode(data)
-        req  = urllib2.Request(self.solr_url, data)
-        res  = urllib2.urlopen(req)
+        data = urllib.parse.urlencode(data)
+        req  = urllib.request.Request(self.solr_url, data)
+        res  = urllib.request.urlopen(req)
         res  = json.loads(res.read())
 
         numFound = res['response']['numFound']
@@ -96,9 +96,9 @@ class Solr:
             if fq:
                 data['fq'] = fq
 
-            data = urllib.urlencode(data)
-            req  = urllib2.Request(self.solr_url, data)
-            res  = urllib2.urlopen(req)
+            data = urllib.parse.urlencode(data)
+            req  = urllib.request.Request(self.solr_url, data)
+            res  = urllib.request.urlopen(req)
             res  = json.loads(res.read())
 
             articles.extend(res['response']['docs'])
@@ -111,7 +111,7 @@ class Solr:
     def getDocumentsFromIDs(self, ids, maxclauses=1024):
         # Chunk trick from https://stackoverflow.com/questions/312443/how-do-you-split-a-list-into-evenly-sized-chunks
         id_chunks = [ids[i:i + maxclauses] for i
-                     in xrange(0, len(ids), maxclauses)]
+                     in range(0, len(ids), maxclauses)]
 
         docs = list()
         # NB: making copies of this list will use up memory fast!

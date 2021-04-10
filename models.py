@@ -1,7 +1,7 @@
 from sqlalchemy import Boolean, Column, DateTime, Integer, String, Unicode, ForeignKey, UniqueConstraint, Text, Date, UnicodeText
 from sqlalchemy.orm import relationship, backref
 from flask_login import UserMixin
-from database import Base
+from .database import Base
 import datetime as dt
 import pytz
 from pytz import timezone

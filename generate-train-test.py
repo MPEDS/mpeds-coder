@@ -1,5 +1,5 @@
-from database import db_session, init_db
-from models import ArticleMetadata, CodeFirstPass, CodeSecondPass
+from .database import db_session, init_db
+from .models import ArticleMetadata, CodeFirstPass, CodeSecondPass
 from sqlalchemy import func
 from datetime import datetime
 import random
@@ -21,7 +21,7 @@ def findVariableLocation(id, variable):
     ## paragraph numbers are noted by pp-start-end, indexed from 0. 
     ## meta data is included and will be indexed as -1
     try:
-        values = map(lambda x: -1 if 'meta' in x else int(x.split('-')[0]), values) 
+        values = [-1 if 'meta' in x else int(x.split('-')[0]) for x in values] 
     except ValueError as detail:
         print(detail)
         pass ## some weirdness happening but whatever we'll just catch
@@ -76,7 +76,7 @@ def generateTrainTestSets():
         cfp_dict[am.db_id]["coder_value"].append( (cfp.coder_id, cfp.value) )
         cfp_dict[am.db_id]["num_coders"] += 1
 
-    for article_id, v in cfp_dict.items():
+    for article_id, v in list(cfp_dict.items()):
         for coder, decision in v["coder_value"]:
             ## not sure why this would be null, but it is
             if not decision:

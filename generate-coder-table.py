@@ -4,8 +4,8 @@
 Generates the coder table independently of the dashboard.
 """
 
-from database import db_session
-from models import ArticleMetadata, CodeEventCreator, User
+from .database import db_session
+from .models import ArticleMetadata, CodeEventCreator, User
 
 from sqlalchemy.exc import OperationalError
 from sqlalchemy import func, desc, distinct, or_
@@ -21,7 +21,7 @@ import datetime as dt
 def validate( x ):
     """ replace newlines, returns, and tabs with blank space """
     if x:
-        if type(x) == unicode:
+        if type(x) == str:
             x = string.replace(x, "\n", " ")
             x = string.replace(x, "\r", " ")
             x = string.replace(x, "\t", " ")
