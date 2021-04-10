@@ -1,6 +1,7 @@
 import sys
 import datetime
-import urllib
+import urllib.request
+import urllib.parse
 
 import pandas as pd
 import sqlalchemy

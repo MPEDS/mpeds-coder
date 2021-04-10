@@ -17,18 +17,14 @@ import re
 import smtplib
 import string
 import sys
-import urllib
+import urllib.request
+import urllib.parse
 import datetime as dt
 import time
 from math import ceil
 from random import sample
 from random import choice
 import yaml
-
-if (sys.version_info < (3, 0)):
-    import urllib2
-else:
-    import urllib.request
 
 ## pandas
 import pandas as pd
@@ -866,14 +862,7 @@ def admin():
         url = '{}/select?q=Database:"University%20Wire"&rows=0&wt=json'.format(app.config['SOLR_ADDR'])
         fparams = 'facet=true&facet.field=PUBLICATION&facet.limit=1000'
 
-        if (sys.version_info < (3, 0)):
-            ## Python 2
-            import urllib2
-            req  = urllib2.Request(url + '&' + fparams)
-            res  = urllib2.urlopen(req)
-        else:
-            ## Python 3
-            res = urllib.request.urlopen(url + '&' + fparams)
+        res = urllib.request.urlopen(url + '&' + fparams)
 
         jobj = json.loads(res.read())
 

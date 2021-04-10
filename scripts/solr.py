@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import json
-import urllib
-import urllib2
+import urllib.request
+import urllib.parse
 
 """ 
 Helper class for querying an Apache Solr database. 
