@@ -80,7 +80,15 @@ def genByCoderAndEventByAnnotation(
                              u_q.session.get_bind())
 
     am_q = (session
-            .query(article_metadata_table.id, article_metadata_table.db_id)
+            .query(article_metadata_table.id,
+                   article_metadata_table.title,
+                   article_metadata_table.db_name,
+                   article_metadata_table.db_id,
+                   article_metadata_table.filename,
+                   article_metadata_table.pub_date,
+                   article_metadata_table.publication,
+                   article_metadata_table.source_description
+                   )
             )
     am = pd.read_sql_query(am_q.statement, 
                            # Old pandas fears real connections
