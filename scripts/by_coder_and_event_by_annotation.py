@@ -45,6 +45,66 @@ def numberDuplicatedVariables(df, groupbylist, varcol):
           )
     return df
 
+def pivot_annotations_wider(
+    annotation_table,
+    dim_cols,
+    col_prefix,
+    session):
+
+    ## Get tables into data frames
+    q = (
+        session
+        .query(annotation_table)
+        .order_by('id')
+        )
+    long = pd.read_sql_query(
+        q.statement, 
+        # Old pandas fears real connections
+        #q.session.connection())
+        q.session.get_bind())
+
+    ## Concatenate duplicated variables
+    catted = catDuplicatedVariables(
+        df=long,
+        groupbylist=dim_cols + ['variable'],
+        valcollist=['value', 'text'])
+
+    ## Reshape tables
+    val = unstackWithoutMissings(
+        df=catted,
+        indexlist=dim_cols + ['variable'],
+        valuecol='value')
+
+    text = unstackWithoutMissings(
+        df=catted,
+        indexlist=dim_cols + ['variable'],
+        valuecol='text')
+
+    ## Merge article annotations and rename columns
+    wide = (
+        val
+        .join(text, how='outer')
+        .reset_index()
+        .swaplevel(0, 1, axis=1)
+        )
+    # NB columns are multilevel
+    wide.columns = [col_prefix + '_' + '_'.join(col).strip('_')
+                       for col in wide.columns.values]
+
+    ## Create df with max and min timestamps from both levels
+    times = (
+        long
+        .filter(['coder_id', 'article_id', 'timestamp'])
+        )
+
+    ## Align join key names
+    prefixless_dims = {'_'.join([col_prefix, c]):c for c in dim_cols}
+    wide = (
+        wide
+        .rename(columns=prefixless_dims)
+        )
+    return wide
+
 def genByCoderAndEventByAnnotation(
         session,
         coder_event_table,
