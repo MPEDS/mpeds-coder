@@ -105,7 +105,7 @@ var addSelectedText = function(e, v) {
 }
 
 var deleteCode = function(e) {
-  var r = confirm("Are you sure you want to delete this item?");
+  var r = confirm("Are you sure you want to delete this item?\n(Note: due to bug, duplicates will not be deleted)");
   if (r == false) {
     return
   }
@@ -133,13 +133,12 @@ var deleteCode = function(e) {
   });
 
   req.fail(function() {
-    $("#flash-error").text("Error deleting item.");
+    $("#flash-error").text("Error deleting item." + req.responseText);
     $("#flash-error").show();
   });
 }
 
 /* Adds a value for a variable if not available in the current list. */
-// DS 2020-01-16: Looks like this is only used by code1.js and code2.js
 var addCode = function(e) {
   var oText    = '';
   var aid      = $(".article").attr("id").split("_")[1];
@@ -208,51 +207,7 @@ var generate_handler = function( v, type ) {
   };
 }
 
-/* Adds or deletes values for article variables based on checkboxes. */
-var selectArticleCheckbox = function(e) {
-  var el       = $(e.target);
-  var aid      = $(".article").attr("id").split("_")[1];  
-  var pn       = $('#pass_number').val();
-
-  var variable = el.attr("id").split("_")[1];
-  var val      = el.val();
-
-  // for some of the basic info variables, id == val. change to 'yes'
-  if (variable == val) {
-    val = 'yes';
-  }
-
-  var is_checked = el.is(':checked');
-  var action = ''
-
-  // add this checkbox item
-  if (is_checked == true) {
-    action = 'add';
-  } else { // delete it
-    action = 'del';
-  }
-
-  req = $.ajax({
-    type: "GET",
-    url:  $SCRIPT_ROOT + '/_' + action + '_article_code/' + pn,
-    data: {
-      article:  aid,
-      variable: variable,
-      value:    val
-    }
-  });
-
-  req.done(function(e) {
-    $('#flash-error').hide();
-  });
-
-  req.fail(function(e) {
-    $("#flash-error").text("Error changing checkbox.");
-    $("#flash-error").show();
-  });
-}
-
-/* Adds or deletes values for each event variable based on checkboxes. */
+/* Adds or deletes values for each variable based on checkboxes. */
 var selectCheckbox = function(e) {
   var el       = $(e.target);
   var aid      = $(".article").attr("id").split("_")[1];  
@@ -299,6 +254,7 @@ var selectCheckbox = function(e) {
 }
 
 /* Adds or deletes values for each variable based on radio buttons selected. */
+/* Also handles select controls */
 var selectRadio = function(e) {
   var el       = $(e.target);
   var aid      = $(".article").attr("id").split("_")[1];  
@@ -325,39 +281,7 @@ var selectRadio = function(e) {
   });
 
   req.fail(function(e) {
-    $("#flash-error").text("Error changing radio button.");
-    $("#flash-error").show();
-  });
-}
-
-/* Adds or deletes values for each variable based on radio buttons selected. */
-var storeArticleTextInput = function(e) {
-  var el       = $(e.target);
-  var aid      = $(".article").attr("id").split("_")[1];  
-//  var eid      = el.closest(".event-block").attr("id").split("_")[1];
-  var pn       = $('#pass_number').val();
-
-  var variable = el.attr("id").split("_")[1];
-  var val      = el.val();
-
-  // change code
-  req = $.ajax({
-    type: "GET",
-    url:  $SCRIPT_ROOT + '/_change_article_code/' + pn,
-    data: {
-      article:  aid,
-      variable: variable,
-      value:    val //,
-//      event:    eid
-    }
-  });
-
-  req.done(function(e) {
-    $('#flash-error').hide();
-  });
-
-  req.fail(function(e) {
-    $("#flash-error").text("Error changing article text input.");
+    $("#flash-error").text("Error changing radio button or drop-down.");
     $("#flash-error").show();
   });
 }
@@ -394,7 +318,6 @@ var storeText = function(e) {
   });
 }
 
-// DS 2020-01-16: it looks like nothing anywhere calls this?
 var getCodes = function(ev) {
   // prepopulate existing fields
   var aid = $(".article").attr("id").split("_")[1];    

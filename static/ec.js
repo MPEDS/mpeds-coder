@@ -1,40 +1,3 @@
-/* Edit article-level info. */
-var modifyArticleAnnotations = function() {
-  var aid  = $(".article").attr("id").split("_")[1];
-  var pn   = $('#pass_number').val();
-
-  req = $.ajax({
-      type: "GET",
-      url:  $SCRIPT_ROOT + '/_load_article_annotation_block',
-      data: {
-        'article_id': aid,
-        'pn': pn
-      }
-  });
-
-  req.done(function() {
-    $("#flash-error").hide();
-
-    // add the article block to the HTML
-    $('#article-annotation-blocks').append(req.responseText);
-
-    // listeners for info radio buttons
-    $('#article-annotation-block :radio').change(selectRadio);
-
-    // listeners for text fields
-    $('#article-annotation-block :text').blur(storeArticleTextInput);
-    $('#article-annotation-block textarea').blur(storeArticleTextInput);
-
-    // listeners for adding or deleting checkboxes
-    $('#article-annotation-block :checkbox').change(selectArticleCheckbox);
-  });
-
-  req.fail(function(e) {
-    $("#flash-error").text("Error loading article annotation block.");
-    $("#flash-error").show();
-  });
-}
-
 /* Add or edit an event. Controls the event list. */
 var modifyEvent = function(e) {
   var aid  = $(".article").attr("id").split("_")[1];
@@ -96,6 +59,9 @@ var modifyEvent = function(e) {
     // listeners for info radio buttons
     $('#yes-no_block :radio').change(selectRadio);
 
+    // listeners for select drop-downs
+    $('#basicinfo_block select').change(selectRadio);
+
     // listeners for text fields
     // $('#basicinfo_block :date').blur(storeText); // doesn't work in Firefox :(
 
@@ -103,9 +69,7 @@ var modifyEvent = function(e) {
     $('#basicinfo_block textarea').blur(storeText);
 
     // listeners for adding or deleting checkboxes
-    $('#basicinfo_block :checkbox').change(selectCheckbox);
-    $('#yes-no_block :checkbox').change(selectCheckbox);
-    $('#preset_block :checkbox').change(selectCheckbox);
+    $(':checkbox').change(selectCheckbox);
 
     // Get text select vars from DOM  
     $('.varblock').each(function() {
@@ -291,9 +255,6 @@ $(function(){
   // add event listener
   $('#add-event').click(modifyEvent);
 
-  // test code for article block
-  modifyArticleAnnotations()
-
   // mark done handler
   $('#mark-done').each(function() {
     $(this).click(function() {
@@ -319,4 +280,4 @@ $(function(){
     }); 
   });
 
-});
+});    
