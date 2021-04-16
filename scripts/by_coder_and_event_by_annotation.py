@@ -45,27 +45,31 @@ def numberDuplicatedVariables(df, groupbylist, varcol):
           )
     return df
 
-def pivot_annotations_wider(
-    annotation_table,
-    dim_cols,
-    col_prefix,
-    session):
+def query_to_pd(
+        table,
+        session):
 
     ## Get tables into data frames
     q = (
         session
-        .query(annotation_table)
+        .query(table)
         .order_by('id')
         )
-    long = pd.read_sql_query(
+    out = pd.read_sql_query(
         q.statement, 
         # Old pandas fears real connections
         #q.session.connection())
         q.session.get_bind())
+    return out
+
+def pivot_annotations_wider(
+        annotation_long,
+        dim_cols,
+        col_prefix):
 
     ## Concatenate duplicated variables
     catted = catDuplicatedVariables(
-        df=long,
+        df=annotation_long,
         groupbylist=dim_cols + ['variable'],
         valcollist=['value', 'text'])
 
@@ -91,12 +95,6 @@ def pivot_annotations_wider(
     wide.columns = [col_prefix + '_' + '_'.join(col).strip('_')
                        for col in wide.columns.values]
 
-    ## Create df with max and min timestamps from both levels
-    times = (
-        long
-        .filter(['coder_id', 'article_id', 'timestamp'])
-        )
-
     ## Align join key names
     prefixless_dims = {'_'.join([col_prefix, c]):c for c in dim_cols}
     wide = (
@@ -104,6 +102,29 @@ def pivot_annotations_wider(
         .rename(columns=prefixless_dims)
         )
     return wide
+
+def merge_pivot_times(
+      annotation_longs):
+
+    ## Create dfs with max and min timestamps from all levels
+    time_dfs = [df.filter(['coder_id', 'article_id', 'timestamp'])
+                   for df in annotation_longs]
+
+    times = pd.concat(time_dfs)
+    times_wide = (times
+                  .dropna()
+                  .groupby(['coder_id', 'article_id'])
+                  .agg(['min', 'max'])
+                  .reset_index()
+                  .swaplevel(0, 1, axis=1)
+                  )
+    times_wide.columns = ['article_' + '_'.join(col).strip('_')
+                          for col in times_wide.columns.values]
+    times_wide = (times_wide
+                  .rename(columns={'article_coder_id': 'coder_id'})
+                  .rename(columns={'article_article_id': 'article_id'})
+                  )
+    return times_wide
 
 def genByCoderAndEventByAnnotation(
         session,
