@@ -129,9 +129,9 @@ def merge_pivot_times(
 def genByCoderAndEventByAnnotation(
         session,
         coder_event_table,
-#        coder_article_table,
         user_table,
-        article_metadata_table):
+        article_metadata_table,
+        coder_article_table = None):
 
     ## Get tables into data frames
     event_long = query_to_pd(coder_event_table, session)
@@ -164,29 +164,50 @@ def genByCoderAndEventByAnnotation(
         event_long,
         dim_cols=['coder_id', 'article_id', 'event_id'],
         col_prefix='event')
-    times_wide = merge_pivot_times([event_long])
+
+    annotation_longs = [event_long]
+    annotaion_wides = [e_wide]
+
+    if coder_article_table is not None:
+        ca_long = query_to_pd(coder_article_table, session)
+        ca_wide = pivot_annotations_wider(
+          ca_long,
+          dim_cols=['coder_id', 'article_id'],
+          col_prefix='article')
+        annotation_longs = annotation_longs + [ca_long]
+    else:
+        ca_wide = None
+
+    times_wide = merge_pivot_times(annotation_longs)
     am = (am
           .rename(columns={'id': 'article_id'})
           )
 
     ## Grand Unified Merge
-    all_wide = (
-#        ca_wide
-#        .merge(e_wide, how='outer', on=['coder_id', 'article_id'])
-        e_wide
-        .merge(times_wide, how='outer', on=['coder_id', 'article_id'])
-        .merge(user, how='left', on=['coder_id'])
-        .merge(am, how='left', on='article_id')
-        )
+    if coder_article_table is None:
+        all_wide = (
+            e_wide
+            .merge(times_wide, how='outer', on=['coder_id', 'article_id'])
+            .merge(user, how='left', on=['coder_id'])
+            .merge(am, how='left', on='article_id')
+            )
+    else:
+        all_wide = (
+            ca_wide
+            .merge(e_wide, how='outer', on=['coder_id', 'article_id'])
+            .merge(times_wide, how='outer', on=['coder_id', 'article_id'])
+            .merge(user, how='left', on=['coder_id'])
+            .merge(am, how='left', on='article_id')
+            )
 
     return all_wide
 
 export = genByCoderAndEventByAnnotation(
     session=database.db_session,
     coder_event_table=models.CodeEventCreator,
-    #coder_article_table=models.CoderArticleAnnotation,
     user_table=models.User,
-    article_metadata_table=models.ArticleMetadata)
+    article_metadata_table=models.ArticleMetadata,
+    coder_article_table=models.CoderArticleAnnotation)
 
 ## Create df of counts by coder and article
 counts_by_coder_and_event = (
