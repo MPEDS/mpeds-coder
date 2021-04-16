@@ -45,7 +45,7 @@ def numberDuplicatedVariables(df, groupbylist, varcol):
           )
     return df
 
-def query_to_pd(
+def queryToDf(
         table,
         session):
 
@@ -62,7 +62,7 @@ def query_to_pd(
         q.session.get_bind())
     return out
 
-def pivot_annotations_wider(
+def pivotAnnotationsWider(
         annotation_long,
         dim_cols,
         col_prefix):
@@ -103,7 +103,7 @@ def pivot_annotations_wider(
         )
     return wide
 
-def merge_pivot_times(
+def mergePivotTimes(
       annotation_longs):
 
     ## Create dfs with max and min timestamps from all levels
@@ -134,7 +134,7 @@ def genByCoderAndEventByAnnotation(
         coder_article_table = None):
 
     ## Get tables into data frames
-    event_long = query_to_pd(coder_event_table, session)
+    event_long = queryToDf(coder_event_table, session)
 
     u_q = (session
            .query(user_table.id.label('coder_id'), user_table.username)
@@ -160,7 +160,7 @@ def genByCoderAndEventByAnnotation(
                            #am_q.session.connection())
                            am_q.session.get_bind())
 
-    e_wide = pivot_annotations_wider(
+    e_wide = pivotAnnotationsWider(
         event_long,
         dim_cols=['coder_id', 'article_id', 'event_id'],
         col_prefix='event')
@@ -169,8 +169,8 @@ def genByCoderAndEventByAnnotation(
     annotaion_wides = [e_wide]
 
     if coder_article_table is not None:
-        ca_long = query_to_pd(coder_article_table, session)
-        ca_wide = pivot_annotations_wider(
+        ca_long = queryToDf(coder_article_table, session)
+        ca_wide = pivotAnnotationsWider(
           ca_long,
           dim_cols=['coder_id', 'article_id'],
           col_prefix='article')
@@ -178,7 +178,7 @@ def genByCoderAndEventByAnnotation(
     else:
         ca_wide = None
 
-    times_wide = merge_pivot_times(annotation_longs)
+    times_wide = mergePivotTimes(annotation_longs)
     am = (am
           .rename(columns={'id': 'article_id'})
           )
