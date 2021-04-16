@@ -207,7 +207,7 @@ export = genByCoderAndEventByAnnotation(
     coder_event_table=models.CodeEventCreator,
     user_table=models.User,
     article_metadata_table=models.ArticleMetadata,
-    coder_article_table=models.CoderArticleAnnotation)
+    coder_article_table=None) #models.CoderArticleAnnotation)
 
 ## Create df of counts by coder and article
 counts_by_coder_and_event = (
