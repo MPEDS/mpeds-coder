@@ -202,12 +202,17 @@ def genByCoderAndEventByAnnotation(
 
     return all_wide
 
+if config.ANNOTATE_ARTICLE_LEVEL:
+    coder_article_table = models.CoderArticleAnnotation
+else:
+    coder_article_table = None
+
 export = genByCoderAndEventByAnnotation(
     session=database.db_session,
     coder_event_table=models.CodeEventCreator,
     user_table=models.User,
     article_metadata_table=models.ArticleMetadata,
-    coder_article_table=None) #models.CoderArticleAnnotation)
+    coder_article_table=coder_article_table)
 
 ## Create df of counts by coder and article
 counts_by_coder_and_event = (
