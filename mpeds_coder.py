@@ -1111,16 +1111,42 @@ def generateCoderAudit():
     else:
         return make_response('Invalid pass number.', 500)
 
-    to_df = []
     cols  = [x.name for x in model.__table__.columns]
-    query = db_session.query(model, ArticleMetadata).join(ArticleMetadata).all()
 
-    if len(query) <= 0:
-        return
+    resultset = []
+    filename = '%s/exports/coder-table_%s.csv' % (app.config['WD'], dt.datetime.now().strftime('%Y-%m-%d_%H%M%S'))
 
-    for row in query:
+    query = db_session.query(func.max(model.id)).first()
+
+    print("Query:")
+    for i in range(0, 1000):
+        if i % 50 == 0:
+            print("  " + str(i) + "...")
+        offset = i*1000
+        query  = db_session.query(model, ArticleMetadata).\
+                 join(ArticleMetadata).order_by(model.id).offset(offset).       limit(1000).all()
+
+        if len(query) <= 0:
+            print("  " + str(i) + "...DONE")
+            break
+
+        resultset.extend(query)
+
+    ## do this in chunks to save memory
+
+    header = cols[:]
+    header.extend(['publication', 'pub_date', 'solr_id'])
+
+    ## write headers
+    df = pd.DataFrame([], columns = header)
+    df.to_csv(filename, encoding = 'utf-8', index = False)
+
+    i = 0
+    print("Resultset:")
+    for row in resultset:
         fp  = row[0]
         am  = row[1]
+        i += 1
 
         ## store all fields in a row in a tuple
         to_print = ()
@@ -1133,7 +1159,7 @@ def generateCoderAudit():
         ## add publication, publication date, and solr_id
         pub      = ''
         pub_date = ''
-        solr_id  = am.db_id 
+        solr_id  = am.db_id
         if am.db_id is None:
             pass
         elif 'AGW' in am.db_id:
@@ -1141,39 +1167,35 @@ def generateCoderAudit():
             ## AGW_AFP_ENG_20040104.0056
             pieces   = am.db_id.split("_")
             pub      = "-".join(pieces[0:3])
-            pub_date   = pieces[3].split('.')[0]
+            pub_date = pieces[3].split('.')[0]
             pub_date = dt.datetime.strptime(pub_date, '%Y%m%d').strftime('%Y-%m-%d')
         elif 'NYT' in am.db_id:
-            ## e.g. 
+            ## e.g.
             ## 1989/03/11/0230638.xml_LDC_NYT
             pub      = 'NYT'
             pub_date = am.db_id[0:10].replace('/', '-')
         else:
-            ## e.g. 
-            ## Caribbean-Today;-Miami_1996-12-31_26b696eae2887c8cf71735a33eb39771
+            ## e.g.
+            ## Caribbean-Today;-Miami_1996-12-                                  31_26b696eae2887c8cf71735a33eb39771
             pieces   = am.db_id.split("_")
             pub      = pieces[0]
             pub_date = pieces[1]
+
+            ## remove T00:00:00Z from dates
+            ## e.g. 2013-03-19T00:00:00Z
+            if 'T' in pub_date:
+                pub_date = pub_date.split('T')[0]
+
         to_print += ( pub, pub_date, solr_id )
-        to_df.append(to_print)
 
-    cols.extend(['publication', 'pub_date', 'solr_id'])
+        df = pd.DataFrame([to_print], columns = header)
+        df.to_csv(filename, mode = "a", header = False, index = False)
 
-    ## let the dataframe do all the heavy lifting for CSV formatting
-    df = pd.DataFrame(to_df, columns = cols)
+        if i % 50000 == 0:
+            print("  " + str(i) + "...")
+    print("  " + str(i) + "...DONE")
 
-    if action == 'download':
-        file_str = df.to_csv(None, encoding = 'utf-8', index = False)
-        response = make_response(file_str)
-        response.headers["Content-Disposition"] = "attachment; filename=coder-table.tsv"
-        response.headers["mime-type"] = "text/csv"
-        return response
-    elif action == 'save':
-        filename = '%s/exports/coder-table_%s.csv' % (app.config['WD'], dt.datetime.now().strftime('%Y-%m-%d_%H%M%S'))
-        df.to_csv(filename, encoding = 'utf-8', index = False)
-        return jsonify(result={"status": 200, "filename": filename})
-    else:
-        return make_response("Illegal action.", 500)
+    return jsonify(result={"status": 200, "filename": filename})
 
 #####
 ##### Internal calls
