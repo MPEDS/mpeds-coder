@@ -1092,88 +1092,93 @@ def userArticleListAdmin(coder_id, is_coded, pn, page = 1):
 
 
 ## generate report CSV file and store locally/download
+from modules import export
 @app.route('/_generate_coder_stats')
 @login_required
 def generateCoderAudit():
     if current_user.authlevel < 3:
         return redirect(url_for('index'))
 
-    pn = request.args.get('pn')
-    action = request.args.get('action')
+    ting = export.test()
+    
+    return jsonify(result={"status": 200, "filename": ting})
 
-    # last_month = dt.datetime.now(tz = central) - dt.timedelta(weeks=4)
-    users = {u.id: u.username for u in db_session.query(User).all()}
-
-    if pn == '1':
-        model = CodeFirstPass
-    elif pn == 'ec':
-        model = CodeEventCreator
-    else:
-        return make_response('Invalid pass number.', 500)
-
-    to_df = []
-    cols  = [x.name for x in model.__table__.columns]
-    query = db_session.query(model, ArticleMetadata).join(ArticleMetadata).all()
-
-    if len(query) <= 0:
-        return
-
-    for row in query:
-        fp  = row[0]
-        am  = row[1]
-
-        ## store all fields in a row in a tuple
-        to_print = ()
-        for c in cols:
-            if c == 'coder_id':
-                to_print += ( users[fp.__getattribute__(c)], )
-            else:
-                to_print += ( validate(fp.__getattribute__(c)), )
-
-        ## add publication, publication date, and solr_id
-        pub      = ''
-        pub_date = ''
-        solr_id  = am.db_id 
-        if am.db_id is None:
-            pass
-        elif 'AGW' in am.db_id:
-            ## e.g.
-            ## AGW_AFP_ENG_20040104.0056
-            pieces   = am.db_id.split("_")
-            pub      = "-".join(pieces[0:3])
-            pub_date   = pieces[3].split('.')[0]
-            pub_date = dt.datetime.strptime(pub_date, '%Y%m%d').strftime('%Y-%m-%d')
-        elif 'NYT' in am.db_id:
-            ## e.g. 
-            ## 1989/03/11/0230638.xml_LDC_NYT
-            pub      = 'NYT'
-            pub_date = am.db_id[0:10].replace('/', '-')
-        else:
-            ## e.g. 
-            ## Caribbean-Today;-Miami_1996-12-31_26b696eae2887c8cf71735a33eb39771
-            pieces   = am.db_id.split("_")
-            pub      = pieces[0]
-            pub_date = pieces[1]
-        to_print += ( pub, pub_date, solr_id )
-        to_df.append(to_print)
-
-    cols.extend(['publication', 'pub_date', 'solr_id'])
-
-    ## let the dataframe do all the heavy lifting for CSV formatting
-    df = pd.DataFrame(to_df, columns = cols)
-
-    if action == 'download':
-        file_str = df.to_csv(None, encoding = 'utf-8', index = False)
-        response = make_response(file_str)
-        response.headers["Content-Disposition"] = "attachment; filename=coder-table.tsv"
-        response.headers["mime-type"] = "text/csv"
-        return response
-    elif action == 'save':
-        filename = '%s/exports/coder-table_%s.csv' % (app.config['WD'], dt.datetime.now().strftime('%Y-%m-%d_%H%M%S'))
-        df.to_csv(filename, encoding = 'utf-8', index = False)
-        return jsonify(result={"status": 200, "filename": filename})
-    else:
-        return make_response("Illegal action.", 500)
+#    pn = request.args.get('pn')
+#    action = request.args.get('action')
+#
+#    # last_month = dt.datetime.now(tz = central) - dt.timedelta(weeks=4)
+#    users = {u.id: u.username for u in db_session.query(User).all()}
+#
+#    if pn == '1':
+#        model = CodeFirstPass
+#    elif pn == 'ec':
+#        model = CodeEventCreator
+#    else:
+#        return make_response('Invalid pass number.', 500)
+#
+#    to_df = []
+#    cols  = [x.name for x in model.__table__.columns]
+#    query = db_session.query(model, ArticleMetadata).join(ArticleMetadata).all()
+#
+#    if len(query) <= 0:
+#        return
+#
+#    for row in query:
+#        fp  = row[0]
+#        am  = row[1]
+#
+#        ## store all fields in a row in a tuple
+#        to_print = ()
+#        for c in cols:
+#            if c == 'coder_id':
+#                to_print += ( users[fp.__getattribute__(c)], )
+#            else:
+#                to_print += ( validate(fp.__getattribute__(c)), )
+#
+#        ## add publication, publication date, and solr_id
+#        pub      = ''
+#        pub_date = ''
+#        solr_id  = am.db_id 
+#        if am.db_id is None:
+#            pass
+#        elif 'AGW' in am.db_id:
+#            ## e.g.
+#            ## AGW_AFP_ENG_20040104.0056
+#            pieces   = am.db_id.split("_")
+#            pub      = "-".join(pieces[0:3])
+#            pub_date   = pieces[3].split('.')[0]
+#            pub_date = dt.datetime.strptime(pub_date, '%Y%m%d').strftime('%Y-%m-%d')
+#        elif 'NYT' in am.db_id:
+#            ## e.g. 
+#            ## 1989/03/11/0230638.xml_LDC_NYT
+#            pub      = 'NYT'
+#            pub_date = am.db_id[0:10].replace('/', '-')
+#        else:
+#            ## e.g. 
+#            ## Caribbean-Today;-Miami_1996-12-31_26b696eae2887c8cf71735a33eb39771
+#            pieces   = am.db_id.split("_")
+#            pub      = pieces[0]
+#            pub_date = pieces[1]
+#        to_print += ( pub, pub_date, solr_id )
+#        to_df.append(to_print)
+#
+#    cols.extend(['publication', 'pub_date', 'solr_id'])
+#
+#    ## let the dataframe do all the heavy lifting for CSV formatting
+#    df = pd.DataFrame(to_df, columns = cols)
+#
+#    if action == 'download':
+#        file_str = df.to_csv(None, encoding = 'utf-8', index = False)
+#        response = make_response(file_str)
+#        response.headers["Content-Disposition"] = "attachment; filename=coder-table.tsv"
+#        response.headers["mime-type"] = "text/csv"
+#        return response
+#    elif action == 'save':
+#        filename = '%s/exports/coder-table_%s.csv' % (app.config['WD'], dt.datetime.now().strftime('%Y-%m-%d_%H%M%S'))
+#        df.to_csv(filename, encoding = 'utf-8', index = False)
+#        return jsonify(result={"status": 200, "filename": filename})
+#    else:
+#        return make_response("Illegal action.", 500)
 
 #####
 ##### Internal calls
