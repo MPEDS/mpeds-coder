@@ -1,4 +1,4 @@
-from sqlalchemy import Boolean, Column, DateTime, Integer, String, Unicode, ForeignKey, UniqueConstraint, Text, UnicodeText
+from sqlalchemy import Boolean, Column, Date, DateTime, Integer, String, Unicode, ForeignKey, UniqueConstraint, Text, UnicodeText
 from sqlalchemy.orm import relationship, backref
 from flask_login import UserMixin
 from database import Base

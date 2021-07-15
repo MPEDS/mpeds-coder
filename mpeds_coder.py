@@ -1328,6 +1328,11 @@ def addCode(pn):
             aq.coded_dt = now
             aqs.append(aq)
     elif pn == 'ec':
+        ## checkboxes will be returned as '' in JavaScript.
+        ## need to convert to None
+        if text == '':
+            text = None
+
         model = CodeEventCreator
         p     = CodeEventCreator(aid, ev, var, val, current_user.id, text)
 
@@ -1479,32 +1484,6 @@ def changeCode(pn):
     db_session.commit()
 
     return jsonify(result={"status": 200})
-
-
-@app.route('/_del_event')
-@login_required
-def delEvent():
-    """ Delete an event. """
-    # if current_user.authlevel < 2:
-    #     return redirect(url_for('index'))
-
-    eid = int(request.args.get('event'))
-    pn  = request.args.get('pn');
-
-    model = None
-    if pn == '2':
-        model = CodeSecondPass
-    elif pn == 'ec':
-        model = CodeEventCreator
-    else:
-        return make_response("Invalid model.", 404)
-
-    db_session.query(model).filter_by(event_id = eid).delete()
-    db_session.query(Event).filter_by(id = eid).delete()
-
-    db_session.commit()
-
-    return make_response("Delete succeeded.", 200)
 
 
 @app.route('/_mark_ec_done')
