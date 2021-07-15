@@ -182,8 +182,12 @@ def loadSolr(solr_id):
 
 ## prep any article for display
 def prepText(article):
-    fn    = article.filename
-    db_id = article.db_id
+    fn                 = article.filename
+    db_id              = article.db_id
+    atitle             = article.title
+    pub_date           = article.pub_date
+    publication        = article.publication
+    fulltext           = article.text
 
     metawords = ['DATE', 'PUBLICATION', 'LANGUAGE', 'DATELINE', 'SECTION',
     'EDITION', 'LENGTH', 'DATE', 'SEARCH_ID', 'Published', 'By', 'AP', 'UPI']
@@ -197,7 +201,11 @@ def prepText(article):
 
     filename = str('INTERNAL_ID: %s' % fn)
 
-    if app.config['SOLR'] == True:
+    if app.config['STORE_ARTICLES_INTERNALLY'] == True:
+        title = atitle
+        meta = [publication, pub_date, db_id]
+        paras = fulltext.split('<br/>')
+    elif app.config['SOLR'] == True:
         title, meta, paras = loadSolr(db_id)
         if title == 0:
             title = "Cannot find article in Solr."
@@ -849,7 +857,12 @@ def admin():
     pubs  = []
 
     ## get the available publications
-    if app.config['SOLR']:
+    if app.config['STORE_ARTICLES_INTERNALLY']:
+        pubquery = db_session.query(ArticleMetadata.publication).\
+                   distinct().\
+                   order_by(ArticleMetadata.publication)
+        pubs = [row.publication for row in pubquery]
+    elif app.config['SOLR']:
         url = '{}/select?q=Database:"University%20Wire"&rows=0&wt=json'.format(app.config['SOLR_ADDR'])
         fparams = 'facet=true&facet.field=PUBLICATION&facet.limit=1000'
 
@@ -1156,7 +1169,7 @@ def generateCoderAudit():
         response.headers["mime-type"] = "text/csv"
         return response
     elif action == 'save':
-        filename = '%s/coder-table_%s.csv' % (app.config['WD'], dt.datetime.now().strftime('%Y-%m-%d'))
+        filename = '%s/exports/coder-table_%s.csv' % (app.config['WD'], dt.datetime.now().strftime('%Y-%m-%d_%H%M%S'))
         df.to_csv(filename, encoding = 'utf-8', index = False)
         return jsonify(result={"status": 200, "filename": filename})
     else:

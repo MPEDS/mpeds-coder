@@ -4,6 +4,11 @@
                   border: 1px solid #AACBE2; }
 .error          { background: #F0D6D6; padding: 0.5em; }
 
+.control-panel {
+	max-height: calc(100vh - 80px);
+	overflow-y: auto;
+}
+
 label, select, option, input {
 	font-size: 0.85em;
 }
