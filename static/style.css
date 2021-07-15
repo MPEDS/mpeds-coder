@@ -401,7 +401,6 @@ div.cand-event-group div.event-desc {
 
 div.cand-event-metadata {
 	position: relative;
+	top: 10%;
 	left: 75%;
-	top: 0;
-	display:block;
 }
