@@ -24,6 +24,7 @@ from math import ceil
 from random import sample
 from random import choice
 import yaml
+from collections import OrderedDict
 
 if (sys.version_info < (3, 0)):
     import urllib2
@@ -59,6 +60,19 @@ from database import db_session
 from models import ArticleMetadata, ArticleQueue, CoderArticleAnnotation, \
 CodeFirstPass, CodeSecondPass, CodeEventCreator, \
 Event, EventCreatorQueue, SecondPassQueue, User
+
+##### Enable OrderedDict with PyYAML
+##### Copy-pasta from https://stackoverflow.com/a/21912744 on 2019-12-12
+def ordered_load(stream, Loader=yaml.Loader, object_pairs_hook=OrderedDict):
+    class OrderedLoader(Loader):
+        pass
+    def construct_mapping(loader, node):
+        loader.flatten_mapping(node)
+        return object_pairs_hook(loader.construct_pairs(node))
+    OrderedLoader.add_constructor(
+        yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG,
+        construct_mapping)
+    return yaml.load(stream, OrderedLoader)
 
 # create our application
 app = Flask(__name__)
@@ -184,8 +198,12 @@ def loadSolr(solr_id):
 
 ## prep any article for display
 def prepText(article):
-    fn    = article.filename
-    db_id = article.db_id
+    fn                 = article.filename
+    db_id              = article.db_id
+    atitle             = article.title
+    pub_date           = article.pub_date
+    publication        = article.publication
+    fulltext           = article.text
 
     metawords = ['DATE', 'PUBLICATION', 'LANGUAGE', 'DATELINE', 'SECTION',
     'EDITION', 'LENGTH', 'DATE', 'SEARCH_ID', 'Published', 'By', 'AP', 'UPI']
@@ -199,7 +217,11 @@ def prepText(article):
 
     filename = str('INTERNAL_ID: %s' % fn)
 
-    if app.config['SOLR'] == True:
+    if app.config['STORE_ARTICLES_INTERNALLY'] == True:
+        title = atitle
+        meta = [publication, pub_date, db_id]
+        paras = fulltext.split('<br/>')
+    elif app.config['SOLR'] == True:
         title, meta, paras = loadSolr(db_id)
         if title == 0:
             title = "Cannot find article in Solr."
@@ -851,7 +873,12 @@ def admin():
     pubs  = []
 
     ## get the available publications
-    if app.config['SOLR']:
+    if app.config['STORE_ARTICLES_INTERNALLY']:
+        pubquery = db_session.query(ArticleMetadata.publication).\
+                   distinct().\
+                   order_by(ArticleMetadata.publication)
+        pubs = [row.publication for row in pubquery]
+    elif app.config['SOLR']:
         url = '{}/select?q=Database:"University%20Wire"&rows=0&wt=json'.format(app.config['SOLR_ADDR'])
         fparams = 'facet=true&facet.field=PUBLICATION&facet.limit=1000'
 
@@ -1158,7 +1185,7 @@ def generateCoderAudit():
         response.headers["mime-type"] = "text/csv"
         return response
     elif action == 'save':
-        filename = '%s/coder-table_%s.csv' % (app.config['WD'], dt.datetime.now().strftime('%Y-%m-%d'))
+        filename = '%s/exports/coder-table_%s.csv' % (app.config['WD'], dt.datetime.now().strftime('%Y-%m-%d_%H%M%S'))
         df.to_csv(filename, encoding = 'utf-8', index = False)
         return jsonify(result={"status": 200, "filename": filename})
     else:
@@ -1217,7 +1244,6 @@ def delArticleCode(pn):
     article  = request.form['article']
     variable = request.form['variable']
     value    = request.form['value']
-
     if pn == 'ec':
         a = db_session.query(CoderArticleAnnotation).filter_by(
             article_id = article,
@@ -1277,7 +1303,7 @@ def addCode(pn):
     var  = request.form['variable']
     val  = request.form['value']
     ev   = request.form['event']
-    text = request.form.get('text')
+    text = request.form['text']
     aqs  = []
     now  = dt.datetime.now(tz = central).replace(tzinfo = None)
 
@@ -1422,7 +1448,7 @@ def delCode(pn):
         return make_response("", 404)
 
 
-@app.route('/_change_code/<pn>', methods=['POST'])
+@app.route('/_change_code/<pn>', methods=['GET', 'POST'])
 @login_required
 def changeCode(pn):
     """ 
@@ -1455,7 +1481,33 @@ def changeCode(pn):
     return jsonify(result={"status": 200})
 
 
-@app.route('/_mark_ec_done', methods=['POST'])
+@app.route('/_del_event')
+@login_required
+def delEvent():
+    """ Delete an event. """
+    # if current_user.authlevel < 2:
+    #     return redirect(url_for('index'))
+
+    eid = int(request.args.get('event'))
+    pn  = request.args.get('pn');
+
+    model = None
+    if pn == '2':
+        model = CodeSecondPass
+    elif pn == 'ec':
+        model = CodeEventCreator
+    else:
+        return make_response("Invalid model.", 404)
+
+    db_session.query(model).filter_by(event_id = eid).delete()
+    db_session.query(Event).filter_by(id = eid).delete()
+
+    db_session.commit()
+
+    return make_response("Delete succeeded.", 200)
+
+
+@app.route('/_mark_ec_done')
 @login_required
 def markECDone():
     article_id = request.form['article_id']
