@@ -6,6 +6,11 @@
 
 .sticky { width:250px; }
 
+.control-panel {
+	max-height: calc(100vh - 80px);
+	overflow-y: auto;
+}
+
 label, select, option, input {
 	font-size: 0.85em;
 }
