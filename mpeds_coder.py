@@ -24,6 +24,7 @@ from math import ceil
 from random import sample
 from random import choice
 import yaml
+from collections import OrderedDict
 
 if (sys.version_info < (3, 0)):
     import urllib2
@@ -55,8 +56,23 @@ from sqlite3 import dbapi2 as sqlite3
 
 ## app-specific
 from database import db_session
-from models import ArticleMetadata, ArticleQueue, CodeFirstPass, CodeSecondPass, CodeEventCreator, \
-    Event, EventCreatorQueue, SecondPassQueue, User
+
+from models import ArticleMetadata, ArticleQueue, CoderArticleAnnotation, \
+CodeFirstPass, CodeSecondPass, CodeEventCreator, \
+Event, EventCreatorQueue, SecondPassQueue, User
+
+##### Enable OrderedDict with PyYAML
+##### Copy-pasta from https://stackoverflow.com/a/21912744 on 2019-12-12
+def ordered_load(stream, Loader=yaml.Loader, object_pairs_hook=OrderedDict):
+    class OrderedLoader(Loader):
+        pass
+    def construct_mapping(loader, node):
+        loader.flatten_mapping(node)
+        return object_pairs_hook(loader.construct_pairs(node))
+    OrderedLoader.add_constructor(
+        yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG,
+        construct_mapping)
+    return yaml.load(stream, OrderedLoader)
 
 # create our application
 app = Flask(__name__)
@@ -1092,14 +1108,14 @@ def userArticleListAdmin(coder_id, is_coded, pn, page = 1):
 
 
 ## generate report CSV file and store locally/download
-@app.route('/_generate_coder_stats')
+@app.route('/_generate_coder_stats', methods=['POST'])
 @login_required
 def generateCoderAudit():
     if current_user.authlevel < 3:
         return redirect(url_for('index'))
 
-    pn = request.args.get('pn')
-    action = request.args.get('action')
+    pn = request.form['pn']
+    action = request.form['action']
 
     # last_month = dt.datetime.now(tz = central) - dt.timedelta(weeks=4)
     users = {u.id: u.username for u in db_session.query(User).all()}
@@ -1179,14 +1195,115 @@ def generateCoderAudit():
 ##### Internal calls
 #####
 
-@app.route('/_add_code/<pn>')
+@app.route('/_add_article_code/<pn>', methods=['POST'])
+@login_required
+def addArticleCode(pn):
+    """ Adds a record to article coding table. """
+    aid  = int(request.form['article'])
+    var  = request.form['variable']
+    val  = request.form['value']
+    text = request.form.get('text')
+    aqs  = []
+    now  = dt.datetime.now(tz = central).replace(tzinfo = None)
+
+    if pn == 'ec':
+        model = CoderArticleAnnotation
+        p     = CoderArticleAnnotation(aid, var, val, current_user.id, text)
+
+        for aq in db_session.query(EventCreatorQueue).filter_by(article_id = aid, coder_id = current_user.id).all():
+            aq.coded_dt = now
+            aqs.append(aq)
+    else:
+        return make_response("Invalid model", 404)
+
+    ## variables which only have one value per article
+    if var in sv:
+        a = db_session.query(model).filter_by(
+            article_id = aid,
+            variable   = var,
+            coder_id   = current_user.id
+        ).all()
+
+        ## if there's more then one, delete them
+        if len(a) > 0:
+            for o in a:
+                db_session.delete(o);
+
+            db_session.commit()
+
+    db_session.add(p)
+    db_session.add_all(aqs)
+    db_session.commit()
+    return make_response("", 200)
+
+
+@app.route('/_del_article_code/<pn>', methods=['POST'])
+@login_required
+def delArticleCode(pn):
+    """ Deletes a record from article coding table. """
+    article  = request.form['article']
+    variable = request.form['variable']
+    value    = request.form['value']
+    if pn == 'ec':
+        a = db_session.query(CoderArticleAnnotation).filter_by(
+            article_id = article,
+            variable   = variable,
+            value      = value,
+            coder_id   = current_user.id
+        ).all()
+    else:
+        return make_response("Invalid model", 404)
+
+    if len(a) > 0:
+        for o in a:
+            db_session.delete(o)
+
+        db_session.commit()
+
+        return jsonify(result={"status": 200})
+    else:
+        return make_response("", 404)
+
+
+@app.route('/_change_article_code/<pn>', methods=['POST'])
+@login_required
+def changeArticleCode(pn):
+    """ 
+        Changes a radio button or text input/area by removing all prior
+        values, adds one new one.
+    """
+    article  = request.form['article']
+    variable = request.form['variable']
+    value    = request.form['value']
+
+    ## delete all prior values
+    a = db_session.query(CoderArticleAnnotation).filter_by(
+        article_id = article,
+        variable   = variable,
+        coder_id   = current_user.id
+    ).all()
+
+    for o in a:
+        db_session.delete(o)
+    db_session.commit()
+
+    ## add new value
+    ac = CoderArticleAnnotation(article, variable, value, current_user.id)
+
+    db_session.add(ac)
+    db_session.commit()
+
+    return jsonify(result={"status": 200})
+
+
+@app.route('/_add_code/<pn>', methods=['POST'])
 @login_required
 def addCode(pn):
-    aid  = int(request.args.get('article'))
-    var  = request.args.get('variable')
-    val  = request.args.get('value')
-    ev   = request.args.get('event')
-    text = request.args.get('text')
+    aid  = int(request.form['article'])
+    var  = request.form['variable']
+    val  = request.form['value']
+    ev   = request.form['event']
+    text = request.form['text']
     aqs  = []
     now  = dt.datetime.now(tz = central).replace(tzinfo = None)
 
@@ -1255,15 +1372,15 @@ def addCode(pn):
     return make_response("", 200)
 
 
-@app.route('/_del_event')
+@app.route('/_del_event', methods=['POST'])
 @login_required
 def delEvent():
     """ Delete an event. """
     # if current_user.authlevel < 2:
     #     return redirect(url_for('index'))
 
-    eid = int(request.args.get('event'))
-    pn  = request.args.get('pn');
+    eid = int(request.form['event'])
+    pn  = request.form['pn'];
 
     model = None
     if pn == '2':
@@ -1281,14 +1398,14 @@ def delEvent():
     return make_response("Delete succeeded.", 200)
 
 
-@app.route('/_del_code/<pn>')
+@app.route('/_del_code/<pn>', methods=['POST'])
 @login_required
 def delCode(pn):
     """ Deletes a record from coding tables. """
-    article  = request.args.get('article')
-    variable = request.args.get('variable')
-    value    = request.args.get('value')
-    event    = request.args.get('event')
+    article  = request.form['article']
+    variable = request.form['variable']
+    value    = request.form['value']
+    event    = request.form['event']
 
     if False:
         pass
@@ -1331,17 +1448,17 @@ def delCode(pn):
         return make_response("", 404)
 
 
-@app.route('/_change_code/<pn>')
+@app.route('/_change_code/<pn>', methods=['GET', 'POST'])
 @login_required
 def changeCode(pn):
     """ 
         Changes a radio button by removing all prior values, adds one new one. 
         Only implemented for event creator right now.
     """
-    article  = request.args.get('article')
-    variable = request.args.get('variable')
-    value    = request.args.get('value')
-    event    = request.args.get('event')
+    article  = request.form['article']
+    variable = request.form['variable']
+    value    = request.form['value']
+    event    = request.form['event']
 
     ## delete all prior values
     a = db_session.query(CodeEventCreator).filter_by(
@@ -1364,10 +1481,36 @@ def changeCode(pn):
     return jsonify(result={"status": 200})
 
 
+@app.route('/_del_event')
+@login_required
+def delEvent():
+    """ Delete an event. """
+    # if current_user.authlevel < 2:
+    #     return redirect(url_for('index'))
+
+    eid = int(request.args.get('event'))
+    pn  = request.args.get('pn');
+
+    model = None
+    if pn == '2':
+        model = CodeSecondPass
+    elif pn == 'ec':
+        model = CodeEventCreator
+    else:
+        return make_response("Invalid model.", 404)
+
+    db_session.query(model).filter_by(event_id = eid).delete()
+    db_session.query(Event).filter_by(id = eid).delete()
+
+    db_session.commit()
+
+    return make_response("Delete succeeded.", 200)
+
+
 @app.route('/_mark_ec_done')
 @login_required
 def markECDone():
-    article_id = request.args.get('article_id')
+    article_id = request.form['article_id']
     coder_id   = current_user.id
     now        = dt.datetime.now(tz = central).replace(tzinfo = None)
 
@@ -1381,13 +1524,13 @@ def markECDone():
     return jsonify(result={"status": 200})
 
 
-@app.route('/_mark_sp_done')
+@app.route('/_mark_sp_done', methods=['POST'])
 @login_required
 def markSPDone():
     if current_user.authlevel < 2:
         return redirect(url_for('index'))
 
-    article_id = request.args.get('article_id')
+    article_id = request.form['article_id']
     coder_id   = current_user.id
     now        = dt.datetime.now(tz = central).replace(tzinfo = None)
 
@@ -1465,10 +1608,11 @@ def getEvents():
         elif pn =='ec':
             if len(rvar['desc']) > 0 and len(rvar['desc'][0]) > 0:
                 ev['repr'] = ", ".join(rvar['desc'])
+                ## No longer necessary with article-level description
             elif len(rvar['article-desc']) > 0 and len(rvar['article-desc'][0]) > 0:
                 ev['repr'] = "(no event description): " + ", ".join(rvar['article-desc'])
             else:
-                ev['repr'] = "(no article description)"
+                ev['repr'] = "(no event description)"
 
         evs.append(ev)
 
@@ -1521,6 +1665,37 @@ def getCodes():
 
     return jsonify(cd)
 
+
+@app.route('/_load_article_annotation_block')
+@login_required
+def modifyArticleAnnotations():
+    aid  = int(request.args.get('article_id'))
+    pn   = request.args.get('pn')
+    curr = {}
+
+    model = None
+    if pn == 'ec':
+        model = CoderArticleAnnotation
+        template = 'article-annotation-block.html'
+    else:
+        return make_response("Not a valid model.", 404)
+
+    ## get the current values
+    for annotation in db_session.query(model).filter_by(article_id = aid, coder_id = current_user.id).all():
+        if annotation.variable in sv or annotation.variable in event_creator_single_value:
+            curr[annotation.variable] = annotation.value
+        else:
+            ## stash in array
+            if annotation.variable not in curr:
+                curr[annotation.variable] = []
+
+            ## loads the items which do not have text, which means
+            ## everything but text selects
+            if annotation.text is None:
+                curr[annotation.variable].append(annotation.value)
+
+    return render_template(template, 
+            curr = curr)
 
 @app.route('/_load_event_block')
 @login_required
@@ -1771,13 +1946,13 @@ def highlightVar():
 ##### ADMIN TOOLS
 #####
 
-@app.route('/_add_user')
+@app.route('/_add_user', methods=['POST'])
 @login_required
 def addUser():
     if current_user.authlevel < 3:
         return redirect(url_for('index'))
 
-    username = request.args.get('username')
+    username = request.form['username']
 
     ## validate
     if not re.match(r'[A-Za-z0-9_]+', username):
@@ -1800,19 +1975,19 @@ def addUser():
     return jsonify(result={"status": 200, "password": password})
 
 
-@app.route('/_assign_articles')
+@app.route('/_assign_articles', methods=['POST'])
 @login_required
 def assignArticles():
     if current_user.authlevel < 3:
         return redirect(url_for('index'))
 
-    num     = request.args.get('num')
-    db_name = request.args.get('db')
-    pub     = request.args.get('pub')
-    ids     = request.args.get('ids')
-    users   = request.args.get('users')
-    same    = request.args.get('same')
-    group_size = request.args.get('group_size')
+    num     = request.form['num']
+    db_name = request.form['db']
+    pub     = request.form['pub']
+    ids     = request.form['ids']
+    users   = request.form['users']
+    same    = request.form['same']
+    group_size = request.form['group_size']
     
     ## input validations
     if num == '' and ids == '':
@@ -1908,15 +2083,15 @@ def assignArticles():
     return make_response('%d articles assigned successfully.' % n_added, 200)
 
 
-@app.route('/_transfer_articles')
+@app.route('/_transfer_articles', methods=['POST'])
 @login_required
 def transferArticles():
     if current_user.authlevel < 3:
         return redirect(url_for('index'))
 
-    num        = request.args.get('num')
-    from_users = request.args.get('from_users')
-    to_users   = request.args.get('to_users')
+    num        = request.form['num']
+    from_users = request.form['from_users']
+    to_users   = request.form['to_users']
 
     try:
         num = int(num)

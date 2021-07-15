@@ -61,7 +61,7 @@ createtemp = sqlalchemy.sql.text(
         ', PUBLICATION varchar(511) DEFAULT NULL'
         ', DOCSOURCE varchar(511) DEFAULT NULL'
         ', TEXT mediumtext CHARACTER SET utf8mb4'
-        ') DEFAULT CHARSET=utf8mb4 COLLATE utf8mb4_unicode_ci;'
+        ') DEFAULT CHARSET=utf8mb4 COLLATE utf8mb4_unicode_ci'
         )
 mysql_engine.execute(createtemp)
 
