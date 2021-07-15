@@ -565,6 +565,15 @@ def eventCreator(aid):
     return render_template("event-creator.html", aid = aid, text = html.decode('utf-8'))
 
 
+@app.route('/adj')
+@login_required
+def adj():
+    filter = request.form.get('filter')
+    sort = request.form.get('sort')
+
+    return render_template("adj.html")
+
+
 class Pagination(object):
     """
     Extracted from flask-sqlalchemy

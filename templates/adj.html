@@ -1,0 +1,50 @@
+{% extends "layout.html" %}
+{% block body %}
+<script src="{{ url_for('static', filename='shared.js') }}" type="text/javascript"></script>
+  <div class="row">
+    <div class="col-xs-12">
+        <div class="error" id="flash-error" style="display:none;"></div>
+    </div>
+  </div>
+  <div class="row"></div>
+    <div class="col-xs-4">
+        <div id="adj-filters">
+            <label>Filter by <a class="glyphicon glyphicon-plus"></a></label>
+            <div class="adj-variable-group">
+                <span class="adj-variable">'location' = 'Berkeley, CA, USA' <a class="glyphicon glyphicon-remove"></a></span>
+                <span class="adj-variable">'start_date' >= '2017-02-01' <a class="glyphicon glyphicon-remove"></a></span> 
+            </div>
+        </div>
+        <div id="adj-sorting">
+            <label>Sort by <a class="glyphicon glyphicon-plus"></a></label>
+            <div class="adj-variable-group">    
+                <span class="adj-variable">location <a class="glyphicon glyphicon-remove"></a></span>
+                <span class="adj-variable">start_date <a class="glyphicon glyphicon-remove"></a></span> 
+            </div>
+        </div>
+        <label>Candidate Events</label>
+        <div class="cand-event-group">
+            <div class="event-desc" id="cand-event_k">
+                <div class="cand-event-metadata" id="cand-event-metadata_k">
+                    <b>event_id:</b> 21644<br/>
+                    <b>coder:</b> amritpal
+                </div>
+                <b>title:</b> <a href="http://cliff.ssc.wisc.edu/campus_protest_dev/event_creator/6628" target="_blank">Protesters shut down Yiannopoulos speech</a><br/>
+                <b>publication:</b> The Depaulia: DePaul University<br/>
+                <b>pub_date:</b> 2016-05-24 <br/>
+                <b>article_desc:</b> Article reports on a talk by Milo Yiannopoulos being disrupted by protestors. The article does not provide a protest issue explaining why the disruption took place. The article explains that after the disruption shut down the event, Yiannopoulos marched around campus with his supporters. The article mentions that Yiannopoulos attempted to address the crowd while marching, but continued to be drowned out, suggesting that protestors followed Yiannopoulos and continued to disrupt him during the march. The article also mentions that earlier in the day, students held a 'counter rally' during which they voiced concerns about ongoing issues of racism on campus. However, the article does not explain who the protestors were countering. <br/>
+                <b>desc:</b> Protesters disrupted an event held by Milo Yiannopoulos. A group of protesters stormed the stage and interrupted Yiannopoulos, blowing whistles, and speaking out against Yiannopoulos. A group of about 100 protesters stood outside the doors of the event. Police were called to the Student Center and arrived soon after, but didn't intervene. Protestors followed Yiannopoulos as he marched around campus to protest the disruption, and continued to be drowned out by noise. <br/>
+            </div>
+        </div>
+    </div>
+    <div class="col-xs-4">
+        <p>
+        </p>
+    </div>
+    <div class="col-xs-4">
+        <p>
+        </p>
+    </div>
+  </div>
+</div>
+{% endblock %}
