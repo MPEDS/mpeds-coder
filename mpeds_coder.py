@@ -1195,14 +1195,14 @@ def generateCoderAudit():
 ##### Internal calls
 #####
 
-@app.route('/_add_article_code/<pn>')
+@app.route('/_add_article_code/<pn>', methods=['POST'])
 @login_required
 def addArticleCode(pn):
     """ Adds a record to article coding table. """
-    aid  = int(request.args.get('article'))
-    var  = request.args.get('variable')
-    val  = request.args.get('value')
-    text = request.args.get('text')
+    aid  = int(request.form['article'])
+    var  = request.form['variable']
+    val  = request.form['value']
+    text = request.form.get('text')
     aqs  = []
     now  = dt.datetime.now(tz = central).replace(tzinfo = None)
 
@@ -1237,14 +1237,13 @@ def addArticleCode(pn):
     return make_response("", 200)
 
 
-@app.route('/_del_article_code/<pn>')
+@app.route('/_del_article_code/<pn>', methods=['POST'])
 @login_required
 def delArticleCode(pn):
     """ Deletes a record from article coding table. """
-    article  = request.args.get('article')
-    variable = request.args.get('variable')
-    value    = request.args.get('value')
-
+    article  = request.form['article']
+    variable = request.form['variable']
+    value    = request.form['value']
     if pn == 'ec':
         a = db_session.query(CoderArticleAnnotation).filter_by(
             article_id = article,
@@ -1266,16 +1265,16 @@ def delArticleCode(pn):
         return make_response("", 404)
 
 
-@app.route('/_change_article_code/<pn>')
+@app.route('/_change_article_code/<pn>', methods=['POST'])
 @login_required
 def changeArticleCode(pn):
     """ 
         Changes a radio button or text input/area by removing all prior
         values, adds one new one.
     """
-    article  = request.args.get('article')
-    variable = request.args.get('variable')
-    value    = request.args.get('value')
+    article  = request.form['article']
+    variable = request.form['variable']
+    value    = request.form['value']
 
     ## delete all prior values
     a = db_session.query(CoderArticleAnnotation).filter_by(
@@ -1297,7 +1296,7 @@ def changeArticleCode(pn):
     return jsonify(result={"status": 200})
 
 
-@app.route('/_add_code/<pn>')
+@app.route('/_add_code/<pn>', methods=['POST'])
 @login_required
 def addCode(pn):
     aid  = int(request.form['article'])
