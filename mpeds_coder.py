@@ -1179,14 +1179,14 @@ def generateCoderAudit():
 ##### Internal calls
 #####
 
-@app.route('/_add_code/<pn>', methods=['POST'])
+@app.route('/_add_code/<pn>', methods=['GET', 'POST'])
 @login_required
 def addCode(pn):
     aid  = int(request.form['article'])
     var  = request.form['variable']
     val  = request.form['value']
     ev   = request.form['event']
-    text = request.form.get('text')
+    text = request.form['text']
     aqs  = []
     now  = dt.datetime.now(tz = central).replace(tzinfo = None)
 
@@ -1331,7 +1331,7 @@ def delCode(pn):
         return make_response("", 404)
 
 
-@app.route('/_change_code/<pn>', methods=['POST'])
+@app.route('/_change_code/<pn>', methods=['GET', 'POST'])
 @login_required
 def changeCode(pn):
     """ 
