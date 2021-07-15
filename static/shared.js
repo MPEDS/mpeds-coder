@@ -284,7 +284,8 @@ var selectCheckbox = function(e) {
       article:  aid,
       variable: variable,
       value:    val,
-      event:    eid
+      event:    eid,
+      text:     null
     }
   });
 
