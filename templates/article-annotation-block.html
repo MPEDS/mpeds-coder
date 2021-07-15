@@ -1,0 +1,28 @@
+<div class="article-annotation-block" id="article-annotation-block">
+  <form> 
+  <div id="debug-hook"></div>
+
+    <div class="form-group">
+      <label for="article-desc">Provide a short description of this article.</label>
+      <textarea class="form-control form-control-sm" name="article-desc" id="info_article-desc">{{ curr['article-desc']|safe }}</textarea>
+    </div>
+    
+    <div class="form-group">
+      <label>If this article was skipped, how come?</label>
+      
+      <div class="form-check">
+        <label class="form-check-label">
+          <input class="form-check-input basic-info" type="checkbox" name="date-est" id="dummy-info_date-est" value="exact" {{ 'checked' if curr['date-est'] == 'exact' else '' }} /> No protests
+        </label>
+      </div>
+
+      <div class="form-check">
+        <label class="form-check-label">
+          <input class="form-check-input basic-info" type="checkbox" name="date-est" id="dummy-info_date-est" value="approximate" {{ 'checked' if curr['date-est'] == 'approximate' else '' }} /> Protest(s), but no black protests
+        </label>
+      </div>
+
+    </div>
+
+  </form>
+</div>
