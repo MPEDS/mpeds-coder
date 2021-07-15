@@ -1312,7 +1312,7 @@ def addCode(pn):
     var  = request.form['variable']
     val  = request.form['value']
     ev   = request.form['event']
-    text = request.form['text']
+    text = request.form.get('text')
     aqs  = []
     now  = dt.datetime.now(tz = central).replace(tzinfo = None)
 
@@ -1337,11 +1337,6 @@ def addCode(pn):
             aq.coded_dt = now
             aqs.append(aq)
     elif pn == 'ec':
-        ## checkboxes will be returned as '' in JavaScript.
-        ## need to convert to None
-        if text == '':
-            text = None
-
         model = CodeEventCreator
         p     = CodeEventCreator(aid, ev, var, val, current_user.id, text)
 
