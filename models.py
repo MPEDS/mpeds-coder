@@ -1,4 +1,4 @@
-from sqlalchemy import Boolean, Column, DateTime, Integer, String, Unicode, ForeignKey, UniqueConstraint, Text, Date, UnicodeText
+from sqlalchemy import Boolean, Column, DateTime, Integer, String, Unicode, ForeignKey, UniqueConstraint, Text, UnicodeText
 from sqlalchemy.orm import relationship, backref
 from flask_login import UserMixin
 from database import Base
@@ -13,8 +13,8 @@ class CoderArticleAnnotation(Base):
     id         = Column(Integer, primary_key=True)
     article_id = Column(Integer, ForeignKey('article_metadata.id'), nullable = False)
     variable   = Column(String(100), nullable = False)
-    value      = Column(String(2000), nullable = False)
-    text       = Column(Unicode(2000))
+    value      = Column(Text, nullable = False)
+    text       = Column(UnicodeText)
     coder_id   = Column(Integer, ForeignKey('user.id'))
     timestamp  = Column(DateTime)
 
