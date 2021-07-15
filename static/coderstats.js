@@ -1,7 +1,7 @@
 $(function(){ 
 	$('#generate-ec').click(function (e){
 	    req = $.ajax({
-	      type: "GET",
+	      type: "POST",
 	      url:  $SCRIPT_ROOT + '/_generate_coder_stats',
 	      data: {
 	        'pn': 'ec',
