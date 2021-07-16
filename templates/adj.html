@@ -1,12 +1,13 @@
 {% extends "layout.html" %}
 {% block body %}
 <script src="{{ url_for('static', filename='shared.js') }}" type="text/javascript"></script>
+<div class="container-fluid">
   <div class="row">
     <div class="col-xs-12">
         <div class="error" id="flash-error" style="display:none;"></div>
     </div>
   </div>
-  <div class="row"></div>
+  <div class="row">
     <div class="col-xs-4">
         <div id="adj-filters">
             <label>Filter by <a class="glyphicon glyphicon-plus"></a></label>
