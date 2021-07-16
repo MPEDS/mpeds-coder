@@ -1,6 +1,7 @@
 {% extends "layout.html" %}
 {% block body %}
 <script src="{{ url_for('static', filename='shared.js') }}" type="text/javascript"></script>
+<script src="{{ url_for('static', filename='adj.js') }}" type="text/javascript"></script>
 <div class="container-fluid">
   <div class="row">
     <div class="col-xs-12">
@@ -9,32 +10,117 @@
   </div>
   <div class="row">
     <div class="col-xs-4">
-        <div id="adj-filters">
-            <label>Filter by <a class="glyphicon glyphicon-plus"></a></label>
-            <div class="adj-variable-group">
-                <span class="adj-variable">'location' = 'Berkeley, CA, USA' <a class="glyphicon glyphicon-remove"></a></span>
-                <span class="adj-variable">'start_date' >= '2017-02-01' <a class="glyphicon glyphicon-remove"></a></span> 
+        <h4>Candidate Events</h4>
+        <ul class="nav nav-tabs" id="adj-tabselecter">
+            <li class="tablinks active" id="filters_button">
+                <a href="#">Filters</a>
+            </li>
+            <li class="tablinks" id="results_button">
+                <a href="#">Results</a>
+            </li>
+        </ul>
+        <div class="tab-content">
+            <div class="tab-pane" id="filters_block">
+                <div id="adj-filters">
+                    <label>Filters</label>
+                    <div class="adj-variable-group">
+                        <span class="adj-variable">location IS LIKE 'Berkeley' <a class="glyphicon glyphicon-remove"></a></span>
+                        <span class="adj-variable">start_date >= '2017-02-01' <a class="glyphicon glyphicon-remove"></a></span> 
+                    </div>
+                </div>
+                <div id="adj-sorting">
+                    <label>Sort</label>
+                    <div class="adj-variable-group">    
+                        <span class="adj-variable">location <a class="glyphicon glyphicon-remove"></a></span>
+                        <span class="adj-variable">start_date <a class="glyphicon glyphicon-remove"></a></span> 
+                    </div>
+                </div>
+                <hr />
+                <label>Add filters</label>
+                <form> 
+                    <div class="form-row">
+                        <div class="form-group col-xs-6">
+                            <input class="form-control form-control-sm " 
+                                   name="filter-field" 
+                                   type="text" 
+                                   placeholder = "Field"/>
+                        </div>
+                        <div class="form-group col-xs-6">
+                            <input class="form-control form-control-sm" 
+                                   name="filter-compare" 
+                                   type="text" 
+                                   placeholder = "Comparison"/>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group col-xs-10">
+                            <input class="form-control form-control-sm" 
+                                   name="filter-text" 
+                                   type="text" 
+                                   placeholder = "Filter Text"/>
+                        </div>
+                        <div class="form-group col-xs-2">
+                            <button type="submit" class="btn btm-primary">Add</button>
+                        </div>
+                    </div>
+                </form>
+
+                <label>Add sorting fields</label>
+                <form> 
+                    <div class="form-row">
+                        <div class="form-group col-xs-10">
+                            <input class="form-control form-control-sm" 
+                                   name="sort-field" 
+                                   type="text" 
+                                   placeholder = "Sort field"/>
+                        </div>
+                        <div class="form-group col-xs-2">
+                            <button type="submit" class="btn btm-primary">Add</button>
+                        </div>
+                    </div>
+                </form>                
             </div>
-        </div>
-        <div id="adj-sorting">
-            <label>Sort by <a class="glyphicon glyphicon-plus"></a></label>
-            <div class="adj-variable-group">    
-                <span class="adj-variable">location <a class="glyphicon glyphicon-remove"></a></span>
-                <span class="adj-variable">start_date <a class="glyphicon glyphicon-remove"></a></span> 
-            </div>
-        </div>
-        <label>Candidate Events</label>
-        <div class="cand-event-group">
-            <div class="event-desc" id="cand-event_k">
-                <b>title:</b> <a href="http://cliff.ssc.wisc.edu/campus_protest_dev/event_creator/6628" target="_blank">Protesters shut down Yiannopoulos speech</a><br/>
-                <b>publication:</b> The Depaulia: DePaul University<br/>
-                <b>pub_date:</b> 2016-05-24<br/>
-                <b>start_date:</b> 2016-05-24<br/> 
-                <b>article_desc:</b> Article reports on a talk by Milo Yiannopoulos being disrupted by protestors. The article does not provide a protest issue explaining why the disruption took place. The article explains that after the disruption shut down the event, Yiannopoulos marched around campus with his supporters. The article mentions that Yiannopoulos attempted to address the crowd while marching, but continued to be drowned out, suggesting that protestors followed Yiannopoulos and continued to disrupt him during the march. The article also mentions that earlier in the day, students held a 'counter rally' during which they voiced concerns about ongoing issues of racism on campus. However, the article does not explain who the protestors were countering. <br/>
-                <b>desc:</b> Protesters disrupted an event held by Milo Yiannopoulos. A group of protesters stormed the stage and interrupted Yiannopoulos, blowing whistles, and speaking out against Yiannopoulos. A group of about 100 protesters stood outside the doors of the event. Police were called to the Student Center and arrived soon after, but didn't intervene. Protestors followed Yiannopoulos as he marched around campus to protest the disruption, and continued to be drowned out by noise. <br/>
-                <div class="cand-event-metadata" id="cand-event-metadata_k">
-                    <b>event_id:</b> 21644<br/>
-                    <b>coder:</b> amritpal
+            <div class="tab-pane" id="results_block">
+                <div class="cand-event-group">
+                    <div class="event-desc" id="cand-event_k">
+                        <b>title:</b> <a href="http://cliff.ssc.wisc.edu/campus_protest_dev/event_creator/6628" target="_blank">Protesters shut down Yiannopoulos speech</a><br/>
+                        <b>publication:</b> The Depaulia: DePaul University<br/>
+                        <b>pub_date:</b> 2016-05-24<br/>
+                        <b>start_date:</b> 2016-05-24<br/> 
+                        <b>article_desc:</b> Article reports on a talk by Milo Yiannopoulos being disrupted by protestors. The article does not provide a protest issue explaining why the disruption took place. The article explains that after the disruption shut down the event, Yiannopoulos marched around campus with his supporters. The article mentions that Yiannopoulos attempted to address the crowd while marching, but continued to be drowned out, suggesting that protestors followed Yiannopoulos and continued to disrupt him during the march. The article also mentions that earlier in the day, students held a 'counter rally' during which they voiced concerns about ongoing issues of racism on campus. However, the article does not explain who the protestors were countering. <br/>
+                        <b>desc:</b> Protesters disrupted an event held by Milo Yiannopoulos. A group of protesters stormed the stage and interrupted Yiannopoulos, blowing whistles, and speaking out against Yiannopoulos. A group of about 100 protesters stood outside the doors of the event. Police were called to the Student Center and arrived soon after, but didn't intervene. Protestors followed Yiannopoulos as he marched around campus to protest the disruption, and continued to be drowned out by noise. <br/>
+                        <div class="cand-event-metadata" id="cand-event-metadata_k">
+                            <b>event_id:</b> 21644<br/>
+                            <b>article_id:</b> 6628<br/>
+                            <b>coder:</b> amritpal
+                        </div>
+                    </div>
+                    <div class="event-desc" id="cand-event_k">
+                        <b>title:</b> <a href="http://cliff.ssc.wisc.edu/campus_protest_dev/event_creator/6628" target="_blank">Protesters shut down Yiannopoulos speech</a><br/>
+                        <b>publication:</b> The Depaulia: DePaul University<br/>
+                        <b>pub_date:</b> 2016-05-24<br/>
+                        <b>start_date:</b> 2016-05-24<br/> 
+                        <b>article_desc:</b> Article reports on a talk by Milo Yiannopoulos being disrupted by protestors. The article does not provide a protest issue explaining why the disruption took place. The article explains that after the disruption shut down the event, Yiannopoulos marched around campus with his supporters. The article mentions that Yiannopoulos attempted to address the crowd while marching, but continued to be drowned out, suggesting that protestors followed Yiannopoulos and continued to disrupt him during the march. The article also mentions that earlier in the day, students held a 'counter rally' during which they voiced concerns about ongoing issues of racism on campus. However, the article does not explain who the protestors were countering. <br/>
+                        <b>desc:</b> After being disrupted by protestors, Milo Yiannopoulos decided to leave the Student Center and protest the disruption. The crowd marched around Belden and Yiannopoulos was denied re-entrance to the Student Center. Yiannopoulos marched further down Belden and the Quad, trying to stop occasionally and address the crowd, but was often drowned out by the noise. 
+                        <div class="cand-event-metadata" id="cand-event-metadata_k">
+                            <b>event_id:</b> 21646<br/>
+                            <b>article_id:</b> 6628<br/>
+                            <b>coder:</b> amritpal
+                        </div>
+                    </div>
+                    <div class="event-desc" id="cand-event_k">
+                        <b>title:</b> <a href="http://cliff.ssc.wisc.edu/campus_protest_dev/event_creator/6628" target="_blank">Protesters shut down Yiannopoulos speech</a><br/>
+                        <b>publication:</b> The Depaulia: DePaul University<br/>
+                        <b>pub_date:</b> 2016-05-24<br/>
+                        <b>start_date:</b> 2016-05-24<br/> 
+                        <b>article_desc:</b> Article reports on a talk by Milo Yiannopoulos being disrupted by protestors. The article does not provide a protest issue explaining why the disruption took place. The article explains that after the disruption shut down the event, Yiannopoulos marched around campus with his supporters. The article mentions that Yiannopoulos attempted to address the crowd while marching, but continued to be drowned out, suggesting that protestors followed Yiannopoulos and continued to disrupt him during the march. The article also mentions that earlier in the day, students held a 'counter rally' during which they voiced concerns about ongoing issues of racism on campus. However, the article does not explain who the protestors were countering. <br/>
+                        <b>desc:</b> Students held a counter rally in the Quad during which they voiced concerns about ongoing issues of racism on campus. Several speakers mentioned incidents such as April's chalking and the painting found on the quad earlier Tuesday, which included the phrase "F- Mexico."
+                        <div class="cand-event-metadata" id="cand-event-metadata_k">
+                            <b>event_id:</b> 21647<br/>
+                            <b>article_id:</b> 6628<br/>
+                            <b>coder:</b> amritpal
+                        </div>
+                    </div>                                       
                 </div>
             </div>
         </div>

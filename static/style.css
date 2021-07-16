@@ -41,12 +41,10 @@ label, select, option, input {
 }
 
 .hl-1 {
-	# background-color: #FFF2CC;
 	background-color: #CCF5FF;
 }
 
 .hl-2 {
-	# background-color: #FFD966;
 	background-color: #66E0FF;
 }
 
@@ -69,12 +67,10 @@ label, select, option, input {
 .hl-19,
 .hl-20,
 .hl-21 {
-	# background-color: #BF9000;
 	background-color: #00A3CC;
 }
 
 .options {
-	#font-size: 0.9em;
 	color: #777;
 	padding-left: 6px;
 	display: none;
@@ -393,10 +389,11 @@ span.adj-variable:hover {
 }
 
 div.cand-event-group div.event-desc {
-	height: 220px;
+	height: 150px;
 	width: auto;
 	overflow: scroll;
-	font-size: 0.85em;	
+	font-size: 0.85em;
+	margin: 4px 0;
 }
 
 div.cand-event-metadata {
