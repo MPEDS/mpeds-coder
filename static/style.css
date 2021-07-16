@@ -372,7 +372,12 @@ footer {
 	Adjudication variables 
 */
 .adj-variable-group, .cand-event-group {
-	padding-left: 6px;
+	padding: 6px 0;
+}
+
+.cand-event-group {
+	height: 640px;
+	overflow-y: scroll;
 }
 
 span.adj-variable {
@@ -391,13 +396,9 @@ span.adj-variable:hover {
 div.cand-event-group div.event-desc {
 	height: 150px;
 	width: auto;
-	overflow: scroll;
+	overflow-y: scroll;
+	overflow-x: hidden;
 	font-size: 0.85em;
+	padding-left: 4px;
 	margin: 4px 0;
-}
-
-div.cand-event-metadata {
-	position: relative;
-	top: 10%;
-	left: 75%;
 }

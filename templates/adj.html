@@ -24,15 +24,15 @@
                 <div id="adj-filters">
                     <label>Filters</label>
                     <div class="adj-variable-group">
-                        <span class="adj-variable">location IS LIKE 'Berkeley' <a class="glyphicon glyphicon-remove"></a></span>
-                        <span class="adj-variable">start_date >= '2017-02-01' <a class="glyphicon glyphicon-remove"></a></span> 
+                        <span class="adj-variable"><code>location</code> contains 'Chicago' <a class="glyphicon glyphicon-remove"></a></span>
+                        <span class="adj-variable"><code>start_date</code> &gt;= '2016-05-24' <a class="glyphicon glyphicon-remove"></a></span> 
                     </div>
                 </div>
                 <div id="adj-sorting">
                     <label>Sort</label>
                     <div class="adj-variable-group">    
-                        <span class="adj-variable">location <a class="glyphicon glyphicon-remove"></a></span>
-                        <span class="adj-variable">start_date <a class="glyphicon glyphicon-remove"></a></span> 
+                        <span class="adj-variable"><code>location</code> <a class="glyphicon glyphicon-remove"></a></span>
+                        <span class="adj-variable"><code>start_date</code> <a class="glyphicon glyphicon-remove"></a></span> 
                     </div>
                 </div>
                 <hr />
@@ -43,13 +43,21 @@
                             <input class="form-control form-control-sm " 
                                    name="filter-field" 
                                    type="text" 
-                                   placeholder = "Field"/>
+                                   placeholder = "Field..."/>
                         </div>
                         <div class="form-group col-xs-6">
-                            <input class="form-control form-control-sm" 
+                            <select class="form-control form-control-sm" 
                                    name="filter-compare" 
-                                   type="text" 
-                                   placeholder = "Comparison"/>
+                                   placeholder = "Comparison">
+                              <option>equals</option>
+                              <option>is greater than</option>
+                              <option>is greater than or equal to</option>
+                              <option>is less than</option>
+                              <option>is less than or equal to</option>
+                              <option>contains</option>
+                              <option>starts with</option>
+                              <option>ends with</option>
+                            </select>
                         </div>
                     </div>
                     <div class="form-row">
@@ -60,7 +68,7 @@
                                    placeholder = "Filter Text"/>
                         </div>
                         <div class="form-group col-xs-2">
-                            <button type="submit" class="btn btm-primary">Add</button>
+                            <button type="submit" class="btn btm-primary">Add <span class="glyphicon glyphicon-plus"></span></button>
                         </div>
                     </div>
                 </form>
@@ -72,56 +80,101 @@
                             <input class="form-control form-control-sm" 
                                    name="sort-field" 
                                    type="text" 
-                                   placeholder = "Sort field"/>
+                                   placeholder = "Sort field..."/>
                         </div>
                         <div class="form-group col-xs-2">
-                            <button type="submit" class="btn btm-primary">Add</button>
+                            <button type="submit" class="btn btm-primary">Add <span class="glyphicon glyphicon-plus"></span></button>
                         </div>
                     </div>
                 </form>                
             </div>
             <div class="tab-pane" id="results_block">
                 <div class="cand-event-group">
-                    <div class="event-desc" id="cand-event_k">
-                        <b>title:</b> <a href="http://cliff.ssc.wisc.edu/campus_protest_dev/event_creator/6628" target="_blank">Protesters shut down Yiannopoulos speech</a><br/>
-                        <b>publication:</b> The Depaulia: DePaul University<br/>
-                        <b>pub_date:</b> 2016-05-24<br/>
-                        <b>start_date:</b> 2016-05-24<br/> 
-                        <b>article_desc:</b> Article reports on a talk by Milo Yiannopoulos being disrupted by protestors. The article does not provide a protest issue explaining why the disruption took place. The article explains that after the disruption shut down the event, Yiannopoulos marched around campus with his supporters. The article mentions that Yiannopoulos attempted to address the crowd while marching, but continued to be drowned out, suggesting that protestors followed Yiannopoulos and continued to disrupt him during the march. The article also mentions that earlier in the day, students held a 'counter rally' during which they voiced concerns about ongoing issues of racism on campus. However, the article does not explain who the protestors were countering. <br/>
-                        <b>desc:</b> Protesters disrupted an event held by Milo Yiannopoulos. A group of protesters stormed the stage and interrupted Yiannopoulos, blowing whistles, and speaking out against Yiannopoulos. A group of about 100 protesters stood outside the doors of the event. Police were called to the Student Center and arrived soon after, but didn't intervene. Protestors followed Yiannopoulos as he marched around campus to protest the disruption, and continued to be drowned out by noise. <br/>
-                        <div class="cand-event-metadata" id="cand-event-metadata_k">
-                            <b>event_id:</b> 21644<br/>
-                            <b>article_id:</b> 6628<br/>
-                            <b>coder:</b> amritpal
+                    <nav aria-label="cand-event-pagination">
+                        <ul class="pagination">
+                          <li class="page-item">
+                            <a class="page-link" href="#" aria-label="Previous">
+                              <span aria-hidden="true">&laquo;</span>
+                              <span class="sr-only">Previous</span>
+                            </a>
+                          </li>
+                          <li class="page-item"><a class="page-link" href="#">1</a></li>
+                          <li class="page-item"><a class="page-link" href="#">2</a></li>
+                          <li class="page-item"><a class="page-link" href="#">3</a></li>
+                          <li class="page-item">
+                            <a class="page-link" href="#" aria-label="Next">
+                              <span aria-hidden="true">&raquo;</span>
+                              <span class="sr-only">Next</span>
+                            </a>
+                          </li>
+                        </ul>
+                    </nav>                 
+                    <div class="event-desc" id="cand-event_21644">
+                        <div class="row">
+                            <div class="col-xs-9">
+                                <b>title:</b> Protesters shut down Yiannopoulos speech<br/>
+                                <b>publication:</b> The Depaulia: DePaul University<br/>
+                                <b>pub_date:</b> 2016-05-24<br/>
+                                <b>start_date:</b> 2016-05-24</br>
+                                <b>location:</b> Chicago, Illinois, USA
+                            </div>
+                            <div class="col-xs-3" id="cand-event-metadata_21644">
+                                <b>event_id:</b> 21644<br/>
+                                <b>article_id:</b> <a href="http://cliff.ssc.wisc.edu/campus_protest_dev/event_creator/6628" target="_blank">6628</a><br/>
+                                <b>coder:</b> amritpal <br/>
+                                <b><a href="#">Expand <span class="glyphicon glyphicon-chevron-right"></span></a></b>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-xs-12">
+                                <b>article_desc:</b> Article reports on a talk by Milo Yiannopoulos being disrupted by protestors. The article does not provide a protest issue explaining why the disruption took place. The article explains that after the disruption shut down the event, Yiannopoulos marched around campus with his supporters. The article mentions that Yiannopoulos attempted to address the crowd while marching, but continued to be drowned out, suggesting that protestors followed Yiannopoulos and continued to disrupt him during the march. The article also mentions that earlier in the day, students held a 'counter rally' during which they voiced concerns about ongoing issues of racism on campus. However, the article does not explain who the protestors were countering. <br/>
+                                <b>desc:</b> Protesters disrupted an event held by Milo Yiannopoulos. A group of protesters stormed the stage and interrupted Yiannopoulos, blowing whistles, and speaking out against Yiannopoulos. A group of about 100 protesters stood outside the doors of the event. Police were called to the Student Center and arrived soon after, but didn't intervene. Protestors followed Yiannopoulos as he marched around campus to protest the disruption, and continued to be drowned out by noise. <br/>
+                            </div>
                         </div>
                     </div>
-                    <div class="event-desc" id="cand-event_k">
-                        <b>title:</b> <a href="http://cliff.ssc.wisc.edu/campus_protest_dev/event_creator/6628" target="_blank">Protesters shut down Yiannopoulos speech</a><br/>
-                        <b>publication:</b> The Depaulia: DePaul University<br/>
-                        <b>pub_date:</b> 2016-05-24<br/>
-                        <b>start_date:</b> 2016-05-24<br/> 
-                        <b>article_desc:</b> Article reports on a talk by Milo Yiannopoulos being disrupted by protestors. The article does not provide a protest issue explaining why the disruption took place. The article explains that after the disruption shut down the event, Yiannopoulos marched around campus with his supporters. The article mentions that Yiannopoulos attempted to address the crowd while marching, but continued to be drowned out, suggesting that protestors followed Yiannopoulos and continued to disrupt him during the march. The article also mentions that earlier in the day, students held a 'counter rally' during which they voiced concerns about ongoing issues of racism on campus. However, the article does not explain who the protestors were countering. <br/>
-                        <b>desc:</b> After being disrupted by protestors, Milo Yiannopoulos decided to leave the Student Center and protest the disruption. The crowd marched around Belden and Yiannopoulos was denied re-entrance to the Student Center. Yiannopoulos marched further down Belden and the Quad, trying to stop occasionally and address the crowd, but was often drowned out by the noise. 
-                        <div class="cand-event-metadata" id="cand-event-metadata_k">
-                            <b>event_id:</b> 21646<br/>
-                            <b>article_id:</b> 6628<br/>
-                            <b>coder:</b> amritpal
+                    <div class="event-desc" id="cand-event_21646">
+                        <div class="row">
+                            <div class="col-xs-9">
+                                <b>title:</b> Protesters shut down Yiannopoulos speech<br/>
+                                <b>publication:</b> The Depaulia: DePaul University<br/>
+                                <b>pub_date:</b> 2016-05-24<br/>
+                                <b>start_date:</b> 2016-05-24</br>
+                                <b>location:</b> Chicago, Illinois, USA
+                            </div>
+                            <div class="col-xs-3" id="cand-event-metadata_21646">
+                                <b>event_id:</b> 21646<br/>
+                                <b>article_id:</b> <a href="http://cliff.ssc.wisc.edu/campus_protest_dev/event_creator/6628" target="_blank">6628</a><br/>
+                                <b>coder:</b> amritpal<br/>
+                                <b><a href="#">Expand <span class="glyphicon glyphicon-chevron-right"></span></a></b>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-xs-12">
+                                <b>article_desc:</b> Article reports on a talk by Milo Yiannopoulos being disrupted by protestors. The article does not provide a protest issue explaining why the disruption took place. The article explains that after the disruption shut down the event, Yiannopoulos marched around campus with his supporters. The article mentions that Yiannopoulos attempted to address the crowd while marching, but continued to be drowned out, suggesting that protestors followed Yiannopoulos and continued to disrupt him during the march. The article also mentions that earlier in the day, students held a 'counter rally' during which they voiced concerns about ongoing issues of racism on campus. However, the article does not explain who the protestors were countering. <br/>
+                                <b>desc:</b> After being disrupted by protestors, Milo Yiannopoulos decided to leave the Student Center and protest the disruption. The crowd marched around Belden and Yiannopoulos was denied re-entrance to the Student Center. Yiannopoulos marched further down Belden and the Quad, trying to stop occasionally and address the crowd, but was often drowned out by the noise. 
+                            </div>
                         </div>
                     </div>
-                    <div class="event-desc" id="cand-event_k">
-                        <b>title:</b> <a href="http://cliff.ssc.wisc.edu/campus_protest_dev/event_creator/6628" target="_blank">Protesters shut down Yiannopoulos speech</a><br/>
-                        <b>publication:</b> The Depaulia: DePaul University<br/>
-                        <b>pub_date:</b> 2016-05-24<br/>
-                        <b>start_date:</b> 2016-05-24<br/> 
-                        <b>article_desc:</b> Article reports on a talk by Milo Yiannopoulos being disrupted by protestors. The article does not provide a protest issue explaining why the disruption took place. The article explains that after the disruption shut down the event, Yiannopoulos marched around campus with his supporters. The article mentions that Yiannopoulos attempted to address the crowd while marching, but continued to be drowned out, suggesting that protestors followed Yiannopoulos and continued to disrupt him during the march. The article also mentions that earlier in the day, students held a 'counter rally' during which they voiced concerns about ongoing issues of racism on campus. However, the article does not explain who the protestors were countering. <br/>
-                        <b>desc:</b> Students held a counter rally in the Quad during which they voiced concerns about ongoing issues of racism on campus. Several speakers mentioned incidents such as April's chalking and the painting found on the quad earlier Tuesday, which included the phrase "F- Mexico."
-                        <div class="cand-event-metadata" id="cand-event-metadata_k">
-                            <b>event_id:</b> 21647<br/>
-                            <b>article_id:</b> 6628<br/>
-                            <b>coder:</b> amritpal
-                        </div>
-                    </div>                                       
                 </div>
+                <nav aria-label="cand-event-pagination">
+                    <ul class="pagination">
+                      <li class="page-item">
+                        <a class="page-link" href="#" aria-label="Previous">
+                          <span aria-hidden="true">&laquo;</span>
+                          <span class="sr-only">Previous</span>
+                        </a>
+                      </li>
+                      <li class="page-item"><a class="page-link" href="#">1</a></li>
+                      <li class="page-item"><a class="page-link" href="#">2</a></li>
+                      <li class="page-item"><a class="page-link" href="#">3</a></li>
+                      <li class="page-item">
+                        <a class="page-link" href="#" aria-label="Next">
+                          <span aria-hidden="true">&raquo;</span>
+                          <span class="sr-only">Next</span>
+                        </a>
+                      </li>
+                    </ul>
+                </nav>                   
             </div>
         </div>
     </div>
