@@ -31,8 +31,8 @@
                 <div id="adj-sorting">
                     <label>Sort</label>
                     <div class="adj-variable-group">    
-                        <span class="adj-variable"><code>location</code> <a class="glyphicon glyphicon-remove"></a></span>
-                        <span class="adj-variable"><code>start_date</code> <a class="glyphicon glyphicon-remove"></a></span> 
+                        <span class="adj-variable"><code>location</code> asc <a class="glyphicon glyphicon-remove"></a></span>
+                        <span class="adj-variable"><code>start_date</code> desc <a class="glyphicon glyphicon-remove"></a></span> 
                     </div>
                 </div>
                 <hr />
@@ -46,9 +46,7 @@
                                    placeholder = "Field..."/>
                         </div>
                         <div class="form-group col-xs-6">
-                            <select class="form-control form-control-sm" 
-                                   name="filter-compare" 
-                                   placeholder = "Comparison">
+                            <select class="form-control form-control-sm" name="filter-compare">
                               <option>equals</option>
                               <option>is greater than</option>
                               <option>is greater than or equal to</option>
@@ -76,12 +74,19 @@
                 <label>Add sorting fields</label>
                 <form> 
                     <div class="form-row">
-                        <div class="form-group col-xs-10">
+                        <div class="form-group col-xs-5">
                             <input class="form-control form-control-sm" 
                                    name="sort-field" 
                                    type="text" 
                                    placeholder = "Sort field..."/>
                         </div>
+                        <div class="form-group col-xs-5">
+                            <select class="form-control form-control-sm" name="sort-field-asc">
+                                <option>ascending</option>
+                                <option>descending</option>
+                            </select>
+                        </div>
+
                         <div class="form-group col-xs-2">
                             <button type="submit" class="btn btm-primary">Add <span class="glyphicon glyphicon-plus"></span></button>
                         </div>
@@ -111,14 +116,14 @@
                     </nav>                 
                     <div class="event-desc" id="cand-event_21644">
                         <div class="row">
-                            <div class="col-xs-9">
+                            <div class="col-xs-8">
                                 <b>title:</b> Protesters shut down Yiannopoulos speech<br/>
                                 <b>publication:</b> The Depaulia: DePaul University<br/>
                                 <b>pub_date:</b> 2016-05-24<br/>
                                 <b>start_date:</b> 2016-05-24</br>
                                 <b>location:</b> Chicago, Illinois, USA
                             </div>
-                            <div class="col-xs-3" id="cand-event-metadata_21644">
+                            <div class="col-xs-4" id="cand-event-metadata_21644">
                                 <b>event_id:</b> 21644<br/>
                                 <b>article_id:</b> <a href="http://cliff.ssc.wisc.edu/campus_protest_dev/event_creator/6628" target="_blank">6628</a><br/>
                                 <b>coder:</b> amritpal <br/>
@@ -134,14 +139,14 @@
                     </div>
                     <div class="event-desc" id="cand-event_21646">
                         <div class="row">
-                            <div class="col-xs-9">
+                            <div class="col-xs-8">
                                 <b>title:</b> Protesters shut down Yiannopoulos speech<br/>
                                 <b>publication:</b> The Depaulia: DePaul University<br/>
                                 <b>pub_date:</b> 2016-05-24<br/>
                                 <b>start_date:</b> 2016-05-24</br>
                                 <b>location:</b> Chicago, Illinois, USA
                             </div>
-                            <div class="col-xs-3" id="cand-event-metadata_21646">
+                            <div class="col-xs-4" id="cand-event-metadata_21646">
                                 <b>event_id:</b> 21646<br/>
                                 <b>article_id:</b> <a href="http://cliff.ssc.wisc.edu/campus_protest_dev/event_creator/6628" target="_blank">6628</a><br/>
                                 <b>coder:</b> amritpal<br/>
