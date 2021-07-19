@@ -389,6 +389,11 @@ span.adj-variable {
 	font-size: 0.8em;
 }
 
+.adj-pane {
+	/* padding-right: 2px; */
+	border-right: 1px solid #CCC;
+}
+
 span.adj-variable:hover {
 	background-color: #CCC;
 }
@@ -401,4 +406,42 @@ div.cand-event-group div.event-desc {
 	font-size: 0.85em;
 	padding-left: 4px;
 	margin: 4px 0;
+}
+
+.expanded-event {
+	height: 640px;
+	overflow-y: scroll;
+}
+
+div.expanded-event-variable-name {
+	font-size: 0.8em;
+}
+
+div.expanded-event-variable {
+	border: 1px dashed #AAA;
+	border-radius: 5px;
+	margin: 2px 4px;
+	padding: 2px;
+	font-size: 0.8em;
+	background-color: #EEE; 
+	/* float: right !important; */
+}
+
+.grabbable {
+    cursor: move; /* fallback if grab cursor is unsupported */
+    cursor: grab;
+    /* cursor: -moz-grab;
+    cursor: -webkit-grab; */
+}
+
+ /* (Optional) Apply a "closed-hand" cursor during drag operation. */
+.grabbable:active {
+    cursor: grabbing;
+    /* cursor: -moz-grabbing;
+    cursor: -webkit-grabbing; */
+}
+
+div.expanded-event-variable-group {
+	margin-bottom: 4px;
+	border-bottom: 1px solid #CCC;
 }
