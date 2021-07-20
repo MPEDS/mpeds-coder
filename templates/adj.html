@@ -91,7 +91,15 @@
                             <button type="submit" class="btn btm-primary">Add <span class="glyphicon glyphicon-plus"></span></button>
                         </div>
                     </div>
-                </form>                
+                </form> 
+                
+                <label>Saved search terms</label>
+                <div id="adj-filters">
+                    <div class="adj-variable-group">
+                        <span class="adj-variable"><code>location</code> starts with 'Berkeley' <a class="glyphicon glyphicon-plus"></a></span>
+                    </div>
+                </div>
+
             </div>
             <div class="tab-pane" id="results_block">
                 <div class="cand-event-group">
@@ -184,6 +192,8 @@
         </div>
     </div>
     <div class="col-md-4 adj-pane" id="adj-pane-expanded-view">
+        <a id="cand-events-hide" href="#">&laquo; Hide Candidate Events</a>
+        <a id="cand-events-show" style="display:none;" href="#">Show Candidate Events &raquo;</a>
         <h4>Expanded Event View</h4>
         <div class="expanded-event" id="expanded-event_21644">
             <div class="row expanded-event-variable-group">

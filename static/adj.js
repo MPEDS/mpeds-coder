@@ -4,7 +4,7 @@ var changeTab = function(e) {
 
     // Get all elements with class="tablinks" and remove the class "active"
     $(".tablinks").each(function() {
-      $(this).removeClass('active')
+      $(this).removeClass("active");
     });
 
     // hide all other tab content
@@ -20,8 +20,35 @@ var changeTab = function(e) {
 // MAIN -- document ready 
 $(function(){ 
     $("#filters_block").show();
- 
+
+    // Add listener to tab links 
     $(".tablinks").each(function(){
         $(this).click(changeTab);
+    });
+
+    // hide pane 1 + make other panes bigger
+    $("#cand-events-hide").click(function(){
+      $("#adj-pane-cand-events").hide();
+      $("#cand-events-hide").hide();
+      $("#cand-events-show").show();
+
+      $("#adj-pane-expanded-view").removeClass("col-md-4");
+      $("#adj-pane-expanded-view").addClass("col-md-6");
+    
+      $("#adj-pane-event-constructor").removeClass("col-md-4");
+      $("#adj-pane-event-constructor").addClass("col-md-6");
+    });
+
+    // hide pane 1 + make other panes bigger
+    $("#cand-events-show").click(function(){
+      $("#cand-events-show").hide();
+      $("#cand-events-hide").show();
+      $("#adj-pane-cand-events").show();
+
+      $("#adj-pane-expanded-view").removeClass("col-md-6");
+      $("#adj-pane-expanded-view").addClass("col-md-4");
+
+      $("#adj-pane-event-constructor").removeClass("col-md-6");
+      $("#adj-pane-event-constructor").addClass("col-md-4");
     });
 });
