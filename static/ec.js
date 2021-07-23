@@ -108,6 +108,9 @@ var modifyEvent = function(e) {
 
     $('#basicinfo_block textarea').blur(storeText);
 
+    // listener for actors-freeform
+    $('#textselect_block textarea').blur(storeText);
+      
     // listeners for adding or deleting checkboxes
     $('#basicinfo_block :checkbox').change(selectCheckbox);
     $('#yes-no_block :checkbox').change(selectCheckbox);

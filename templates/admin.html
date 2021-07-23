@@ -245,7 +245,7 @@
           <p>
             <label>Unassigned articles per database</label>
             <ul>
-            {% for k, v in unassigned %}
+            {% for k, v in unassigned|sort %}
               <li>{{ k }}: {{ v }}</li>
             {% endfor %}
             </ul>
