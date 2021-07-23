@@ -145,7 +145,8 @@ event_creator_single_value = ['article-desc', 'desc', 'start-date', 'end-date',
     'article-uncertain',
     'location', 'duration', 'date-est',
     'state', 'city', 'other-location', 
-    'basic-info-uncertain', 'yesno-uncertain', 'textselect-uncertain']
+    'basic-info-uncertain', 'yesno-uncertain', 'textselect-uncertain',
+    'persons-freeform']
 
 event_creator_single_value.extend([[x[0] for x in v] for k, v in yes_no_vars.iteritems()])
 
@@ -222,7 +223,7 @@ def prepText(article):
     paras = []
     path  = app.config['DOC_ROOT'] + fn
 
-    filename = str('INTERNAL_ID: %s' % fn)
+    filename = str('INTERNAL_ID: %s' % fn.encode('utf8'))
 
     if app.config['STORE_ARTICLES_INTERNALLY'] == True:
         title = atitle
@@ -1013,9 +1014,9 @@ def coderStats():
 @app.route('/publications')
 @app.route('/publications/<sort>')
 @login_required
-def publications(sort = 'tbc'):
+def publications(db):
     """
-      Geenerate list of all publications and all articles remaining. 
+      Generate list of all publications and all articles remaining. 
     """
     if current_user.authlevel < 3:
         return redirect(url_for('index'))
@@ -1031,13 +1032,13 @@ def publications(sort = 'tbc'):
     (
     SELECT SUBSTRING_INDEX(am.db_id, '_', 1) as publication, COUNT(*) AS in_queue
     FROM article_metadata am
-    WHERE am.db_name = 'uwire' AND am.id IN (SELECT article_id FROM event_creator_queue)
+    WHERE am.db_name = '%s' AND am.id IN (SELECT article_id FROM event_creator_queue)
     GROUP BY 1
 ) num RIGHT JOIN
 (
     SELECT SUBSTRING_INDEX(am.db_id, '_', 1) as publication, COUNT(*) AS total
     FROM article_metadata am
-    WHERE db_name = 'uwire'
+    WHERE db_name = '%s'
     GROUP BY 1
 ) dem ON num.publication = dem.publication
 ORDER BY to_be_coded DESC, total DESC
@@ -1251,7 +1252,6 @@ def delArticleCode(pn):
     article  = request.form['article']
     variable = request.form['variable']
     value    = request.form['value']
-
     if pn == 'ec':
         a = db_session.query(CoderArticleAnnotation).filter_by(
             article_id = article,
@@ -1304,7 +1304,7 @@ def changeArticleCode(pn):
     return jsonify(result={"status": 200})
 
 
-@app.route('/_add_code/<pn>', methods=['GET', 'POST'])
+@app.route('/_add_code/<pn>', methods=['POST'])
 @login_required
 def addCode(pn):
     aid  = int(request.form['article'])
