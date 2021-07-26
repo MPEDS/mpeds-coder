@@ -32,11 +32,11 @@ $(function(){
       $("#cand-events-hide").hide();
       $("#cand-events-show").show();
 
-      $("#adj-pane-expanded-view").removeClass("col-md-4");
-      $("#adj-pane-expanded-view").addClass("col-md-6");
+      $("#adj-pane-expanded-view").removeClass("col-md-6");
+      $("#adj-pane-expanded-view").addClass("col-md-12");
     
-      $("#adj-pane-event-constructor").removeClass("col-md-4");
-      $("#adj-pane-event-constructor").addClass("col-md-6");
+      $("#adj-pane-event-constructor").removeClass("col-md-6");
+      $("#adj-pane-event-constructor").addClass("col-md-12");
     });
 
     // hide pane 1 + make other panes bigger
@@ -45,10 +45,10 @@ $(function(){
       $("#cand-events-hide").show();
       $("#adj-pane-cand-events").show();
 
-      $("#adj-pane-expanded-view").removeClass("col-md-6");
-      $("#adj-pane-expanded-view").addClass("col-md-4");
+      $("#adj-pane-expanded-view").removeClass("col-md-12");
+      $("#adj-pane-expanded-view").addClass("col-md-6");
 
-      $("#adj-pane-event-constructor").removeClass("col-md-6");
-      $("#adj-pane-event-constructor").addClass("col-md-4");
+      $("#adj-pane-event-constructor").removeClass("col-md-12");
+      $("#adj-pane-event-constructor").addClass("col-md-6");
     });
 });

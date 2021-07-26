@@ -421,11 +421,14 @@ div.expanded-event-variable-name {
 div.expanded-event-variable {
 	border: 1px dashed #AAA;
 	border-radius: 5px;
-	margin: 4px 15px 4px 2px;
+	margin: 4px -30px 4px 0;
 	padding: 2px;
 	font-size: 0.8em;
-	background-color: #EEE; 
-	float: right !important;
+	background-color: #EEE;
+	width: 100%;
+	display: block;
+	max-height: 100px;
+	overflow-y: scroll;	
 }
 
 .grabbable {
@@ -440,6 +443,10 @@ div.expanded-event-variable {
     cursor: grabbing;
     /* cursor: -moz-grabbing;
     cursor: -webkit-grabbing; */
+}
+
+.data-buttons {
+	float: right;
 }
 
 div.expanded-event-variable-group {
