@@ -21,6 +21,9 @@
             <li class="tablinks" id="canon_button">
                 <a href="#">Canonical Events</a>
             </li>
+            <li class="tablinks" id="relationships_button">
+                <a href="#">Relationships</a>
+            </li>
         </ul>
         <div class="tab-content">
             <div class="tab-pane" id="filters_block">
@@ -137,7 +140,8 @@
                                 <b>event_id:</b> 21644<br/>
                                 <b>article_id:</b> <a href="http://cliff.ssc.wisc.edu/campus_protest_dev/event_creator/6628" target="_blank">6628</a><br/>
                                 <b>coder:</b> amritpal <br/>
-                                <b><a href="#">Add to Expand <span class="glyphicon glyphicon-plus-sign"></span></a></b>
+                                <b><a href="#">Add to Expand <span class="glyphicon glyphicon-plus-sign"></span></a></b><br/>
+                                <b>Flags: <a href="#" class="glyphicon glyphicon-thumbs-up"></a> <a href="#" class="glyphicon glyphicon-thumbs-down"></a></b>
                             </div>
                         </div>
                         <div class="row">
@@ -160,7 +164,8 @@
                                 <b>event_id:</b> 21646<br/>
                                 <b>article_id:</b> <a href="http://cliff.ssc.wisc.edu/campus_protest_dev/event_creator/6628" target="_blank">6628</a><br/>
                                 <b>coder:</b> amritpal<br/>
-                                <b><a href="#">Add to Expand <span class="glyphicon glyphicon-plus-sign"></span></a></b>
+                                <b><a href="#">Add to Expand <span class="glyphicon glyphicon-plus-sign"></span></a></b><br/>
+                                <b>Flags: <a href="#" class="glyphicon glyphicon-thumbs-up"></a> <a href="#" class="glyphicon glyphicon-thumbs-down"></a></b>
                             </div>
                         </div>
                         <div class="row">
@@ -266,6 +271,50 @@
                     </ul>
                 </nav>
             </div>
+            <div class="tab-pane" id="relationships_block">
+                <label>Add relationship</label> 
+                <form> 
+                    <div class="form-row">
+                        <div class="form-group col-sm-3">
+                            <input class="form-control form-control-sm" 
+                                name="search-key-1" 
+                                type="text" 
+                                placeholder = "Key 1..."/>
+                        </div>
+                        <div class="form-group col-sm-3">
+                            <input class="form-control form-control-sm" 
+                                name="search-key-2" 
+                                type="text" 
+                                placeholder = "Key 2..."/>
+                        </div>
+                        <div class="form-group col-sm-4">
+                            <select class="form-control form-control-sm" name="relationship-type">
+                                <option>Campaign</option>
+                                <option>Sub-event</option>
+                                <option>Counterprotest</option>
+                                <option>Solidarity</option>
+                                <option>Coordinated</option>
+                            </select>
+                        </div>
+                        <div class="form-group col-sm-2">
+                            <button type="submit" class="btn btm-primary">Add <span class="glyphicon glyphicon-plus"></span></button>
+                        </div> 
+                    </div>
+                </form>
+                <hr />
+                <div class="form-row">
+                    <label>View hierarchy</label> </br>
+                    <div class="form-group col-sm-8">
+                        <input class="form-control form-control-sm" 
+                            name="view-key" 
+                            type="text" 
+                            placeholder = "Key..."/>
+                    </div>
+                    <p>
+                        <img src="static/example-event-hierarchy.png" width="50%"/>                        
+                    </p>
+                </div>
+            </div>     
         </div>
     </div>
     <div class="col-sm-7 adj-pane" id="adj-pane-expanded-view">
@@ -277,7 +326,10 @@
                 <div class="col-sm-1 expanded-event-variable-name">metadata</div>
                 {% for e in (21644, 21646, 21648, 21650) %}
                 <div class="col-sm-2 expanded-event-variable-col">
-                    <label>Event {{ e }} <a href="#" class="glyphicon glyphicon-remove-sign"></a></label> 
+                    <label>
+                        Event {{ e }} <a href="#" class="glyphicon glyphicon-remove-sign" title="Remove from grid"></a>
+                        <a href="#" class="glyphicon glyphicon-plus" title="Add all values"></a>
+                    </label> 
                     <div class="expanded-event-variable expanded-event-variable-metadata" id="expanded-event-metadata_21644">
                         <b>title:</b> Protesters shut down Yiannopoulos speech<br/>
                         <b>publication:</b> The Depaulia: DePaul University<br/>
@@ -292,7 +344,7 @@
                     <label>Canonical Event</label>
                     <div class="expanded-event-variable expanded-event-variable canonical" id="expanded-event-metadata_21644">
                         <div class="sticky-top data-buttons">
-                            <a class="glyphicon glyphicon-pencil" title="Edit"></a> <a class="glyphicon glyphicon-info-sign" title="Info"></a>
+                            <a class="glyphicon glyphicon-plus"></a> <a class="glyphicon glyphicon-pencil" title="Edit"></a> <a class="glyphicon glyphicon-info-sign" title="Info"></a>
                         </div>
                         <b>Key: </b> Milo_Chicago_2016<br />
                     </div>
@@ -304,7 +356,7 @@
                 <div class="col-sm-2 expanded-event-variable-col">
                     <div class="expanded-event-variable grabbable" id="article-desc_21644">
                         <div class="sticky-top data-buttons">
-                            <a class="glyphicon glyphicon-pencil" title="Edit"></a> <a class="glyphicon glyphicon-info-sign" title="Info"></a>
+                            <a class="glyphicon glyphicon-plus"></a> <a class="glyphicon glyphicon-pencil" title="Edit"></a> <a class="glyphicon glyphicon-info-sign" title="Info"></a>
                         </div>
                         Article reports on a talk by Milo Yiannopoulos being disrupted by protestors. The article does not provide a protest issue explaining why the disruption took place. The article explains that after the disruption shut down the event, Yiannopoulos marched around campus with his supporters. The article mentions that Yiannopoulos attempted to address the crowd while marching, but continued to be drowned out, suggesting that protestors followed Yiannopoulos and continued to disrupt him during the march. The article also mentions that earlier in the day, students held a 'counter rally' during which they voiced concerns about ongoing issues of racism on campus. However, the article does not explain who the protestors were countering. 
                     </div>
@@ -325,7 +377,7 @@
                 <div class="col-sm-2 expanded-event-variable-col">
                     <div class="expanded-event-variable grabbable" id="desc_21644">
                         <div class="sticky-top data-buttons">
-                            <a class="glyphicon glyphicon-pencil" title="Edit"></a> <a class="glyphicon glyphicon-info-sign" title="Info"></a>
+                            <a class="glyphicon glyphicon-plus"></a> <a class="glyphicon glyphicon-pencil" title="Edit"></a> <a class="glyphicon glyphicon-info-sign" title="Info"></a>
                         </div>
                         Protesters disrupted an event held by Milo Yiannopoulos. A group of protesters stormed the stage and interrupted Yiannopoulos, blowing whistles, and speaking out against Yiannopoulos. A group of about 100 protesters stood outside the doors of the event. Police were called to the Student Center and arrived soon after, but didn't intervene. Protestors followed Yiannopoulos as he marched around campus to protest the disruption, and continued to be drowned out by noise.
                     </div>
@@ -347,7 +399,7 @@
                 <div class="col-sm-2 expanded-event-variable-col">
                     <div class="expanded-event-variable grabbable">
                         <div class="sticky-top data-buttons">
-                            <a class="glyphicon glyphicon-pencil" title="Edit"></a> <a class="glyphicon glyphicon-info-sign" title="Info"></a>
+                            <a class="glyphicon glyphicon-plus"></a> <a class="glyphicon glyphicon-pencil" title="Edit"></a> <a class="glyphicon glyphicon-info-sign" title="Info"></a>
                         </div>
                         2016-05-24
                     </div>
@@ -368,7 +420,7 @@
                 <div class="col-sm-2 expanded-event-variable-col">
                     <div class="expanded-event-variable grabbable" id="end_date_21644">
                         <div class="sticky-top data-buttons">
-                            <a class="glyphicon glyphicon-pencil" title="Edit"></a> <a class="glyphicon glyphicon-info-sign" title="Info"></a>
+                            <a class="glyphicon glyphicon-plus"></a> <a class="glyphicon glyphicon-pencil" title="Edit"></a> <a class="glyphicon glyphicon-info-sign" title="Info"></a>
                         </div>
                         2016-05-24
                     </div>
@@ -389,7 +441,7 @@
                 <div class="col-sm-2 expanded-event-variable-col">
                     <div class="expanded-event-variable grabbable">
                         <div class="sticky-top data-buttons">
-                            <a class="glyphicon glyphicon-pencil" title="Edit"></a> <a class="glyphicon glyphicon-info-sign" title="Info"></a>
+                            <a class="glyphicon glyphicon-plus"></a> <a class="glyphicon glyphicon-pencil" title="Edit"></a> <a class="glyphicon glyphicon-info-sign" title="Info"></a>
                         </div>
                         Chicago, Illinois, USA
                     </div>
@@ -410,7 +462,7 @@
                 <div class="col-sm-2 expanded-event-variable-col">
                     <div class="expanded-event-variable grabbable">
                         <div class="sticky-top data-buttons">
-                            <a class="glyphicon glyphicon-pencil" title="Edit"></a> <a class="glyphicon glyphicon-info-sign" title="Info"></a>
+                            <a class="glyphicon glyphicon-plus"></a> <a class="glyphicon glyphicon-pencil" title="Edit"></a> <a class="glyphicon glyphicon-info-sign" title="Info"></a>
                         </div>
                         one
                     </div>
@@ -423,7 +475,7 @@
                 <div class="col-sm-2 expanded-event-variable-col">
                     <div class="expanded-event-variable grabbable" id="quotes_21644">
                         <div class="sticky-top data-buttons">
-                            <a class="glyphicon glyphicon-pencil" title="Edit"></a> <a class="glyphicon glyphicon-info-sign" title="Info"></a>
+                            <a class="glyphicon glyphicon-plus"></a> <a class="glyphicon glyphicon-pencil" title="Edit"></a> <a class="glyphicon glyphicon-info-sign" title="Info"></a>
                         </div>
                         yes
                     </div>
@@ -436,7 +488,7 @@
                 <div class="col-sm-2 expanded-event-variable-col">
                     <div class="expanded-event-variable grabbable" id="counterprotest_21644">
                         <div class="sticky-top data-buttons">
-                            <a class="glyphicon glyphicon-pencil" title="Edit"></a> <a class="glyphicon glyphicon-info-sign" title="Info"></a>
+                            <a class="glyphicon glyphicon-plus"></a> <a class="glyphicon glyphicon-pencil" title="Edit"></a> <a class="glyphicon glyphicon-info-sign" title="Info"></a>
                         </div>
                         yes
                     </div>
@@ -449,7 +501,7 @@
                 <div class="col-sm-2 expanded-event-variable-col">
                     <div class="expanded-event-variable grabbable" id="movement-organizations-text-text_21644">
                         <div class="sticky-top data-buttons">
-                            <a class="glyphicon glyphicon-pencil" title="Edit"></a> <a class="glyphicon glyphicon-info-sign" title="Info"></a>
+                            <a class="glyphicon glyphicon-plus"></a> <a class="glyphicon glyphicon-pencil" title="Edit"></a> <a class="glyphicon glyphicon-info-sign" title="Info"></a>
                         </div>
                         Men of Vision and Empowerment
                     </div>
@@ -462,7 +514,7 @@
                 <div class="col-sm-2 expanded-event-variable-col">
                     <div class="expanded-event-variable grabbable" id="size-text_21644">
                         <div class="sticky-top data-buttons">
-                            <a class="glyphicon glyphicon-pencil" title="Edit"></a> <a class="glyphicon glyphicon-info-sign" title="Info"></a>
+                            <a class="glyphicon glyphicon-plus"></a> <a class="glyphicon glyphicon-pencil" title="Edit"></a> <a class="glyphicon glyphicon-info-sign" title="Info"></a>
                         </div>
                         a group of about 100 protesters stood outside the doors of the event
                     </div>
@@ -484,13 +536,13 @@
                 <div class="col-sm-2 expanded-event-variable-col">
                     <div class="expanded-event-variable grabbable" id="actors-text_21644-1">
                         <div class="sticky-top data-buttons">
-                            <a class="glyphicon glyphicon-pencil" title="Edit"></a> <a class="glyphicon glyphicon-info-sign" title="Info"></a>
+                            <a class="glyphicon glyphicon-plus"></a> <a class="glyphicon glyphicon-pencil" title="Edit"></a> <a class="glyphicon glyphicon-info-sign" title="Info"></a>
                         </div>
                         Ed Ward, a DePaul alum who founded Men of Vision and Empowerment                     
                     </div>
                     <div class="expanded-event-variable grabbable" id="actors-text_21644-2">
                         <div class="sticky-top data-buttons">
-                            <a class="glyphicon glyphicon-pencil" title="Edit"></a> <a class="glyphicon glyphicon-info-sign" title="Info"></a>
+                            <a class="glyphicon glyphicon-plus"></a> <a class="glyphicon glyphicon-pencil" title="Edit"></a> <a class="glyphicon glyphicon-info-sign" title="Info"></a>
                         </div>
                         students
                     </div>    
@@ -503,7 +555,7 @@
                 <div class="col-sm-2 expanded-event-variable-col">
                     <div class="expanded-event-variable grabbable" id="target-text_21644">
                         <div class="sticky-top data-buttons">
-                            <a class="glyphicon glyphicon-pencil" title="Edit"></a> <a class="glyphicon glyphicon-info-sign" title="Info"></a>
+                            <a class="glyphicon glyphicon-plus"></a> <a class="glyphicon glyphicon-pencil" title="Edit"></a> <a class="glyphicon glyphicon-info-sign" title="Info"></a>
                         </div>
                         Milo Yiannopoulos, a technology reporter for Breitbart
                     </div>
@@ -524,13 +576,13 @@
                 <div class="col-sm-2 expanded-event-variable-col">
                     <div class="expanded-event-variable grabbable" id="actions-form-text_21644-1">
                         <div class="sticky-top data-buttons">
-                            <a class="glyphicon glyphicon-pencil" title="Edit"></a> <a class="glyphicon glyphicon-info-sign" title="Info"></a>
+                            <a class="glyphicon glyphicon-plus"></a> <a class="glyphicon glyphicon-pencil" title="Edit"></a> <a class="glyphicon glyphicon-info-sign" title="Info"></a>
                         </div>
                         disrupted              
                     </div>
                     <div class="expanded-event-variable grabbable" id="actions-form-text_21644-2">
                         <div class="sticky-top data-buttons">
-                            <a class="glyphicon glyphicon-pencil" title="Edit"></a> <a class="glyphicon glyphicon-info-sign" title="Info"></a>
+                            <a class="glyphicon glyphicon-plus"></a> <a class="glyphicon glyphicon-pencil" title="Edit"></a> <a class="glyphicon glyphicon-info-sign" title="Info"></a>
                         </div>
                         drowned out by the noise
                     </div>
@@ -543,7 +595,7 @@
                 <div class="col-sm-2 expanded-event-variable-col">
                     <div class="expanded-event-variable grabbable" id="form_21644">
                         <div class="sticky-top data-buttons">
-                            <a class="glyphicon glyphicon-pencil" title="Edit"></a> <a class="glyphicon glyphicon-info-sign" title="Info"></a>
+                            <a class="glyphicon glyphicon-plus"></a> <a class="glyphicon glyphicon-pencil" title="Edit"></a> <a class="glyphicon glyphicon-info-sign" title="Info"></a>
                         </div>
                         Blockade/slowdown/disruption
                     </div>
@@ -556,7 +608,7 @@
                 <div class="col-sm-2 expanded-event-variable-col">
                     <div class="expanded-event-variable grabbable" id="target_21644">
                         <div class="sticky-top data-buttons">
-                            <a class="glyphicon glyphicon-pencil" title="Edit"></a> <a class="glyphicon glyphicon-info-sign" title="Info"></a>
+                            <a class="glyphicon glyphicon-plus"></a> <a class="glyphicon glyphicon-pencil" title="Edit"></a> <a class="glyphicon glyphicon-info-sign" title="Info"></a>
                         </div>
                         Individual
                     </div>
