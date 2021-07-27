@@ -15,8 +15,8 @@
             <li class="tablinks active" id="filters_button">
                 <a href="#">Filters</a>
             </li>
-            <li class="tablinks" id="results_button">
-                <a href="#">Results</a>
+            <li class="tablinks" id="cand_button">
+                <a href="#">Candidate Events</a>
             </li>
             <li class="tablinks" id="canon_button">
                 <a href="#">Canonical Events</a>
@@ -102,9 +102,8 @@
                         <span class="adj-variable"><code>location</code> starts with 'Berkeley' <a class="glyphicon glyphicon-plus"></a></span>
                     </div>
                 </div>
-
             </div>
-            <div class="tab-pane" id="results_block">
+            <div class="tab-pane" id="cand_block">
                 <div class="cand-event-group">
                     <nav aria-label="cand-event-pagination">
                         <ul class="pagination">
@@ -138,7 +137,7 @@
                                 <b>event_id:</b> 21644<br/>
                                 <b>article_id:</b> <a href="http://cliff.ssc.wisc.edu/campus_protest_dev/event_creator/6628" target="_blank">6628</a><br/>
                                 <b>coder:</b> amritpal <br/>
-                                <b><a href="#">Expand <span class="glyphicon glyphicon-chevron-right"></span></a></b>
+                                <b><a href="#">Add to Expand <span class="glyphicon glyphicon-plus-sign"></span></a></b>
                             </div>
                         </div>
                         <div class="row">
@@ -161,7 +160,7 @@
                                 <b>event_id:</b> 21646<br/>
                                 <b>article_id:</b> <a href="http://cliff.ssc.wisc.edu/campus_protest_dev/event_creator/6628" target="_blank">6628</a><br/>
                                 <b>coder:</b> amritpal<br/>
-                                <b><a href="#">Expand <span class="glyphicon glyphicon-chevron-right"></span></a></b>
+                                <b><a href="#">Add to Expand <span class="glyphicon glyphicon-plus-sign"></span></a></b>
                             </div>
                         </div>
                         <div class="row">
@@ -190,34 +189,119 @@
                         </a>
                       </li>
                     </ul>
-                </nav>                   
+                </nav>                 
+            </div>
+            <div class="tab-pane" id="canon_block">
+                <div class="cand-event-group">
+                    <label>Search keys</label>
+                    <form> 
+                        <div class="form-row">
+                            <div class="form-group">
+                                <input class="form-control form-control-sm" 
+                                       name="search-key" 
+                                       type="text" 
+                                       placeholder = "Key..."/>
+                            </div>    
+                        </div>
+                    </form>                     
+                    <nav aria-label="cand-event-pagination">
+                        <ul class="pagination">
+                          <li class="page-item">
+                            <a class="page-link" href="#" aria-label="Previous">
+                              <span aria-hidden="true">&laquo;</span>
+                              <span class="sr-only">Previous</span>
+                            </a>
+                          </li>
+                          <li class="page-item"><a class="page-link" href="#">1</a></li>
+                          <li class="page-item"><a class="page-link" href="#">2</a></li>
+                          <li class="page-item"><a class="page-link" href="#">3</a></li>
+                          <li class="page-item">
+                            <a class="page-link" href="#" aria-label="Next">
+                              <span aria-hidden="true">&raquo;</span>
+                              <span class="sr-only">Next</span>
+                            </a>
+                          </li>
+                        </ul>
+                    </nav>
+                    <div class="event-desc" id="canon-event_21644">
+                        <div class="row">
+                            <div class="col-sm-8">
+                                <b>title:</b> Protesters shut down Yiannopoulos speech<br/>
+                                <b>publication:</b> The Depaulia: DePaul University<br/>
+                                <b>pub_date:</b> 2016-05-24<br/>
+                                <b>start_date:</b> 2016-05-24</br>
+                                <b>location:</b> Chicago, Illinois, USA
+                            </div>
+                            <div class="col-sm-4" id="cand-event-metadata_21644">
+                                <b>key:</b> Milo_Chicago_2016<br/>
+                                <b>Last edited:</b> 2021-07-26 13:11:00<br/>
+                                <b><a href="#">Edit <span class="glyphicon glyphicon-pencil"></span></a></b>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <b>article_desc:</b> Article reports on a talk by Milo Yiannopoulos being disrupted by protestors. The article does not provide a protest issue explaining why the disruption took place. The article explains that after the disruption shut down the event, Yiannopoulos marched around campus with his supporters. The article mentions that Yiannopoulos attempted to address the crowd while marching, but continued to be drowned out, suggesting that protestors followed Yiannopoulos and continued to disrupt him during the march. The article also mentions that earlier in the day, students held a 'counter rally' during which they voiced concerns about ongoing issues of racism on campus. However, the article does not explain who the protestors were countering. <br/>
+                                <b>desc:</b> Protesters disrupted an event held by Milo Yiannopoulos. A group of protesters stormed the stage and interrupted Yiannopoulos, blowing whistles, and speaking out against Yiannopoulos. A group of about 100 protesters stood outside the doors of the event. Police were called to the Student Center and arrived soon after, but didn't intervene. Protestors followed Yiannopoulos as he marched around campus to protest the disruption, and continued to be drowned out by noise. <br/>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <nav aria-label="cand-event-pagination">
+                    <ul class="pagination">
+                      <li class="page-item">
+                        <a class="page-link" href="#" aria-label="Previous">
+                          <span aria-hidden="true">&laquo;</span>
+                          <span class="sr-only">Previous</span>
+                        </a>
+                      </li>
+                      <li class="page-item"><a class="page-link" href="#">1</a></li>
+                      <li class="page-item"><a class="page-link" href="#">2</a></li>
+                      <li class="page-item"><a class="page-link" href="#">3</a></li>
+                      <li class="page-item">
+                        <a class="page-link" href="#" aria-label="Next">
+                          <span aria-hidden="true">&raquo;</span>
+                          <span class="sr-only">Next</span>
+                        </a>
+                      </li>
+                    </ul>
+                </nav>
             </div>
         </div>
     </div>
     <div class="col-sm-7 adj-pane" id="adj-pane-expanded-view">
-        <a id="cand-events-hide" href="#">&laquo; Hide Candidate Events</a>
-        <a id="cand-events-show" style="display:none;" href="#">Show Candidate Events &raquo;</a>
+        <a id="cand-events-hide" href="#">&laquo; Hide Events</a>
+        <a id="cand-events-show" style="display:none;" href="#">Show Events &raquo;</a>
         <h4>Expanded Event View</h4>
         <div class="expanded-event" id="expanded-event_21644">
             <div class="row expanded-event-variable-group">
                 <div class="col-sm-1 expanded-event-variable-name">metadata</div>
-                {% for i in range(5) %}
-                <div class="col-sm-2">
-                    <div class="expanded-event-variable text-muted" id="expanded-event-metadata_21644">
+                {% for e in (21644, 21646, 21648, 21650) %}
+                <div class="col-sm-2 expanded-event-variable-col">
+                    <label>Event {{ e }} <a href="#" class="glyphicon glyphicon-remove-sign"></a></label> 
+                    <div class="expanded-event-variable expanded-event-variable-metadata" id="expanded-event-metadata_21644">
                         <b>title:</b> Protesters shut down Yiannopoulos speech<br/>
                         <b>publication:</b> The Depaulia: DePaul University<br/>
                         <b>pub_date:</b> 2016-05-24<br/>
-                        <b>event_id:</b> 21644<br/>
+                        <b>event_id:</b> {{ e }}<br/>
                         <b>article_id:</b> <a href="http://cliff.ssc.wisc.edu/campus_protest_dev/event_creator/6628" target="_blank">6628</a><br/>
                         <b>coder:</b> amritpal <br/>
                     </div>
                 </div>
                 {% endfor %}
+                <div class="col-sm-2 expanded-event-variable-col">
+                    <label>Canonical Event</label>
+                    <div class="expanded-event-variable expanded-event-variable canonical" id="expanded-event-metadata_21644">
+                        <div class="sticky-top data-buttons">
+                            <a class="glyphicon glyphicon-pencil" title="Edit"></a> <a class="glyphicon glyphicon-info-sign" title="Info"></a>
+                        </div>
+                        <b>Key: </b> Milo_Chicago_2016<br />
+                    </div>
+                </div>
             </div>
             <div class="row expanded-event-variable-group">
                 <div class="col-sm-1 expanded-event-variable-name">article_desc</div>
-                {% for i in range(5) %}
-                <div class="col-sm-2">
+                {% for i in range(4) %}
+                <div class="col-sm-2 expanded-event-variable-col">
                     <div class="expanded-event-variable grabbable" id="article-desc_21644">
                         <div class="sticky-top data-buttons">
                             <a class="glyphicon glyphicon-pencil" title="Edit"></a> <a class="glyphicon glyphicon-info-sign" title="Info"></a>
@@ -226,11 +310,19 @@
                     </div>
                 </div>
                 {% endfor %}
+                <div class="col-sm-2 expanded-event-variable-col">
+                    <div class="expanded-event-variable canonical" id="expanded-event-metadata_21644">
+                        <div class="sticky-top data-buttons">
+                            <a class="glyphicon glyphicon-remove" title="Remove"></a> <a class="glyphicon glyphicon-info-sign" title="Info"></a>
+                        </div>
+                        Article reports on a talk by Milo Yiannopoulos being disrupted by protestors. The article does not provide a protest issue explaining why the disruption took place. The article explains that after the disruption shut down the event, Yiannopoulos marched around campus with his supporters. The article mentions that Yiannopoulos attempted to address the crowd while marching, but continued to be drowned out, suggesting that protestors followed Yiannopoulos and continued to disrupt him during the march. The article also mentions that earlier in the day, students held a 'counter rally' during which they voiced concerns about ongoing issues of racism on campus. However, the article does not explain who the protestors were countering. 
+                    </div>
+                </div>
             </div>
             <div class="row expanded-event-variable-group">
                 <div class="col-sm-1 expanded-event-variable-name">desc</div>
-                {% for i in range(5) %}
-                <div class="col-sm-2">
+                {% for i in range(4) %}
+                <div class="col-sm-2 expanded-event-variable-col">
                     <div class="expanded-event-variable grabbable" id="desc_21644">
                         <div class="sticky-top data-buttons">
                             <a class="glyphicon glyphicon-pencil" title="Edit"></a> <a class="glyphicon glyphicon-info-sign" title="Info"></a>
@@ -239,11 +331,20 @@
                     </div>
                 </div>
                 {% endfor %}
+                <div class="col-sm-2 expanded-event-variable-col">
+                    <div class="expanded-event-variable canonical" id="desc_21644">
+                        <div class="sticky-top data-buttons">
+                            <a class="glyphicon glyphicon-remove" title="Remove"></a> <a class="glyphicon glyphicon-info-sign" title="Info"></a>
+                        </div>
+                        Protesters disrupted an event held by Milo Yiannopoulos. A group of protesters stormed the stage and interrupted Yiannopoulos, blowing whistles, and speaking out against Yiannopoulos. A group of about 100 protesters stood outside the doors of the event. Police were called to the Student Center and arrived soon after, but didn't intervene. Protestors followed Yiannopoulos as he marched around campus to protest the disruption, and continued to be drowned out by noise.
+                    </div>
+                </div>
+
             </div>
             <div class="row expanded-event-variable-group">
                 <div class="col-sm-1 expanded-event-variable-name">start_date</div>
-                {% for i in range(5) %}
-                <div class="col-sm-2">
+                {% for i in range(4) %}
+                <div class="col-sm-2 expanded-event-variable-col">
                     <div class="expanded-event-variable grabbable">
                         <div class="sticky-top data-buttons">
                             <a class="glyphicon glyphicon-pencil" title="Edit"></a> <a class="glyphicon glyphicon-info-sign" title="Info"></a>
@@ -252,11 +353,19 @@
                     </div>
                 </div>
                 {% endfor %}
+                <div class="col-sm-2 expanded-event-variable-col">
+                    <div class="expanded-event-variable canonical">
+                        <div class="sticky-top data-buttons">
+                            <a class="glyphicon glyphicon-remove" title="Remove"></a> <a class="glyphicon glyphicon-info-sign" title="Info"></a>
+                        </div>
+                        2016-05-24
+                    </div>
+                </div>                
             </div>
             <div class="row expanded-event-variable-group">
                 <div class="col-sm-1 expanded-event-variable-name">end_date</div>
-                {% for i in range(5) %}
-                <div class="col-sm-2">
+                {% for i in range(4) %}
+                <div class="col-sm-2 expanded-event-variable-col">
                     <div class="expanded-event-variable grabbable" id="end_date_21644">
                         <div class="sticky-top data-buttons">
                             <a class="glyphicon glyphicon-pencil" title="Edit"></a> <a class="glyphicon glyphicon-info-sign" title="Info"></a>
@@ -265,11 +374,19 @@
                     </div>
                 </div>
                 {% endfor %}
+                <div class="col-sm-2 expanded-event-variable-col">
+                    <div class="expanded-event-variable canonical" id="end_date_21644">
+                        <div class="sticky-top data-buttons">
+                            <a class="glyphicon glyphicon-remove" title="Remove"></a> <a class="glyphicon glyphicon-info-sign" title="Info"></a>
+                        </div>
+                        2016-05-24
+                    </div>
+                </div>
             </div>
             <div class="row expanded-event-variable-group">
                 <div class="col-sm-1 expanded-event-variable-name">location</div>
-                {% for i in range(5) %}
-                <div class="col-sm-2">
+                {% for i in range(4) %}
+                <div class="col-sm-2 expanded-event-variable-col">
                     <div class="expanded-event-variable grabbable">
                         <div class="sticky-top data-buttons">
                             <a class="glyphicon glyphicon-pencil" title="Edit"></a> <a class="glyphicon glyphicon-info-sign" title="Info"></a>
@@ -278,11 +395,19 @@
                     </div>
                 </div>
                 {% endfor %}
+                <div class="col-sm-2 expanded-event-variable-col">
+                    <div class="expanded-event-variable canonical">
+                        <div class="sticky-top data-buttons">
+                            <a class="glyphicon glyphicon-remove" title="Remove"></a> <a class="glyphicon glyphicon-info-sign" title="Info"></a>
+                        </div>
+                        Chicago, Illinois, USA
+                    </div>
+                </div>
             </div>
             <div class="row expanded-event-variable-group">
                 <div class="col-sm-1 expanded-event-variable-name">duration</div>
-                {% for i in range(5) %}
-                <div class="col-sm-2">
+                {% for i in range(4) %}
+                <div class="col-sm-2 expanded-event-variable-col">
                     <div class="expanded-event-variable grabbable">
                         <div class="sticky-top data-buttons">
                             <a class="glyphicon glyphicon-pencil" title="Edit"></a> <a class="glyphicon glyphicon-info-sign" title="Info"></a>
@@ -294,8 +419,8 @@
             </div>
             <div class="row expanded-event-variable-group">
                 <div class="col-sm-1 expanded-event-variable-name">quotes</div>
-                {% for i in range(5) %}
-                <div class="col-sm-2">
+                {% for i in range(4) %}
+                <div class="col-sm-2 expanded-event-variable-col">
                     <div class="expanded-event-variable grabbable" id="quotes_21644">
                         <div class="sticky-top data-buttons">
                             <a class="glyphicon glyphicon-pencil" title="Edit"></a> <a class="glyphicon glyphicon-info-sign" title="Info"></a>
@@ -307,8 +432,8 @@
             </div>
             <div class="row expanded-event-variable-group">
                 <div class="col-sm-1 expanded-event-variable-name">counterprotest</div>
-                {% for i in range(5) %}
-                <div class="col-sm-2">
+                {% for i in range(4) %}
+                <div class="col-sm-2 expanded-event-variable-col">
                     <div class="expanded-event-variable grabbable" id="counterprotest_21644">
                         <div class="sticky-top data-buttons">
                             <a class="glyphicon glyphicon-pencil" title="Edit"></a> <a class="glyphicon glyphicon-info-sign" title="Info"></a>
@@ -320,8 +445,8 @@
             </div>            
             <div class="row expanded-event-variable-group">
                 <div class="col-sm-1 expanded-event-variable-name">movement-organizations-text</div>
-                {% for i in range(5) %}
-                <div class="col-sm-2">
+                {% for i in range(4) %}
+                <div class="col-sm-2 expanded-event-variable-col">
                     <div class="expanded-event-variable grabbable" id="movement-organizations-text-text_21644">
                         <div class="sticky-top data-buttons">
                             <a class="glyphicon glyphicon-pencil" title="Edit"></a> <a class="glyphicon glyphicon-info-sign" title="Info"></a>
@@ -333,8 +458,8 @@
             </div>
             <div class="row expanded-event-variable-group">
                 <div class="col-sm-1 expanded-event-variable-name">size-text</div>
-                {% for i in range(5) %}
-                <div class="col-sm-2">
+                {% for i in range(4) %}
+                <div class="col-sm-2 expanded-event-variable-col">
                     <div class="expanded-event-variable grabbable" id="size-text_21644">
                         <div class="sticky-top data-buttons">
                             <a class="glyphicon glyphicon-pencil" title="Edit"></a> <a class="glyphicon glyphicon-info-sign" title="Info"></a>
@@ -343,12 +468,20 @@
                     </div>
                 </div>
                 {% endfor %}
+                <div class="col-sm-2 expanded-event-variable-col">
+                    <div class="expanded-event-variable canonical" id="size-text_21644">
+                        <div class="sticky-top data-buttons">
+                            <a class="glyphicon glyphicon-remove" title="Remove"></a> <a class="glyphicon glyphicon-info-sign" title="Info"></a>
+                        </div>
+                        a group of about 100 protesters stood outside the doors of the event
+                    </div>
+                </div>
             </div>
             <div class="row expanded-event-variable-group">
                 <div class="col-sm-1 expanded-event-variable-name">actors-text
                 </div>
-                {% for i in range(5) %}
-                <div class="col-sm-2">
+                {% for i in range(4) %}
+                <div class="col-sm-2 expanded-event-variable-col">
                     <div class="expanded-event-variable grabbable" id="actors-text_21644-1">
                         <div class="sticky-top data-buttons">
                             <a class="glyphicon glyphicon-pencil" title="Edit"></a> <a class="glyphicon glyphicon-info-sign" title="Info"></a>
@@ -366,8 +499,8 @@
             </div>
             <div class="row expanded-event-variable-group">
                 <div class="col-sm-1 expanded-event-variable-name">target-text</div>
-                {% for i in range(5) %}
-                <div class="col-sm-2">
+                {% for i in range(4) %}
+                <div class="col-sm-2 expanded-event-variable-col">
                     <div class="expanded-event-variable grabbable" id="target-text_21644">
                         <div class="sticky-top data-buttons">
                             <a class="glyphicon glyphicon-pencil" title="Edit"></a> <a class="glyphicon glyphicon-info-sign" title="Info"></a>
@@ -376,11 +509,19 @@
                     </div>
                 </div>
                 {% endfor %}
+                <div class="col-sm-2 expanded-event-variable-col">
+                    <div class="expanded-event-variable canonical id="target-text_21644">
+                        <div class="sticky-top data-buttons">
+                            <a class="glyphicon glyphicon-remove" title="Remove"></a> <a class="glyphicon glyphicon-info-sign" title="Info"></a>
+                        </div>
+                        Milo Yiannopoulos, a technology reporter for Breitbart
+                    </div>
+                </div>
             </div>
             <div class="row expanded-event-variable-group">
                 <div class="col-sm-1 expanded-event-variable-name">actions-form-text</div>
-                {% for i in range(5) %}
-                <div class="col-sm-2">
+                {% for i in range(4) %}
+                <div class="col-sm-2 expanded-event-variable-col">
                     <div class="expanded-event-variable grabbable" id="actions-form-text_21644-1">
                         <div class="sticky-top data-buttons">
                             <a class="glyphicon glyphicon-pencil" title="Edit"></a> <a class="glyphicon glyphicon-info-sign" title="Info"></a>
@@ -398,8 +539,8 @@
             </div>
             <div class="row expanded-event-variable-group">
                 <div class="col-sm-1 expanded-event-variable-name">form</div>
-                {% for i in range(5) %}
-                <div class="col-sm-2">
+                {% for i in range(4) %}
+                <div class="col-sm-2 expanded-event-variable-col">
                     <div class="expanded-event-variable grabbable" id="form_21644">
                         <div class="sticky-top data-buttons">
                             <a class="glyphicon glyphicon-pencil" title="Edit"></a> <a class="glyphicon glyphicon-info-sign" title="Info"></a>
@@ -411,8 +552,8 @@
             </div>
             <div class="row expanded-event-variable-group">
                 <div class="col-sm-1 expanded-event-variable-name">target</div>
-                {% for i in range(5) %}
-                <div class="col-sm-2">
+                {% for i in range(4) %}
+                <div class="col-sm-2 expanded-event-variable-col">
                     <div class="expanded-event-variable grabbable" id="target_21644">
                         <div class="sticky-top data-buttons">
                             <a class="glyphicon glyphicon-pencil" title="Edit"></a> <a class="glyphicon glyphicon-info-sign" title="Info"></a>
