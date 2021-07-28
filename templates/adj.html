@@ -107,75 +107,6 @@
                 </div>
             </div>
             <div class="tab-pane" id="cand_block">
-                <div class="cand-event-group">
-                    <nav aria-label="cand-event-pagination">
-                        <ul class="pagination">
-                          <li class="page-item">
-                            <a class="page-link" href="#" aria-label="Previous">
-                              <span aria-hidden="true">&laquo;</span>
-                              <span class="sr-only">Previous</span>
-                            </a>
-                          </li>
-                          <li class="page-item"><a class="page-link" href="#">1</a></li>
-                          <li class="page-item"><a class="page-link" href="#">2</a></li>
-                          <li class="page-item"><a class="page-link" href="#">3</a></li>
-                          <li class="page-item">
-                            <a class="page-link" href="#" aria-label="Next">
-                              <span aria-hidden="true">&raquo;</span>
-                              <span class="sr-only">Next</span>
-                            </a>
-                          </li>
-                        </ul>
-                    </nav>                 
-                    <div class="event-desc" id="cand-event_21644">
-                        <div class="row">
-                            <div class="col-sm-8">
-                                <b>title:</b> Protesters shut down Yiannopoulos speech<br/>
-                                <b>publication:</b> The Depaulia: DePaul University<br/>
-                                <b>pub_date:</b> 2016-05-24<br/>
-                                <b>start_date:</b> 2016-05-24</br>
-                                <b>location:</b> Chicago, Illinois, USA
-                            </div>
-                            <div class="col-sm-4" id="cand-event-metadata_21644">
-                                <b>event_id:</b> 21644<br/>
-                                <b>article_id:</b> <a href="http://cliff.ssc.wisc.edu/campus_protest_dev/event_creator/6628" target="_blank">6628</a><br/>
-                                <b>coder:</b> amritpal <br/>
-                                <b><a href="#">Add to Expand <span class="glyphicon glyphicon-plus-sign"></span></a></b><br/>
-                                <b>Flags: <a href="#" class="glyphicon glyphicon-thumbs-up"></a> <a href="#" class="glyphicon glyphicon-thumbs-down"></a></b>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-sm-12">
-                                <b>article_desc:</b> Article reports on a talk by Milo Yiannopoulos being disrupted by protestors. The article does not provide a protest issue explaining why the disruption took place. The article explains that after the disruption shut down the event, Yiannopoulos marched around campus with his supporters. The article mentions that Yiannopoulos attempted to address the crowd while marching, but continued to be drowned out, suggesting that protestors followed Yiannopoulos and continued to disrupt him during the march. The article also mentions that earlier in the day, students held a 'counter rally' during which they voiced concerns about ongoing issues of racism on campus. However, the article does not explain who the protestors were countering. <br/>
-                                <b>desc:</b> Protesters disrupted an event held by Milo Yiannopoulos. A group of protesters stormed the stage and interrupted Yiannopoulos, blowing whistles, and speaking out against Yiannopoulos. A group of about 100 protesters stood outside the doors of the event. Police were called to the Student Center and arrived soon after, but didn't intervene. Protestors followed Yiannopoulos as he marched around campus to protest the disruption, and continued to be drowned out by noise. <br/>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="event-desc" id="cand-event_21646">
-                        <div class="row">
-                            <div class="col-sm-8">
-                                <b>title:</b> Protesters shut down Yiannopoulos speech<br/>
-                                <b>publication:</b> The Depaulia: DePaul University<br/>
-                                <b>pub_date:</b> 2016-05-24<br/>
-                                <b>start_date:</b> 2016-05-24</br>
-                                <b>location:</b> Chicago, Illinois, USA
-                            </div>
-                            <div class="col-sm-4" id="cand-event-metadata_21646">
-                                <b>event_id:</b> 21646<br/>
-                                <b>article_id:</b> <a href="http://cliff.ssc.wisc.edu/campus_protest_dev/event_creator/6628" target="_blank">6628</a><br/>
-                                <b>coder:</b> amritpal<br/>
-                                <b><a href="#">Add to Expand <span class="glyphicon glyphicon-plus-sign"></span></a></b><br/>
-                                <b>Flags: <a href="#" class="glyphicon glyphicon-thumbs-up"></a> <a href="#" class="glyphicon glyphicon-thumbs-down"></a></b>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-sm-12">
-                                <b>article_desc:</b> Article reports on a talk by Milo Yiannopoulos being disrupted by protestors. The article does not provide a protest issue explaining why the disruption took place. The article explains that after the disruption shut down the event, Yiannopoulos marched around campus with his supporters. The article mentions that Yiannopoulos attempted to address the crowd while marching, but continued to be drowned out, suggesting that protestors followed Yiannopoulos and continued to disrupt him during the march. The article also mentions that earlier in the day, students held a 'counter rally' during which they voiced concerns about ongoing issues of racism on campus. However, the article does not explain who the protestors were countering. <br/>
-                                <b>desc:</b> After being disrupted by protestors, Milo Yiannopoulos decided to leave the Student Center and protest the disruption. The crowd marched around Belden and Yiannopoulos was denied re-entrance to the Student Center. Yiannopoulos marched further down Belden and the Quad, trying to stop occasionally and address the crowd, but was often drowned out by the noise. 
-                            </div>
-                        </div>
-                    </div>
-                </div>
                 <nav aria-label="cand-event-pagination">
                     <ul class="pagination">
                       <li class="page-item">
@@ -194,7 +125,39 @@
                         </a>
                       </li>
                     </ul>
-                </nav>                 
+                </nav>
+                <div class="cand-event-group">                
+                    {% for e in (21644, 21646, 21648, 21650, 21652, 21654, 21656, 21658) %}
+                    <div class="event-desc" id="cand-event_{{ e }}">
+                        <div class="row">
+                            <div class="col-sm-8">
+                                <b>title:</b> Protesters shut down Yiannopoulos speech<br/>
+                                <b>publication:</b> The Depaulia: DePaul University<br/>
+                                <b>pub_date:</b> 2016-05-24<br/>
+                                <b>start_date:</b> 2016-05-24</br>
+                                <b>location:</b> Chicago, Illinois, USA
+                            </div>
+                            <div class="col-sm-4" id="cand-event-metadata_21644">
+                                <b>event_id:</b> {{ e }}<br/>
+                                <b>article_id:</b> <a href="http://cliff.ssc.wisc.edu/campus_protest_dev/event_creator/6628" target="_blank">6628</a><br/>
+                                <b>coder:</b> amritpal <br/>
+                                {% if e < 21652 %}
+                                    <b class="text-muted">In the expanded view</b> <a href="#" class="glyphicon glyphicon-remove"></a><br/>
+                                {% else %}
+                                    <b><a href="#">Add to Expand <span class="glyphicon glyphicon-plus"></span></a></b><br/>
+                                {% endif %}
+                                <b>Flags: <a href="#" class="glyphicon glyphicon-thumbs-up"></a> <a href="#" class="glyphicon glyphicon-thumbs-down"></a></b>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <b>article_desc:</b> Article reports on a talk by Milo Yiannopoulos being disrupted by protestors. The article does not provide a protest issue explaining why the disruption took place. The article explains that after the disruption shut down the event, Yiannopoulos marched around campus with his supporters. The article mentions that Yiannopoulos attempted to address the crowd while marching, but continued to be drowned out, suggesting that protestors followed Yiannopoulos and continued to disrupt him during the march. The article also mentions that earlier in the day, students held a 'counter rally' during which they voiced concerns about ongoing issues of racism on campus. However, the article does not explain who the protestors were countering. <br/>
+                                <b>desc:</b> Protesters disrupted an event held by Milo Yiannopoulos. A group of protesters stormed the stage and interrupted Yiannopoulos, blowing whistles, and speaking out against Yiannopoulos. A group of about 100 protesters stood outside the doors of the event. Police were called to the Student Center and arrived soon after, but didn't intervene. Protestors followed Yiannopoulos as he marched around campus to protest the disruption, and continued to be drowned out by noise. <br/>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
             </div>
             <div class="tab-pane" id="canon_block">
                 <div class="cand-event-group">
@@ -341,12 +304,24 @@
                 </div>
                 {% endfor %}
                 <div class="col-sm-2 expanded-event-variable-col">
-                    <label>Canonical Event</label>
-                    <div class="expanded-event-variable expanded-event-variable canonical" id="expanded-event-metadata_21644">
+                    <label>Canonical Event <a class="glyphicon glyphicon-trash" href="#" title="Delete canonical event"></a></label>
+                    <div class="expanded-event-variable expanded-event-variable canonical" id="expanded-event-canonical-key_1">
                         <div class="sticky-top data-buttons">
-                            <a class="glyphicon glyphicon-plus"></a> <a class="glyphicon glyphicon-pencil" title="Edit"></a> <a class="glyphicon glyphicon-info-sign" title="Info"></a>
+                            <a class="glyphicon glyphicon-pencil" title="Edit"></a> <a class="glyphicon glyphicon-info-sign" title="Info"></a>
                         </div>
                         <b>Key: </b> Milo_Chicago_2016<br />
+                    </div>
+                    <div class="expanded-event-variable expanded-event-variable canonical">
+                        <div class="sticky-top data-buttons">
+                            <a class="glyphicon glyphicon-pencil" title="Edit"></a> <a class="glyphicon glyphicon-info-sign" title="Info"></a>
+                        </div>
+                        <b>Notes: </b>This is the main event for the protest against Milo in Chicago in 2016. This is filler text to try to break this part of it. This is filler text to try to break this part of it. This is filler text to try to break this part of it. This is filler text to try to break this part of it.<br />
+                    </div>
+                    <div class="expanded-event-variable expanded-event-variable canonical">
+                        <div class="sticky-top data-buttons">
+                            <a class="glyphicon glyphicon-pencil" title="Edit"></a> <a class="glyphicon glyphicon-info-sign" title="Info"></a>
+                        </div>
+                        <b>Status: </b>Done<br />
                     </div>
                 </div>
             </div>
@@ -540,12 +515,15 @@
                         </div>
                         Ed Ward, a DePaul alum who founded Men of Vision and Empowerment                     
                     </div>
+                    {% set b = range(1, 10) | random -%}
+                    {% for a in range(1, b) %}
                     <div class="expanded-event-variable grabbable" id="actors-text_21644-2">
                         <div class="sticky-top data-buttons">
                             <a class="glyphicon glyphicon-plus"></a> <a class="glyphicon glyphicon-pencil" title="Edit"></a> <a class="glyphicon glyphicon-info-sign" title="Info"></a>
                         </div>
                         students
-                    </div>    
+                    </div>
+                    {% endfor %}
                 </div>
                 {% endfor %}                           
             </div>
