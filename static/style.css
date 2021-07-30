@@ -408,6 +408,10 @@ div.cand-event-group div.event-desc {
 	margin: 4px 0;
 }
 
+#adj-subtabselecter {
+	margin-top: 4px;
+}
+
 .expanded-event {
 	height: 640px;
 	overflow-y: scroll;
