@@ -1099,9 +1099,10 @@ def generateCoderAudit():
     if current_user.authlevel < 3:
         return redirect(url_for('index'))
 
-    ting = export.test()
+    filename = '%s/exports/coder-table_%s.csv' % (app.config['WD'], dt.datetime.now().strftime('%Y-%m-%d_%H%M%S'))
+    event_export = export.gen_event_export(filename)
     
-    return jsonify(result={"status": 200, "filename": ting})
+    return jsonify(result={"status": 200, "filename": event_export})
 
 #    pn = request.args.get('pn')
 #    action = request.args.get('action')
