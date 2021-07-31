@@ -70,7 +70,6 @@ class LoginTest(unittest.TestCase):
             filter(CodeEventCreator.coder_id == 2)
         texts = [x.value for x in q]
 
-        ## TK: This doesn't actually work yet! Not sure why.
         self.assertIn("This is a test of adding text.", texts)
         self.assertIn("Adding text to the event description.", texts)
         
