@@ -62,10 +62,8 @@ class LoginTest(unittest.TestCase):
 
         ## find text box and add
         self.driver.find_element_by_id("info_article-desc").send_keys("This is a test of adding text.")
-        # time.sleep(1)
-
         self.driver.find_element_by_id("info_desc").send_keys("Adding text to the event description.")
-        # time.sleep(1)
+        self.driver.find_element_by_id("save").send_keys(Keys.ENTER)
 
         ## get the fields from the database
         q = db_session.query(CodeEventCreator).\
