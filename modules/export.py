@@ -34,9 +34,11 @@ def gen_event_export(
     cols  = [x.name for x in annotations.__table__.columns]
 
     resultset = []
+
+    annotations_n = db_session.query(annotations).count()
     
     print("Query:")
-    for i in range(0, 1000):
+    for i in range(0, annotations_n):
         if i % 50 == 0:
             print("  " + str(i) + "...")
         offset = i*1000
