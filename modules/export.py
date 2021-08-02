@@ -30,8 +30,8 @@ def validate( x ):
 def gen_event_export(
     filename):
     users = {u.id: u.username for u in db_session.query(User).all()}
-    model = CodeEventCreator
-    cols  = [x.name for x in model.__table__.columns]
+    annotations = CodeEventCreator
+    cols  = [x.name for x in annotations.__table__.columns]
 
     resultset = []
     
@@ -40,8 +40,8 @@ def gen_event_export(
         if i % 50 == 0:
             print("  " + str(i) + "...")
         offset = i*1000
-        query  = db_session.query(model, ArticleMetadata).\
-                 join(ArticleMetadata).order_by(model.id).offset(offset).limit(1000).all()
+        query  = db_session.query(annotations, ArticleMetadata).\
+                 join(ArticleMetadata).order_by(annotations.id).offset(offset).limit(1000).all()
 
         if len(query) <= 0:
             print("  " + str(i) + "...DONE")
