@@ -33,8 +33,8 @@ class LoginTest(unittest.TestCase):
     ## Tests
     def test_login(self):
         el = WebDriverWait(driver = self.driver, timeout = 10).\
-            until(lambda d: d.find_element_by_link_text("Home"))
-        self.assertEqual(el.text, "Home")
+            until(lambda d: d.find_element_by_link_text("Adjudication Interface"))
+        self.assertEqual(el.text, "Adjudication Interface")
         
 if __name__ == "__main__":
     unittest.main()
