@@ -35,8 +35,6 @@ def gen_event_export(
 
     resultset = []
     
-    query = db_session.query(func.max(model.id)).first()
-    
     print("Query:")
     for i in range(0, 1000):
         if i % 50 == 0:
