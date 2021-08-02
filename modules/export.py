@@ -42,8 +42,15 @@ def gen_event_export(
         if i % 50 == 0:
             print("  " + str(i) + "...")
         offset = i*1000
-        query  = db_session.query(annotations, ArticleMetadata).\
-                 join(ArticleMetadata).order_by(annotations.id).offset(offset).limit(1000).all()
+        query  = (db_session
+                     .query(
+                         annotations,
+                         ArticleMetadata)
+                     .join(ArticleMetadata)
+                     .order_by(annotations.id)
+                     .offset(offset)
+                     .limit(1000)
+                     .all())
 
         if len(query) <= 0:
             print("  " + str(i) + "...DONE")
