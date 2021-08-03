@@ -49,7 +49,7 @@ def gen_event_export(
         q  = (db_session
                   .query(
                       annotations,
-                      ArticleMetadata)
+                      ArticleMetadata.db_id)
                   .join(ArticleMetadata)
                   .order_by(annotations.id)
                   .offset(offset)
@@ -73,7 +73,7 @@ def gen_event_export(
     print("Resultset:")
     for row in resultset:
         fp  = row[0]
-        am  = row[1]
+        db_id  = row.db_id
         i += 1
 
         ## store all fields in a row in a tuple
@@ -87,25 +87,25 @@ def gen_event_export(
         ## add publication, publication date, and solr_id
         pub      = ''
         pub_date = ''
-        solr_id  = am.db_id 
-        if am.db_id is None:
+        solr_id  = db_id 
+        if db_id is None:
             pass
-        elif 'AGW' in am.db_id:
+        elif 'AGW' in db_id:
             ## e.g.
             ## AGW_AFP_ENG_20040104.0056
-            pieces   = am.db_id.split("_")
+            pieces   = db_id.split("_")
             pub      = "-".join(pieces[0:3])
             pub_date = pieces[3].split('.')[0]
             pub_date = dt.datetime.strptime(pub_date, '%Y%m%d').strftime('%Y-%m-%d')
-        elif 'NYT' in am.db_id:
+        elif 'NYT' in db_id:
             ## e.g. 
             ## 1989/03/11/0230638.xml_LDC_NYT
             pub      = 'NYT'
-            pub_date = am.db_id[0:10].replace('/', '-')
+            pub_date = db_id[0:10].replace('/', '-')
         else:
             ## e.g. 
             ## Caribbean-Today;-Miami_1996-12-31_26b696eae2887c8cf71735a33eb39771
-            pieces   = am.db_id.split("_")
+            pieces   = db_id.split("_")
             pub      = pieces[0]
             pub_date = pieces[1]
 
