@@ -28,6 +28,33 @@ def validate( x ):
     else:
         return "0"
 
+def split_solr_id(id):
+    if id is None:
+        pass
+    elif 'AGW' in id:
+        ## e.g.
+        ## AGW_AFP_ENG_20040104.0056
+        pieces   = id.split("_")
+        pub      = "-".join(pieces[0:3])
+        pub_date = pieces[3].split('.')[0]
+        pub_date = dt.datetime.strptime(pub_date, '%Y%m%d').strftime('%Y-%m-%d')
+    elif 'NYT' in id:
+        ## e.g. 
+        ## 1989/03/11/0230638.xml_LDC_NYT
+        pub      = 'NYT'
+        pub_date = id[0:10].replace('/', '-')
+    else:
+        ## e.g. 
+        ## Caribbean-Today;-Miami_1996-12-31_26b696eae2887c8cf71735a33eb39771
+        pieces   = id.split("_")
+        pub      = pieces[0]
+        pub_date = pieces[1]
+
+        ## remove T00:00:00Z from dates
+        ## e.g. 2013-03-19T00:00:00Z
+        if 'T' in pub_date:
+            pub_date = pub_date.split('T')[0]
+    return (pub, pub_date)
 
 def gen_event_export(
     filename):
@@ -88,33 +115,9 @@ def gen_event_export(
         pub      = ''
         pub_date = ''
         solr_id  = db_id 
-        if db_id is None:
-            pass
-        elif 'AGW' in db_id:
-            ## e.g.
-            ## AGW_AFP_ENG_20040104.0056
-            pieces   = db_id.split("_")
-            pub      = "-".join(pieces[0:3])
-            pub_date = pieces[3].split('.')[0]
-            pub_date = dt.datetime.strptime(pub_date, '%Y%m%d').strftime('%Y-%m-%d')
-        elif 'NYT' in db_id:
-            ## e.g. 
-            ## 1989/03/11/0230638.xml_LDC_NYT
-            pub      = 'NYT'
-            pub_date = db_id[0:10].replace('/', '-')
-        else:
-            ## e.g. 
-            ## Caribbean-Today;-Miami_1996-12-31_26b696eae2887c8cf71735a33eb39771
-            pieces   = db_id.split("_")
-            pub      = pieces[0]
-            pub_date = pieces[1]
-
-            ## remove T00:00:00Z from dates
-            ## e.g. 2013-03-19T00:00:00Z
-            if 'T' in pub_date:
-                pub_date = pub_date.split('T')[0]
-            
-        to_print += ( pub, pub_date, solr_id )
+        pub_info = split_solr_id(solr_id)
+        to_print += pub_info
+        to_print += (solr_id,)
 
         df = pd.DataFrame([to_print], columns = header)
         df.to_csv(filename, mode = "a", header = False, index = False)
