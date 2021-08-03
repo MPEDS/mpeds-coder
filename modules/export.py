@@ -76,7 +76,7 @@ def gen_event_export(
         q  = (db_session
                   .query(
                       annotations,
-                      ArticleMetadata.db_id)
+                      ArticleMetadata)
                   .join(ArticleMetadata)
                   .order_by(annotations.id)
                   .offset(offset)
@@ -100,7 +100,7 @@ def gen_event_export(
     print("Resultset:")
     for row in resultset:
         fp  = row[0]
-        db_id  = row.db_id
+        db_id  = row[1].db_id
         i += 1
 
         ## store all fields in a row in a tuple
