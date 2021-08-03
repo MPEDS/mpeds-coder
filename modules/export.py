@@ -33,6 +33,7 @@ def gen_event_export(
     annotations = CodeEventCreator
     cols  = [x.name for x in annotations.__table__.columns]
 
+    chunksize = 1000
     resultset = []
 
     annotations_n = db_session.query(annotations).count()
@@ -41,7 +42,7 @@ def gen_event_export(
     for i in range(0, annotations_n):
         if i % 50 == 0:
             print("  " + str(i) + "...")
-        offset = i*1000
+        offset = i*chunksize
         q  = (db_session
                   .query(
                       annotations,
@@ -49,7 +50,7 @@ def gen_event_export(
                   .join(ArticleMetadata)
                   .order_by(annotations.id)
                   .offset(offset)
-                  .limit(1000))
+                  .limit(chunksize))
         r = q.all()
 
         if len(r) <= 0:
