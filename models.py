@@ -1,5 +1,5 @@
 from sqlalchemy import Boolean, Column, DateTime, Integer, String, Unicode, ForeignKey, UniqueConstraint, Text, Date, UnicodeText
-from sqlalchemy.orm import relationship, backref
+from sqlalchemy.orm import relationship, backref, deferred
 from flask_login import UserMixin
 from database import Base
 import datetime as dt
@@ -152,8 +152,8 @@ class ArticleMetadata(Base):
     publication         = Column(String(511))
     source_description  = Column(String(511))
     ## FIXME: Collation arg may will break anything but MySQL 5.7
-    text                = Column(UnicodeText(4194300,
-                                 collation='utf8mb4_general_ci'))
+    text                = deferred(Column(UnicodeText(4194300,
+                                   collation='utf8mb4_general_ci')))
 
     firsts  = relationship("CodeFirstPass",  backref = backref("article_metadata", order_by = id))
     seconds = relationship("CodeSecondPass", backref = backref("article_metadata", order_by = id))
