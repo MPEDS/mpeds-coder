@@ -1,7 +1,10 @@
+# -*- coding: utf-8 -*-
 import csv
+import random
 import sys
 import time
 import unittest
+import yaml
 
 sys.path.insert(0, '/var/www/campus_protest_dev')
 
@@ -15,6 +18,7 @@ from selenium.webdriver import Firefox, FirefoxOptions
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 
+from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 
 class EventAddTest(unittest.TestCase):
@@ -62,7 +66,6 @@ class EventAddTest(unittest.TestCase):
     def tearDown(self):
         ## Logout
         print("TEAR DOWN")
-        self.driver.find_element_by_link_text("Logout").click()
 
         ## remove all test codings
         cecs = db_session.query(CodeEventCreator).filter(CodeEventCreator.coder_id == 2)
@@ -89,6 +92,8 @@ class EventAddTest(unittest.TestCase):
         ## find text box and add descriptions
         self.driver.find_element_by_id("info_article-desc").send_keys("This is a test of adding text.")
         self.driver.find_element_by_id("info_desc").send_keys("Adding text to the event description.")
+
+        ## change focus to save
         self.driver.find_element_by_id("info_start-date").click()
 
         ## get the fields from the database
@@ -106,6 +111,8 @@ class EventAddTest(unittest.TestCase):
         self.driver.find_element_by_id("info_start-date").send_keys("2020-07-20")
         self.driver.find_element_by_id("info_end-date").send_keys("2020-07-21")
         self.driver.find_element_by_id("info_location").send_keys("Chicago, IL, USA")
+        
+        ## changes focus to start-date
         self.driver.find_element_by_id("info_start-date").click()
 
         for a in db_session.query(CodeEventCreator).filter(CodeEventCreator.coder_id == 2).all():
@@ -138,26 +145,44 @@ class EventAddTest(unittest.TestCase):
         for q in qs:
             self.assertEqual(test_dict[q.variable], q.value)
 
-
+    ## TK: This is not quite working yet.
+    @unittest.skip("Skipping text selects for now.")
     def test_text_select(self):
         textselect = WebDriverWait(driver = self.driver, timeout = 10).\
             until(lambda d: d.find_element_by_id("textselect_button"))
         textselect.click()
 
-        ## TK: load from YAML
-        test_fields = ['actions-form-text', 'size-text']
+        ## Load from YAML
+        fh = open('../text-selects.yaml', 'r')
+        test_fields = [x for x in yaml.load(fh, Loader = yaml.BaseLoader).keys()]
+        fh.close()
 
-        ## get the focus on the body text
-        bodytext = self.driver.find_element_by_id("bodytext")
-        bodytext.click()
+        ## get the grafs
+        grafs = self.driver.find_element_by_id("bodytext").find_elements(By.TAG_NAME, "p")
+
+        ## set the average length of text fields
+        avg_length = 50
 
         for variable in test_fields:
-            ## hold down left shift
-            webdriver.ActionChains(self.driver).key_down(Keys.LEFT_SHIFT).perform()
+            ## Select some random body text by picking a random graf 
+            ## and getting some random text
+            graf = random.choice(grafs)
+            graf.click()
 
-            ## for now, start from 0 to 10 and go to the right
-            ## TK: select some random body text
-            for i in range(10):
+            graf_len = len(graf.text)
+            offset = random.choice(range(avg_length)) if graf_len > avg_length else graf_len
+
+            print(variable, offset)
+
+            ## move over to the n-th character
+            # for _ in range(start):
+            #     webdriver.ActionChains(self.driver).send_keys(Keys.ARROW_RIGHT).perform()
+
+            ## press left shift
+            webdriver.ActionChains(self.driver).key_up(Keys.LEFT_SHIFT).perform()
+
+            ## move to n+kth character
+            for _ in range(offset):
                 webdriver.ActionChains(self.driver).send_keys(Keys.ARROW_RIGHT).perform()
 
             ## lift up left shift
@@ -166,19 +191,72 @@ class EventAddTest(unittest.TestCase):
             ## click an add button
             self.driver.find_element_by_id("add_{}".format(variable)).click()
 
-            ## clear, selected text
-            bodytext.click()
+            ## get the selected text but wait until it loads
+            ## TK: this is timing out?? need to find out why this is happening
+            selected_text = WebDriverWait(driver = self.driver, timeout = 10).\
+                until(lambda d: d.find_element_by_id("list_{}".format(variable)).\
+                    find_element_by_tag_name("p"))
 
-        for variable in test_fields:
-            q = db_session.query(CodeEventCreator).\
-                filter(CodeEventCreator.coder_id == 2, CodeEventCreator.variable == variable).first()
+            ## clear selected text by clicking on the graf
+            graf.click()
 
-            print(variable, q.value, q.text)
-            self.assertIsNot(q.value, None)
+            ## Assert that the addition has ended up in the list
+            self.assertIsNot(selected_text, "")
 
-    # def test_presets(self):
-    #     ## TK: test presets
-    #     pass
-        
+        vals = {}
+        qs = db_session.query(CodeEventCreator).filter(CodeEventCreator.coder_id == 2).all()
+
+        ## ensure that the number of fields stored is equal
+        self.assertEqual(len(qs), len(test_fields))
+
+        for q in qs:
+            vals[q.variable] = q.text
+
+            print(q.variable, q.value, q.text)
+            self.assertIsNot(q.text, None)
+
+
+    ## test presets
+    def test_presets(self):
+        presets = WebDriverWait(driver = self.driver, timeout = 10).\
+            until(lambda d: d.find_element_by_id("preset_button"))
+        presets.click()
+
+        ## Load from YAML
+        fh = open('../presets.yaml', 'r')
+        preset_fields = yaml.load(fh, Loader = yaml.BaseLoader)
+        fh.close()
+
+        ## stored values to check
+        d = {}
+
+        ## select form, issue, racial issue, and target
+        for variable in (['form', 'issue', 'racial-issue', 'target']):
+            self.driver.find_element_by_id("l_varevent_{}".format(variable)).click()
+            d[variable] = []
+
+            ## select three random items
+            for value in random.sample(preset_fields[variable], 3):
+                ## wait until we can click
+                ## from https://stackoverflow.com/questions/56085152/selenium-python-error-element-could-not-be-scrolled-into-view
+                element = WebDriverWait(self.driver, 10).until(\
+                    EC.element_to_be_clickable((By.CSS_SELECTOR, "input[value='{}']".format(value))))
+                element.location_once_scrolled_into_view
+                element.click()
+
+                ## append to stored value dict
+                d[variable].append(value)
+
+        qs = db_session.query(CodeEventCreator).filter(CodeEventCreator.coder_id == 2).all()
+
+        ## ensure that the number of fields stored 
+        ## is equal to number of fields * number selected (4 * 3 = 12)
+        self.assertEqual(len(qs), 12)
+
+        ## check if the value was selected
+        for q in qs:
+            self.assertIn(q.value, d[q.variable])
+
+
 if __name__ == "__main__":
     unittest.main()
