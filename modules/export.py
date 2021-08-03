@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 """Tools to generate exports"""
 
+from __future__ import division
 import datetime as dt
+import math
 import string
 
 import pandas as pd
@@ -37,9 +39,10 @@ def gen_event_export(
     resultset = []
 
     annotations_n = db_session.query(annotations).count()
+    chunks_n = int(math.ceil(annotations_n / chunksize))
     
     print("Query:")
-    for i in range(0, annotations_n):
+    for i in range(0, chunks_n):
         if i % 50 == 0:
             print("  " + str(i) + "...")
         offset = i*chunksize
