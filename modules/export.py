@@ -56,12 +56,10 @@ def gen_event_export(
                   .limit(chunksize))
         r = q.all()
 
-        if len(r) <= 0:
-            print("  " + str(i) + "...DONE")
-            break
-        
         resultset.extend(r)
 
+    print("  " + str(i) + "...DONE")
+        
     ## do this in chunks to save memory
 
     header = cols[:]
