@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 import csv
+import os
 import random
 import sys
 import time
 import unittest
 import yaml
 
-sys.path.insert(0, '/var/www/campus_protest_dev')
+sys.path.insert(0, os.path.abspath('.'))
 
 from database import db_session
 from models import CodeEventCreator, Event

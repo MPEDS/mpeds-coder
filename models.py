@@ -137,6 +137,38 @@ class EventFlag(Base):
         return '<EventFlag %r (%r)>' % (self.event_id, self.flag)
 
 
+class EventMetadata(Base):
+    __tablename__ = 'event_metadata'
+    id           = Column(Integer, primary_key=True)
+    coder_id     = Column(Integer, ForeignKey('user.id'))
+    event_id     = Column(Integer, ForeignKey('event.id'))
+    article_id   = Column(Integer, ForeignKey('article_metadata.id'))
+    article_desc = Column(UnicodeText, nullable = True)
+    desc         = Column(UnicodeText, nullable = True)
+    location     = Column(Text, nullable = True)
+    start_date   = Column(Date, nullable = True)
+    publication  = Column(Text)
+    pub_date     = Column(Date)
+    title        = Column(Text)
+
+    UniqueConstraint('event_id', name = 'unique1')
+
+    def __init__(self, coder_id, event_id, article_id, article_desc, desc, location, start_date, publication, pub_date, title):
+        self.coder_id     = coder_id
+        self.event_id     = event_id
+        self.article_id   = article_id
+        self.article_desc = article_desc
+        self.desc         = desc
+        self.location     = location
+        self.start_date   = start_date
+        self.publication  = publication
+        self.pub_date     = pub_date
+        self.title        = title
+        
+    def __repr__(self):
+        return '<EventMetadata %r>' % (self.event_id)
+
+
 class RecentCanonicalEvent(Base):
     __tablename__ = 'recent_canonical_event'
     id            = Column(Integer, primary_key=True)

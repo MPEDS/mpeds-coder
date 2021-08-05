@@ -9,17 +9,14 @@
 """
 
 ## base
-import csv
 import json
 import math
 import os
 import re
-import smtplib
 import string
 import sys
 import urllib
 import datetime as dt
-import time
 from math import ceil
 from random import sample
 from random import choice
@@ -38,7 +35,6 @@ import numpy as np
 ## lxml, time
 from lxml import etree
 from pytz import timezone
-import pytz
 
 ## flask
 from flask import Flask, request, session, g, redirect, url_for, abort, make_response, render_template, flash, jsonify, Response, stream_with_context
@@ -51,15 +47,13 @@ import assign_lib
 from sqlalchemy.exc import OperationalError
 from sqlalchemy import func, desc, distinct, or_, text
 from sqlalchemy.sql import select
-from sqlalchemy.schema import Table
-from sqlite3 import dbapi2 as sqlite3
 
 ## app-specific
 from database import db_session
 
 from models import ArticleMetadata, ArticleQueue, CoderArticleAnnotation, \
 CodeFirstPass, CodeSecondPass, CodeEventCreator, \
-Event, EventCreatorQueue, SecondPassQueue, User
+Event, EventMetadata, EventCreatorQueue, SecondPassQueue, User
 
 ##### Enable OrderedDict with PyYAML
 ##### Copy-pasta from https://stackoverflow.com/a/21912744 on 2019-12-12
@@ -564,6 +558,9 @@ def eventCreator(aid):
 
     return render_template("event-creator.html", aid = aid, text = html.decode('utf-8'))
 
+#####
+##### Adjudication
+#####
 
 @app.route('/adj')
 @login_required
@@ -571,7 +568,15 @@ def adj():
     filter = request.form.get('filter')
     sort = request.form.get('sort')
 
-    return render_template("adj.html")
+    query1 = 'Chicago'
+    query2 = '2016-05-24'
+
+    ## perform the query on the web
+    events = db_session.query(EventMetadata).\
+        filter(EventMetadata.location.like('%{}%'.format(query1)),
+            EventMetadata.start_date == query2).all()
+
+    return render_template("adj.html", events = events)
 
 
 class Pagination(object):

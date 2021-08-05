@@ -138,39 +138,39 @@
                         </ul>
                     </nav>
                     <div class="cand-event-group">                
-                        {% for e in (21644, 21646, 21648, 21650, 21652, 21654, 21656, 21658) %}
+                        {% for e in events %}
                         <div class="event-desc" id="cand-event_{{ e }}">
                             <div class="row">
                                 <div class="col-sm-8">
-                                    <b>title:</b> Protesters shut down Yiannopoulos speech<br/>
-                                    <b>publication:</b> The Depaulia: DePaul University<br/>
-                                    <b>pub_date:</b> 2016-05-24<br/>
-                                    <b>start_date:</b> 2016-05-24</br>
-                                    <b>location:</b> Chicago, Illinois, USA
+                                    <b>title:</b> {{e.title | safe }}<br/>
+                                    <b>publication:</b> {{e.publication | safe}}<br/>
+                                    <b>pub_date:</b> {{e.pub_date}}<br/>
+                                    <b>start_date:</b> {{e.start_date}}</br>
+                                    <b>location:</b> {{e.location | safe }}
                                 </div>
                                 <div class="col-sm-4" id="cand-event-metadata_21644">
-                                    <b>event_id:</b> {{ e }}<br/>
-                                    <b>article_id:</b> <a href="http://cliff.ssc.wisc.edu/campus_protest_dev/event_creator/6628" target="_blank">6628</a><br/>
+                                    <b>event_id:</b> {{ e.event_id }}<br/>
+                                    <b>article_id:</b> <a href="http://cliff.ssc.wisc.edu/campus_protest_dev/event_creator/{{e.article_id}}" target="_blank">{{e.article_id}}</a><br/>
                                     <b>coder:</b> amritpal <br/>
-                                    {% if e < 21652 %}
+                                    <!-- {% if e < 21652 %}
                                         <b class="text-muted">In the expanded view</b> <a href="#" class="glyphicon glyphicon-remove"></a><br/>
                                     {% else %}
-                                        <b><a href="#">Add to Expand <span class="glyphicon glyphicon-plus"></span></a></b><br/>
-                                    {% endif %}
+                                    {% endif %} -->
+                                    <b><a href="#">Add to Expand <span class="glyphicon glyphicon-plus"></span></a></b><br/>
                                     <b>Flags: <a href="#" class="glyphicon glyphicon-thumbs-up"></a> <a href="#" class="glyphicon glyphicon-thumbs-down"></a></b>
                                 </div>
                             </div>
                             <div class="row">
                                 <div class="col-sm-12">
-                                    <b>article_desc:</b> Article reports on a talk by Milo Yiannopoulos being disrupted by protestors. The article does not provide a protest issue explaining why the disruption took place. The article explains that after the disruption shut down the event, Yiannopoulos marched around campus with his supporters. The article mentions that Yiannopoulos attempted to address the crowd while marching, but continued to be drowned out, suggesting that protestors followed Yiannopoulos and continued to disrupt him during the march. The article also mentions that earlier in the day, students held a 'counter rally' during which they voiced concerns about ongoing issues of racism on campus. However, the article does not explain who the protestors were countering. <br/>
-                                    <b>desc:</b> Protesters disrupted an event held by Milo Yiannopoulos. A group of protesters stormed the stage and interrupted Yiannopoulos, blowing whistles, and speaking out against Yiannopoulos. A group of about 100 protesters stood outside the doors of the event. Police were called to the Student Center and arrived soon after, but didn't intervene. Protestors followed Yiannopoulos as he marched around campus to protest the disruption, and continued to be drowned out by noise. <br/>
+                                    <b>article_desc:</b> {{ e.article_desc | safe}}<br/>
+                                    <b>desc:</b> {{ e.desc | safe }}<br/>
                                 </div>
                             </div>
                         </div>
                         {% endfor %}
                     </div>
                 </div>
-                <div class="subtab-pane" id="cand-recent_block">
+                <div class="subtab-pane" id="cand-recent_block" style="display:none;">
                     <div class="cand-event-group">                
                         {% for e in (21644, 21646) %}
                         <div class="event-desc" id="cand-event_{{ e }}">
