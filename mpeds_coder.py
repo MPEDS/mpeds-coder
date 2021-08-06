@@ -53,7 +53,7 @@ from database import db_session
 
 from models import ArticleMetadata, ArticleQueue, CoderArticleAnnotation, \
 CodeFirstPass, CodeSecondPass, CodeEventCreator, \
-Event, EventMetadata, EventCreatorQueue, SecondPassQueue, User
+Event, EventMetadata, EventCreatorQueue, RecentEvent, RecentCanonicalEvent, SecondPassQueue, User
 
 ##### Enable OrderedDict with PyYAML
 ##### Copy-pasta from https://stackoverflow.com/a/21912744 on 2019-12-12
@@ -570,13 +570,77 @@ def adj():
 
     query1 = 'Chicago'
     query2 = '2016-05-24'
+    grid_query  = [(6031), (6032)]
+    grid_events = {x: {} for x in grid_query}
+
+    ## TK: Move to YAML
+    single_vals = ['event_id', 'coder_id', 'article_id', 'publication', 'pub_date', 'title']
 
     ## perform the query on the web
     events = db_session.query(EventMetadata).\
         filter(EventMetadata.location.like('%{}%'.format(query1)),
             EventMetadata.start_date == query2).all()
 
-    return render_template("adj.html", events = events)
+    ## load in metadata
+    for metadata in db_session.query(EventMetadata).\
+        filter(EventMetadata.event_id.in_(grid_query)).all():
+        for field in single_vals:
+            grid_events[metadata.event_id][field] = metadata.__getattribute__(field)
+
+    for field in db_session.query(CodeEventCreator).\
+        filter(CodeEventCreator.event_id.in_(grid_query)).all():
+        if field.variable in single_vals:
+            continue
+        ## insert list
+        if not grid_events[field.event_id].get(field.variable):
+            grid_events[field.event_id][field.variable] = []
+        
+        ## insert in record
+        if field.text is not None:
+            grid_events[field.event_id][field.variable].append(field.text)
+        else:
+            grid_events[field.event_id][field.variable].append(field.value)
+
+    # grid_events = db_session.query(CodeEventCreator).\
+    #     filter(CodeEventCreator.event_id.in_(grid_query)).\
+    #     join(EventMetadata, CodeEventCreator.event_id == EventMetadata.event_id).all()
+
+    ## get the most recent events
+    ## TK: Fix this
+    recent_events = []
+    # recent_events = db_session.query(RecentEvent).\
+    #     join(EventMetadata.event_id).\
+    #     order_by(desc(RecentEvent.last_accessed)).\
+    #     limit(10)
+
+    ## assess how wide the columns should be
+    grid_width = None
+    grid_len   = len(grid_query)
+    if grid_len == 1:
+        grid_width = 5
+    elif grid_len == 2:
+        grid_width = 3
+    elif grid_len <= 3:
+        grid_width = 2
+
+    grid_vars = []
+    for i in event_creator_single_value:
+        if type(i) == list:
+            for j in i:
+                grid_vars.append(j)
+        else:
+            grid_vars.append(i)
+
+    grid_vars.extend([x[0] for x in event_creator_vars])
+    grid_vars.extend(['form', 'issue', 'racial-issue', 'target'])
+
+    return render_template("adj.html", 
+        events        = events, 
+        recent_events = recent_events,
+        grid_query    = grid_query,
+        grid_events   = grid_events,
+        grid_width    = grid_width,
+        grid_vars     = grid_vars)
 
 
 class Pagination(object):
