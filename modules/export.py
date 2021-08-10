@@ -57,7 +57,8 @@ def split_solr_id(id):
     return (pub, pub_date)
 
 def gen_event_export(
-    filename):
+        filename):
+    # Doesn't seem to do anything?
     users = {u.id: u.username for u in db_session.query(User).all()}
     annotations = CodeEventCreator
     cols  = [x.name for x in annotations.__table__.columns]
