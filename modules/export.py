@@ -12,7 +12,7 @@ from sqlalchemy import func, desc, distinct, or_
 from sqlalchemy.sql import select, func
 from sqlalchemy.schema import Table
 
-from ..database import db_session
+#from ..database import db_session
 from ..models import ArticleMetadata, CodeEventCreator, User
 
 def validate( x ):
@@ -55,6 +55,33 @@ def split_solr_id(id):
         if 'T' in pub_date:
             pub_date = pub_date.split('T')[0]
     return (pub, pub_date)
+
+def write_chunk(
+        resultset,
+        filename):
+    df = pd.DataFrame(resultset)
+    df.to_csv(filename, mode = "a", header = False, index = False)
+
+def export_query(
+        colwise_query,
+        filename):
+    r = colwise_query.all()
+    write_chunk(r, filename)
+    return filename
+
+def build_event_annotations_query(
+        db_session):
+    print(event_cols)
+    q = (db_session
+            .query(CodeEventCreator))
+    return q
+
+def export_event_annotations(
+        db_session,
+        filename):
+    q = build_event_annotations_query(db_session)
+    export_query(q, filename)
+    return filename
 
 def gen_event_export(
         filename):

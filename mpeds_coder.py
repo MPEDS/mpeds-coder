@@ -1100,7 +1100,7 @@ def generateCoderAudit():
         return redirect(url_for('index'))
 
     filename = '%s/exports/coder-table_%s.csv' % (app.config['WD'], dt.datetime.now().strftime('%Y-%m-%d_%H%M%S'))
-    event_export = export.gen_event_export(filename)
+    event_export = export.export_event_annotations(db_session,filename)
     
     return jsonify(result={"status": 200, "filename": event_export})
 
