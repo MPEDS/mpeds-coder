@@ -31,3 +31,7 @@ DOC_ROOT = "/var/www/misconfigured-mai/example-articles/"
 ## whether or not to use Solr, and the location of that server
 SOLR = True
 SOLR_ADDR = "http://localhost:8983/solr/mpeds2"
+
+## whether or not to store articles internally
+STORE_ARTICLES_INTERNALLY = True
+
