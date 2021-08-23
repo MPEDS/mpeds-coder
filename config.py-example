@@ -31,3 +31,15 @@ DOC_ROOT = "/var/www/misconfigured-mai/example-articles/"
 ## whether or not to use Solr, and the location of that server
 SOLR = True
 SOLR_ADDR = "http://localhost:8983/solr/mpeds2"
+
+## annotation variables that can only store one value per event
+SINGLE_VALUE_VARS = [
+    'article-desc',
+    'desc',
+    'start-date',
+    'end-date',
+    'location',
+    'duration',
+    'date-est',
+    'persons-freeform']
+
