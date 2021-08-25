@@ -412,7 +412,11 @@ div.cand-event-group div.event-desc {
 	margin-top: 4px;
 }
 
-.expanded-event {
+#expanded-event-view-metadata {
+	border-bottom: 1px solid #888;
+}
+
+.expanded-event-view {
 	height: 640px;
 	overflow-y: scroll;
 	overflow-x: hidden;

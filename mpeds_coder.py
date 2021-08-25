@@ -570,7 +570,7 @@ def adj():
 
     query1 = 'Chicago'
     query2 = '2016-05-24'
-    grid_query  = [(6031), (6032)]
+    grid_query  = [6031, 6032, 21644]
     grid_events = {x: {} for x in grid_query}
 
     ## TK: Move to YAML
