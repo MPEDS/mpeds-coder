@@ -31,3 +31,7 @@ DOC_ROOT = "/var/www/misconfigured-mai/example-articles/"
 ## whether or not to use Solr, and the location of that server
 SOLR = True
 SOLR_ADDR = "http://localhost:8983/solr/mpeds2"
+
+## location of templates that override defaults
+ADDITIONAL_TEMPLATE_DIR = "/var/www/misconfigured-mai_templates"
+
