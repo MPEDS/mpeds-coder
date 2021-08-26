@@ -41,9 +41,7 @@ from pytz import timezone
 import pytz
 
 ## flask
-from flask import Flask, request, session, g, redirect, url_for, abort, make_response, render_
-
-, flash, jsonify, Response, stream_with_context
+from flask import Flask, request, session, g, redirect, url_for, abort, make_response, render_template, flash, jsonify, Response, stream_with_context
 from flask_login import LoginManager, login_user, logout_user, current_user, login_required
 
 ## jinja
@@ -85,11 +83,10 @@ app.config.from_pyfile('config.py')
 
 # customize template path
 # copy-pasta from https://stackoverflow.com/questions/13598363/how-to-dynamically-select-template-directory-to-be-used-in-flask
-if 'ADDITIONAL_TEMPLATE_DIR' in app.config:
-    template_loader = jinja2.ChoiceLoader([
-        jinja2.FileSystemLoader([app.config['ADDITIONAL_TEMPLATE_DIR']]),
-        app.jinja_loader])
-    app.jinja_loader = template_loader
+template_loader = jinja2.ChoiceLoader([
+    jinja2.FileSystemLoader([app.config['ADDITIONAL_TEMPLATE_DIR']]),
+    app.jinja_loader])
+app.jinja_loader = template_loader
 
 
 ## login stuff
