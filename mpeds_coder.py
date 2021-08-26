@@ -44,6 +44,9 @@ import pytz
 from flask import Flask, request, session, g, redirect, url_for, abort, make_response, render_template, flash, jsonify, Response, stream_with_context
 from flask_login import LoginManager, login_user, logout_user, current_user, login_required
 
+## jinja
+import jinja2
+
 ## article assignment library
 import assign_lib
 
@@ -77,6 +80,14 @@ def ordered_load(stream, Loader=yaml.Loader, object_pairs_hook=OrderedDict):
 # create our application
 app = Flask(__name__)
 app.config.from_pyfile('config.py')
+
+# customize template path
+# copy-pasta from https://stackoverflow.com/questions/13598363/how-to-dynamically-select-template-directory-to-be-used-in-flask
+template_loader = jinja2.ChoiceLoader([
+    jinja2.FileSystemLoader([app.config['ADDITIONAL_TEMPLATE_DIR']]),
+    app.jinja_loader])
+app.jinja_loader = template_loader
+
 
 ## login stuff
 lm  = LoginManager()
@@ -144,8 +155,7 @@ else:
     state_and_territory_vals = dict()
 
 ## mark the single-valued items
-event_creator_single_value = ['article-desc', 'desc', 'start-date', 'end-date', 
-                              'location', 'duration', 'date-est', 'persons-freeform']
+event_creator_single_value = app.config['SINGLE_VALUE_VARS']
 
 event_creator_single_value.extend([[x[0] for x in v] for k, v in yes_no_vars.iteritems()])
 
@@ -1589,8 +1599,10 @@ def getEvents():
         elif pn =='ec':
             if len(rvar['desc']) > 0 and len(rvar['desc'][0]) > 0:
                 ev['repr'] = ", ".join(rvar['desc'])
-                ## No longer necessary with article-level description
-            elif len(rvar['article-desc']) > 0 and len(rvar['article-desc'][0]) > 0:
+            ## No longer necessary with article-level description
+            elif (len(rvar['article-desc']) > 0
+                  and len(rvar['article-desc'][0]) > 0
+                  and not app.config['ANNOTATE_ARTICLE_LEVEL']):
                 ev['repr'] = "(no event description): " + ", ".join(rvar['article-desc'])
             else:
                 ev['repr'] = "(no event description)"

@@ -35,3 +35,22 @@ SOLR_ADDR = "http://localhost:8983/solr/mpeds2"
 ## whether to use states and territories YAML
 USE_STATES_AND_TERR = False
 
+## whether or not to use article-level annotations
+ANNOTATE_ARTICLE_LEVEL = True
+
+## whether or not to store articles internally
+STORE_ARTICLES_INTERNALLY = True
+
+## annotation variables that can only store one value per event
+SINGLE_VALUE_VARS = [
+    'article-desc',
+    'desc',
+    'start-date',
+    'end-date',
+    'location',
+    'duration',
+    'date-est',
+    'persons-freeform']
+
+## location of templates that override defaults
+ADDITIONAL_TEMPLATE_DIR = "/var/www/misconfigured-mai_templates"
