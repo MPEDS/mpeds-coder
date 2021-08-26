@@ -32,6 +32,16 @@ DOC_ROOT = "/var/www/misconfigured-mai/example-articles/"
 SOLR = True
 SOLR_ADDR = "http://localhost:8983/solr/mpeds2"
 
+## annotation variables that can only store one value per event
+SINGLE_VALUE_VARS = [
+    'article-desc',
+    'desc',
+    'start-date',
+    'end-date',
+    'location',
+    'duration',
+    'date-est',
+    'persons-freeform']
+
 ## location of templates that override defaults
 ADDITIONAL_TEMPLATE_DIR = "/var/www/misconfigured-mai_templates"
-
