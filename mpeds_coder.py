@@ -83,10 +83,11 @@ app.config.from_pyfile('config.py')
 
 # customize template path
 # copy-pasta from https://stackoverflow.com/questions/13598363/how-to-dynamically-select-template-directory-to-be-used-in-flask
-template_loader = jinja2.ChoiceLoader([
-    jinja2.FileSystemLoader([app.config['ADDITIONAL_TEMPLATE_DIR']]),
-    app.jinja_loader])
-app.jinja_loader = template_loader
+if 'ADDITIONAL_TEMPLATE_DIR' in app.config and app.config.get('ADDITIONAL_TEMPLATE_DIR'):
+    template_loader = jinja2.ChoiceLoader([
+        jinja2.FileSystemLoader([app.config['ADDITIONAL_TEMPLATE_DIR']]),
+        app.jinja_loader])
+    app.jinja_loader = template_loader
 
 
 ## login stuff
