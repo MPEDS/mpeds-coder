@@ -43,3 +43,5 @@ SINGLE_VALUE_VARS = [
     'date-est',
     'persons-freeform']
 
+## location of templates that override defaults
+ADDITIONAL_TEMPLATE_DIR = "/var/www/misconfigured-mai_templates"
