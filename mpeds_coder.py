@@ -147,6 +147,13 @@ sv = ['comments', 'protest', 'multi', 'nous', 'ignore']
 ## yaml for yes/no variables
 yes_no_vars = yaml.load(open(app.config['WD'] + '/yes-no.yaml', 'r'))
 
+## yaml for states/provinces/territories
+if app.config['USE_STATES_AND_TERR']:
+    state_and_territory_vals = ordered_load(open(app.config['WD'] + '/states.yaml', 'r'))
+    #state_and_territory_vals = OrderedDict([('b', 2), ('a', 1), ('c', 3)])
+else:
+    state_and_territory_vals = dict()
+
 ## mark the single-valued items
 event_creator_single_value = app.config['SINGLE_VALUE_VARS']
 
@@ -1758,6 +1765,7 @@ def modifyEvents():
             v2 = v2,
             vars = event_creator_vars,
             yes_no_vars = yes_no_vars,
+            state_and_territory_vals = state_and_territory_vals,
             opts = opts, 
             curr = curr, 
             event_id = eid)

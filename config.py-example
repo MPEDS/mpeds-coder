@@ -32,6 +32,9 @@ DOC_ROOT = "/var/www/misconfigured-mai/example-articles/"
 SOLR = True
 SOLR_ADDR = "http://localhost:8983/solr/mpeds2"
 
+## whether to use states and territories YAML
+USE_STATES_AND_TERR = False
+
 ## whether or not to use article-level annotations
 ANNOTATE_ARTICLE_LEVEL = True
 
