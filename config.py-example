@@ -32,6 +32,9 @@ DOC_ROOT = "/var/www/misconfigured-mai/example-articles/"
 SOLR = True
 SOLR_ADDR = "http://localhost:8983/solr/mpeds2"
 
+## whether or not to store articles internally
+STORE_ARTICLES_INTERNALLY = True
+
 ## annotation variables that can only store one value per event
 SINGLE_VALUE_VARS = [
     'article-desc',
