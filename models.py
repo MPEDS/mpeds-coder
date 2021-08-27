@@ -225,7 +225,7 @@ class RecentSearch(Base):
 
     def __repr__(self):
         return '<RecentSearch %r-%r-%r (%r)>' % \
-            (self.field, self.comaprison, self.value, self.last_accessed)
+            (self.field, self.comparison, self.value, self.last_accessed)
 
 
 class CodeFirstPass(Base):

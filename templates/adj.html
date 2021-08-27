@@ -339,6 +339,7 @@
                     </div>
                 </div>
                 {% endfor %}
+                <!-- The Canonical Event Metadata -->
                 <div class="col-sm-{{ grid_width }} expanded-event-variable-col">
                     <label>Canonical Event <a class="glyphicon glyphicon-trash" href="#" title="Delete canonical event"></a></label>
                     <div class="expanded-event-variable expanded-event-variable canonical" id="expanded-event-canonical-key_1">
@@ -369,23 +370,25 @@
                 {% for event_id in grid_query %}
                     <div class="col-sm-{{ grid_width }} expanded-event-variable-col">
                     {% if grid_events[event_id][var]|length > 0 %}
-                        {% for value in grid_events[event_id][var] %}
-                            <div class="expanded-event-variable grabbable" id="{{ var }}_{{ event_id }}">
-                                <div class="sticky-top data-buttons">
-                                    {% for b in buttons %}
-                                        <a class="glyphicon glyphicon-{{ b }}"></a> 
-                                    {% endfor %}
-                                </div>
-                                {{ value | safe }}
+                    {% for value in grid_events[event_id][var] %}
+                        <div class="expanded-event-variable grabbable" id="{{ var }}_{{ event_id }}">
+                            <div class="sticky-top data-buttons">
+                                {% for b in buttons %}
+                                    <a class="glyphicon glyphicon-{{ b }}"></a> 
+                                {% endfor %}
                             </div>
-                        {% endfor %}
+                            {{ value | safe }}
+                        </div>
+                    {% endfor %}
                     {% else %}
                         <div class="expanded-event-variable text-muted">(None)</div>
                     {% endif %}
                     </div>
                 {% endfor %}
+                <!-- The Canonical Event Fields -->
                 <div class="col-sm-{{ grid_width }} expanded-event-variable-col">
-                    {% for value in grid_events[event_id][var] %}
+                    {% if canonical_event[var]|length > 0 %}
+                    {% for value in canonical_event[var] %}
                     <div class="expanded-event-variable canonical" id="expanded-event-metadata_canonical">
                         <div class="sticky-top data-buttons">
                             <a class="glyphicon glyphicon-remove" title="Remove"></a> <a class="glyphicon glyphicon-info-sign" title="Info"></a>
@@ -393,6 +396,9 @@
                         {{ value | safe }}
                     </div>
                     {% endfor %}
+                    {% else %}
+                        <div class="expanded-event-variable canonical text-muted">(None)</div>
+                    {% endif %}
                 </div>
             </div>
             {% endfor %}

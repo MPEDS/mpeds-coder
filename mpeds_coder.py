@@ -614,23 +614,27 @@ def adj():
     canonical_event['key'] = canonical_event_key
 
     ## TK: This doesn't work yet.
-    rs = db_session.query(CanonicalEvent).\
-        join(CanonicalEventLink).\
-        join(CodeEventCreator).\
+    rs = db_session.query(CanonicalEvent, CanonicalEventLink, CodeEventCreator).\
+        join(CanonicalEventLink, CanonicalEvent.id == CanonicalEventLink.canonical_id).\
+        join(CodeEventCreator, CanonicalEventLink.cec_id == CodeEventCreator.id).\
         filter(CanonicalEvent.key == canonical_event_key).all()
 
-    print(rs[0].__dict__)
-
-    for field in rs:
+    ## we're only interested in the CEC data
+    for _, _, cec  in rs:
         ## create a new list if it doesn't exist
-        if not canonical_event.get(field.variable):
-            canonical_event[field.variable] = []
+        if not canonical_event.get(cec.variable):
+            canonical_event[cec.variable] = []
 
         ## insert in record
-        if field.text is not None:
-            canonical_event[field.variable].append(field.text)
+        if cec.text is not None:
+            canonical_event[cec.variable].append(cec.text)
         else:
-            canonical_event[field.variable].append(field.value)
+            canonical_event[cec.variable].append(cec.value)
+
+    ## and some of the CE data
+    canonical_event['key'] = rs[0][0].key
+    canonical_event['notes'] = rs[0][0].notes
+    canonical_event['status'] = rs[0][0].status
 
     # grid_events = db_session.query(CodeEventCreator).\
     #     filter(CodeEventCreator.event_id.in_(grid_query)).\
