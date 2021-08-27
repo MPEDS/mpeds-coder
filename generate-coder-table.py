@@ -28,7 +28,7 @@ def validate( x ):
         return "0"
 
 
-def main(model, filename_base):
+def exportAnnotations(model, filename_base):
     users = {u.id: u.username for u in db_session.query(User).all()}
     cols  = [x.name for x in model.__table__.columns]
 
@@ -126,4 +126,4 @@ def main(model, filename_base):
     print(("  " + str(i) + "...DONE"))
 
 if __name__ == '__main__':
-    main(CodeEventCreator, 'coder-table')
+    exportAnnotations(CodeEventCreator, 'coder-table')
