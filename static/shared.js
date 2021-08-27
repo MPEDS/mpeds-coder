@@ -80,7 +80,7 @@ var addSelectedText = function(e, v) {
   }
 
   req = $.ajax({
-    type: "GET",
+    type: "POST",
     url:  $SCRIPT_ROOT + '/_add_code/' + pn,
     data: {
       article:  aid[1],
@@ -116,7 +116,7 @@ var deleteCode = function(e) {
   var ev  = $(e.target).closest('div.event-block').attr('id').split("_")[1];
 
   req = $.ajax({
-    type: "GET",
+    type: "POST",
     url:  $SCRIPT_ROOT + '/_del_code/' + pn,
     data: {
       article:  aid[1],
@@ -139,6 +139,7 @@ var deleteCode = function(e) {
 }
 
 /* Adds a value for a variable if not available in the current list. */
+// DS 2020-01-16: Looks like this is only used by code1.js and code2.js
 var addCode = function(e) {
   var oText    = '';
   var aid      = $(".article").attr("id").split("_")[1];
@@ -162,7 +163,7 @@ var addCode = function(e) {
   }
 
   req = $.ajax({
-    type: "GET",
+    type: "POST",
     url:  $SCRIPT_ROOT + '/_add_code/' + pn,
     data: {
       article:  aid,
@@ -207,7 +208,51 @@ var generate_handler = function( v, type ) {
   };
 }
 
-/* Adds or deletes values for each variable based on checkboxes. */
+/* Adds or deletes values for article variables based on checkboxes. */
+var selectArticleCheckbox = function(e) {
+  var el       = $(e.target);
+  var aid      = $(".article").attr("id").split("_")[1];  
+  var pn       = $('#pass_number').val();
+
+  var variable = el.attr("id").split("_")[1];
+  var val      = el.val();
+
+  // for some of the basic info variables, id == val. change to 'yes'
+  if (variable == val) {
+    val = 'yes';
+  }
+
+  var is_checked = el.is(':checked');
+  var action = ''
+
+  // add this checkbox item
+  if (is_checked == true) {
+    action = 'add';
+  } else { // delete it
+    action = 'del';
+  }
+
+  req = $.ajax({
+    type: "POST",
+    url:  $SCRIPT_ROOT + '/_' + action + '_article_code/' + pn,
+    data: {
+      article:  aid,
+      variable: variable,
+      value:    val
+    }
+  });
+
+  req.done(function(e) {
+    $('#flash-error').hide();
+  });
+
+  req.fail(function(e) {
+    $("#flash-error").text("Error changing checkbox.");
+    $("#flash-error").show();
+  });
+}
+
+/* Adds or deletes values for each event variable based on checkboxes. */
 var selectCheckbox = function(e) {
   var el       = $(e.target);
   var aid      = $(".article").attr("id").split("_")[1];  
@@ -233,7 +278,7 @@ var selectCheckbox = function(e) {
   }
 
   req = $.ajax({
-    type: "GET",
+    type: "POST",
     url:  $SCRIPT_ROOT + '/_' + action + '_code/' + pn,
     data: {
       article:  aid,
@@ -266,7 +311,7 @@ var selectRadio = function(e) {
 
   // change code
   req = $.ajax({
-    type: "GET",
+    type: "POST",
     url:  $SCRIPT_ROOT + '/_change_code/' + pn,
     data: {
       article:  aid,
@@ -287,6 +332,38 @@ var selectRadio = function(e) {
 }
 
 /* Adds or deletes values for each variable based on radio buttons selected. */
+var storeArticleTextInput = function(e) {
+  var el       = $(e.target);
+  var aid      = $(".article").attr("id").split("_")[1];  
+//  var eid      = el.closest(".event-block").attr("id").split("_")[1];
+  var pn       = $('#pass_number').val();
+
+  var variable = el.attr("id").split("_")[1];
+  var val      = el.val();
+
+  // change code
+  req = $.ajax({
+    type: "POST",
+    url:  $SCRIPT_ROOT + '/_change_article_code/' + pn,
+    data: {
+      article:  aid,
+      variable: variable,
+      value:    val //,
+//      event:    eid
+    }
+  });
+
+  req.done(function(e) {
+    $('#flash-error').hide();
+  });
+
+  req.fail(function(e) {
+    $("#flash-error").text("Error changing article text input.");
+    $("#flash-error").show();
+  });
+}
+
+/* Adds or deletes values for each variable based on radio buttons selected. */
 var storeText = function(e) {
   var el       = $(e.target);
   var aid      = $(".article").attr("id").split("_")[1];  
@@ -298,7 +375,7 @@ var storeText = function(e) {
 
   // change code
   req = $.ajax({
-    type: "GET",
+    type: "POST",
     url:  $SCRIPT_ROOT + '/_change_code/' + pn,
     data: {
       article:  aid,
@@ -313,11 +390,12 @@ var storeText = function(e) {
   });
 
   req.fail(function(e) {
-    $("#flash-error").text("Error changing radio button.");
+    $("#flash-error").text("Error changing text field.");
     $("#flash-error").show();
   });
 }
 
+// DS 2020-01-16: it looks like nothing anywhere calls this?
 var getCodes = function(ev) {
   // prepopulate existing fields
   var aid = $(".article").attr("id").split("_")[1];    

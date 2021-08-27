@@ -19,7 +19,7 @@ var changeTab = function(e) {
 var addUser = function(e) {
     var username = $('#username').val();
     req = $.ajax({
-      type: "GET",
+      type: "POST",
       url:  $SCRIPT_ROOT + '/_add_user',
       data: {
         'username': username
@@ -60,7 +60,7 @@ var assignArticles = function(e) {
     });
 
     req = $.ajax({
-      type: "GET",
+      type: "POST",
       url:  $SCRIPT_ROOT + '/_assign_articles',
       data: {
         'num':        num,
@@ -101,7 +101,7 @@ var transferArticles = function(e) {
     });
 
     req = $.ajax({
-      type: "GET",
+      type: "POST",
       url:  $SCRIPT_ROOT + '/_transfer_articles',
       data: {
         'num': num,
