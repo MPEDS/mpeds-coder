@@ -55,9 +55,9 @@ class AdjudicatorEdit(Base):
 class CanonicalEvent(Base):
     __tablename__ = 'canonical_event'
     id           = Column(Integer, primary_key=True)
-    coder_id     = Column(Integer, ForeignKey('user.id'))
-    key          = Column(Text)
-    notes        = Column(UnicodeText, nullable = False)
+    coder_id     = Column(Integer, ForeignKey('user.id'), nullable = False)
+    key          = Column(Text, nullable = False)
+    notes        = Column(UnicodeText)
     status       = Column(Text)
     last_updated = Column(DateTime)
 
@@ -74,12 +74,12 @@ class CanonicalEvent(Base):
         return '<CanonicalEvent %r>' % (self.id)
 
 
-class CanonicalEventRecord(Base):
-    __tablename__ = 'canonical_event_record'
+class CanonicalEventLink(Base):
+    __tablename__ = 'canonical_event_link'
     id           = Column(Integer, primary_key=True)
-    coder_id     = Column(Integer, ForeignKey('user.id'))
-    canonical_id = Column(Integer, ForeignKey('canonical_event.id'))
-    cec_id       = Column(Integer, ForeignKey('coder_event_creator.id'))
+    coder_id     = Column(Integer, ForeignKey('user.id'), nullable = False)
+    canonical_id = Column(Integer, ForeignKey('canonical_event.id'), nullable = False)
+    cec_id       = Column(Integer, ForeignKey('coder_event_creator.id'), nullable = False)
     timestamp    = Column(DateTime)
 
     UniqueConstraint('canonical_id', 'cec_id', name = 'unique1')
@@ -91,7 +91,7 @@ class CanonicalEventRecord(Base):
         self.timestamp    = dt.datetime.now(tz = central).replace(tzinfo = None)
 
     def __repr__(self):
-        return '<CanonicalEventRecord %r>' % (self.id)
+        return '<CanonicalEventLink %r>' % (self.id)
 
 
 class CanonicalEventRelationship(Base):

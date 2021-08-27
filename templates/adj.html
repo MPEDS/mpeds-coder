@@ -345,19 +345,19 @@
                         <div class="sticky-top data-buttons">
                             <a class="glyphicon glyphicon-pencil" title="Edit"></a> <a class="glyphicon glyphicon-info-sign" title="Info"></a>
                         </div>
-                        <b>Key: </b> Milo_Chicago_2016<br />
+                        <b>Key: </b> {{ canonical_event['key'] }}<br />
                     </div>
                     <div class="expanded-event-variable expanded-event-variable canonical">
                         <div class="sticky-top data-buttons">
                             <a class="glyphicon glyphicon-pencil" title="Edit"></a> <a class="glyphicon glyphicon-info-sign" title="Info"></a>
                         </div>
-                        <b>Notes: </b>This is the main event for the protest against Milo in Chicago in 2016. This is filler text to try to break this part of it. This is filler text to try to break this part of it. This is filler text to try to break this part of it. This is filler text to try to break this part of it.<br />
+                        <b>Notes: </b>{{ canonical_event['notes']|safe }}<br />
                     </div>
                     <div class="expanded-event-variable expanded-event-variable canonical">
                         <div class="sticky-top data-buttons">
                             <a class="glyphicon glyphicon-pencil" title="Edit"></a> <a class="glyphicon glyphicon-info-sign" title="Info"></a>
                         </div>
-                        <b>Status: </b>Done<br />
+                        <b>Status: </b>{{ canonical_event['status'] }}<br />
                     </div>
                 </div>
             </div>
@@ -385,12 +385,14 @@
                     </div>
                 {% endfor %}
                 <div class="col-sm-{{ grid_width }} expanded-event-variable-col">
+                    {% for value in grid_events[event_id][var] %}
                     <div class="expanded-event-variable canonical" id="expanded-event-metadata_canonical">
                         <div class="sticky-top data-buttons">
                             <a class="glyphicon glyphicon-remove" title="Remove"></a> <a class="glyphicon glyphicon-info-sign" title="Info"></a>
                         </div>
-                        canonical_placeholder
+                        {{ value | safe }}
                     </div>
+                    {% endfor %}
                 </div>
             </div>
             {% endfor %}

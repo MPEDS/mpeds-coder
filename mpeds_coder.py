@@ -51,7 +51,7 @@ from sqlalchemy.sql import select
 ## app-specific
 from database import db_session
 
-from models import ArticleMetadata, ArticleQueue, CoderArticleAnnotation, \
+from models import ArticleMetadata, ArticleQueue, CanonicalEvent, CanonicalEventLink, CoderArticleAnnotation, \
 CodeFirstPass, CodeSecondPass, CodeEventCreator, \
 Event, EventMetadata, EventCreatorQueue, RecentEvent, RecentCanonicalEvent, SecondPassQueue, User
 
@@ -568,9 +568,12 @@ def adj():
     filter = request.form.get('filter')
     sort = request.form.get('sort')
 
+    ## TK: These are placeholders which will be gathered from queries later
     query1 = 'Chicago'
     query2 = '2016-05-24'
-    grid_query  = [6031, 6032, 21644]
+    canonical_event = {}
+    canonical_event_key = 'Milo_Chicago_2016'
+    grid_query  = [6031, 6032, 21644, 21646]
     grid_events = {x: {} for x in grid_query}
 
     ## TK: Move to YAML
@@ -587,11 +590,15 @@ def adj():
         for field in single_vals:
             grid_events[metadata.event_id][field] = metadata.__getattribute__(field)
 
+    #####
+    ## Get the candidate events
+    #####
     for field in db_session.query(CodeEventCreator).\
         filter(CodeEventCreator.event_id.in_(grid_query)).all():
         if field.variable in single_vals:
             continue
-        ## insert list
+
+        ## create a new list if it doesn't exist
         if not grid_events[field.event_id].get(field.variable):
             grid_events[field.event_id][field.variable] = []
         
@@ -600,6 +607,30 @@ def adj():
             grid_events[field.event_id][field.variable].append(field.text)
         else:
             grid_events[field.event_id][field.variable].append(field.value)
+
+    #####
+    ## Get the canonical event
+    #####
+    canonical_event['key'] = canonical_event_key
+
+    ## TK: This doesn't work yet.
+    rs = db_session.query(CanonicalEvent).\
+        join(CanonicalEventLink).\
+        join(CodeEventCreator).\
+        filter(CanonicalEvent.key == canonical_event_key).all()
+
+    print(rs[0].__dict__)
+
+    for field in rs:
+        ## create a new list if it doesn't exist
+        if not canonical_event.get(field.variable):
+            canonical_event[field.variable] = []
+
+        ## insert in record
+        if field.text is not None:
+            canonical_event[field.variable].append(field.text)
+        else:
+            canonical_event[field.variable].append(field.value)
 
     # grid_events = db_session.query(CodeEventCreator).\
     #     filter(CodeEventCreator.event_id.in_(grid_query)).\
@@ -620,7 +651,7 @@ def adj():
         grid_width = 5
     elif grid_len == 2:
         grid_width = 3
-    elif grid_len <= 3:
+    else:
         grid_width = 2
 
     grid_vars = []
@@ -640,7 +671,8 @@ def adj():
         grid_query    = grid_query,
         grid_events   = grid_events,
         grid_width    = grid_width,
-        grid_vars     = grid_vars)
+        grid_vars     = grid_vars,
+        canonical_event = canonical_event)
 
 
 class Pagination(object):

@@ -414,12 +414,16 @@ div.cand-event-group div.event-desc {
 
 #expanded-event-view-metadata {
 	border-bottom: 1px solid #888;
+	/* overflow-x: auto;
+    white-space: nowrap; */
 }
 
 .expanded-event-view {
 	height: 640px;
 	overflow-y: scroll;
 	overflow-x: hidden;
+	/* overflow-x: auto;
+    white-space: nowrap; */
 }
 
 div.expanded-event-variable-name {
