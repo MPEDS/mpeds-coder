@@ -3,7 +3,7 @@ Generates the coder table independently of the dashboard.
 """
 
 from database import db_session
-from models import ArticleMetadata, CodeEventCreator, User
+from models import ArticleMetadata, User
 import config
 
 from sqlalchemy.exc import OperationalError
@@ -125,5 +125,3 @@ def exportAnnotations(model, filename_base):
             print(("  " + str(i) + "..."))
     print(("  " + str(i) + "...DONE"))
 
-if __name__ == '__main__':
-    exportAnnotations(CodeEventCreator, 'coder-table')
