@@ -4,6 +4,7 @@ Generates the coder table independently of the dashboard.
 
 from database import db_session
 from models import ArticleMetadata, CodeEventCreator, User
+import config
 
 from sqlalchemy.exc import OperationalError
 from sqlalchemy import func, desc, distinct, or_
@@ -13,6 +14,7 @@ from sqlalchemy.schema import Table
 import pandas as pd
 
 import datetime as dt
+import os
 
 def validate( x ):
     """ replace newlines, returns, and tabs with blank space """
@@ -26,13 +28,16 @@ def validate( x ):
         return "0"
 
 
-def main():
+def main(model, filename_base):
     users = {u.id: u.username for u in db_session.query(User).all()}
-    model = CodeEventCreator
     cols  = [x.name for x in model.__table__.columns]
 
     resultset = []
-    filename = '/var/www/campus_protest/exports/coder-table_%s.csv' % (dt.datetime.now().strftime('%Y-%m-%d'))
+    filename = os.path.join(
+            config.WD,
+            "exports",
+            filename_base + '_%s.csv' % (dt.datetime.now().strftime('%Y-%m-%d_%H%M%S')))
+    print(filename)
     
     query = db_session.query(func.max(model.id)).first()
     
@@ -121,4 +126,4 @@ def main():
     print(("  " + str(i) + "...DONE"))
 
 if __name__ == '__main__':
-    main()
+    main(CodeEventCreator, 'coder-table')
