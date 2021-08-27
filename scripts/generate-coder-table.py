@@ -1,4 +1,4 @@
-import models
-import modules.export
+from context import models
+from context import export
 
-modules.export.exportAnnotations(models.CodeEventCreator, 'coder-table')
+export.exportAnnotations(models.CodeEventCreator, 'coder-table')
