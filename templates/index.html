@@ -14,15 +14,9 @@
 				<p><a href="{{ url_for('code2Next') }}">Coding interface</a> | <a href="{{ url_for('userArticleList', pn = 2) }}">List</a> | <a href="{{ url_for('code2queue', sort = 'percent_yes', sort_dir = 'desc') }}">First pass summary</a></p> -->
 			{% else %}
 	    <p><a href="{{ url_for('admin') }}">Admin Dashboard</a></p>
-	    <p>Publication report</p>
-	    <p>
-	      <a href="{{ url_for('publications', db = 'uwire') }}">UWIRE</a> |
-	      <a href="{{ url_for('publications', db = 'uwire2016-18') }}">UWIRE 2016-18</a> |	      
-	      <a href="{{ url_for('publications', db = 'canadian-papers') }}">Canadian</a> |
-	      <a href="{{ url_for('publications', db = 'hbcu-papers') }}">HBCUs</a>
-	    </p>
-	    
-	    {% endif %}
+	    <p><a href="{{ url_for('publications') }}">Publication report</a></p>
+	    <p><a href="{{ url_for('exports') }}">Exports</a></p>
+			{% endif %}
 			<p><a href="{{ url_for('coderStats') }}">Coder stats</a></p>
 		</div>
 
