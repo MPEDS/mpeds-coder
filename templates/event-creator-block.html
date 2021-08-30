@@ -79,7 +79,7 @@
             </label>            
           </div>
 	</div>
-	{% for question, values in yes_no_vars.iteritems() %}
+	{% for question, values in yes_no_vars.items() %}
 	<div class="form-group">
           <label>{{ question|safe }}</label>
           {% for list_items in values %}

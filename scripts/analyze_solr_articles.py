@@ -1,13 +1,14 @@
 import sys
 import datetime
-import urllib
+import urllib.request
+import urllib.parse
 
 import pandas as pd
 import sqlalchemy
 import sqlalchemy.orm
 
-from context import config
-import solr
+from .context import config
+from . import solr
 
 ## MySQL setup
 mysql_engine = sqlalchemy.create_engine(
@@ -39,7 +40,7 @@ def testURLEncoding(id):
         'wt':    'json'
         }
     try:
-        urllib.urlencode(data)
+        urllib.parse.urlencode(data)
     except UnicodeEncodeError:
         print("#### Bad encoding: %s" % id)
 
@@ -59,7 +60,7 @@ def getQueryChunk(ids):
     return docs
 
 # Chunk trick from https://stackoverflow.com/questions/312443/how-do-you-split-a-list-into-evenly-sized-chunks
-id_chunks = [ids[i:i + 1024] for i in xrange(0, len(ids), 1024)]
+id_chunks = [ids[i:i + 1024] for i in range(0, len(ids), 1024)]
 
 docs = list()
 # NB: making copies of this list will use up memory fast!
@@ -76,7 +77,7 @@ print("Article count: %d" % solr_df.shape[0])
 
 def clean_lists(listcell):
     if isinstance(listcell, list):
-        listcell = '|||'.join(unicode(v) for v in listcell)
+        listcell = '|||'.join(str(v) for v in listcell)
     return listcell
 
 solr_df = solr_df.applymap(clean_lists)
@@ -124,8 +125,8 @@ maxentries = (solr_df
                 # sort changed to sort_values at pandas 0.17 or so
                 #.sort('maxn', ascending=False)
                 )
-print '\n\nLargest multi-entry cell in each column:'
-print maxentries
+print('\n\nLargest multi-entry cell in each column:')
+print(maxentries)
 
 ## Nonempty analysis
 
@@ -134,5 +135,5 @@ nonmissing = (solr_df
                 # sort changed to sort_values at pandas 0.17 or so
                 #.sort(ascending=False)
                 )
-print '\n\nNonmissing entries in each column:'
-print nonmissing
+print('\n\nNonmissing entries in each column:')
+print(nonmissing)

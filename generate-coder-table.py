@@ -2,8 +2,8 @@
 Generates the coder table independently of the dashboard.
 """
 
-from database import db_session
-from models import ArticleMetadata, CodeEventCreator, User
+from .database import db_session
+from .models import ArticleMetadata, CodeEventCreator, User
 
 from sqlalchemy.exc import OperationalError
 from sqlalchemy import func, desc, distinct, or_

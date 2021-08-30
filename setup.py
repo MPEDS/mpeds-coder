@@ -1,5 +1,5 @@
-from database import db_session, init_db
-from models import User, ArticleMetadata, CodeFirstPass, CodeSecondPass, CodeEventCreator, \
+from .database import db_session, init_db
+from .models import User, ArticleMetadata, CodeFirstPass, CodeSecondPass, CodeEventCreator, \
 	ArticleQueue, SecondPassQueue, EventCreatorQueue, Event
 from sqlalchemy import func
 from sqlalchemy.exc import IntegrityError
@@ -9,7 +9,7 @@ import random
 import glob
 import json
 
-import config
+from . import config
 
 def addArticlesExample(db_name = 'test'):
 	""" Add articles from example directory. """
@@ -33,7 +33,7 @@ def addArticles(filename, db_name):
 	with open(filename, "rb") as csvfile:
 		reader = csv.DictReader(csvfile)
 		for row in reader:
-			row = {k:v.decode("utf8") for k, v in row.items()}
+			row = {k:v.decode("utf8") for k, v in list(row.items())}
 			title = row['title']
 			db_id = row['db_id']
 			pub_date = row['pub_date']

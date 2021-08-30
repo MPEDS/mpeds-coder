@@ -77,7 +77,7 @@ def parseLexisNexis(filename, output = "."):
 
         date = datetime.strptime(" ".join(da[0:3]), "%B %d %Y")
         date = date.strftime("%Y-%m-%d")
-        ed   = " ".join( map(lambda x: x.strip(), da[4:]) )
+        ed   = " ".join( [x.strip() for x in da[4:]] )
 
         ## if edition is a time or day, skip it      
         if 'GMT' in ed or 'day' in ed:

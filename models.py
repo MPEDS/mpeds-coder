@@ -1,7 +1,7 @@
 from sqlalchemy import Boolean, Column, Date, DateTime, Integer, String, Unicode, ForeignKey, UniqueConstraint, Text, UnicodeText
 from sqlalchemy.orm import relationship, backref
 from flask_login import UserMixin
-from database import Base
+from .database import Base
 import datetime as dt
 import pytz
 from pytz import timezone
@@ -220,10 +220,7 @@ class User(Base, UserMixin):
         self.authlevel = authlevel
 
     def get_id(self):
-        try:
-            return unicode(self.id)  # python 2
-        except NameError:
-            return str(self.id)  # python 3
+        return str(self.id)
 
     def __repr__(self):
         return '<Coder %r>' % (self.username)
