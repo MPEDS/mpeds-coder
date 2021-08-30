@@ -108,6 +108,9 @@ var modifyEvent = function(e) {
 
     $('#basicinfo_block textarea').blur(storeText);
 
+    // listener for actors-freeform
+    $('#textselect_block textarea').blur(storeText);
+      
     // listeners for adding or deleting checkboxes
     $('#basicinfo_block :checkbox').change(selectCheckbox);
     $('#yes-no_block :checkbox').change(selectCheckbox);
@@ -191,7 +194,7 @@ var deleteEvent = function(e) {
   }
 
   req = $.ajax({
-    type: "GET",
+    type: "POST",
     url:  $SCRIPT_ROOT + '/_del_event',
     data: {
       event: eid,
@@ -304,7 +307,7 @@ $(function(){
   $('#mark-done').each(function() {
     $(this).click(function() {
       var req = $.ajax({
-          type: "GET",
+          type: "POST",
           url:  $SCRIPT_ROOT + '/_mark_ec_done',
           data: {
             article_id: aid

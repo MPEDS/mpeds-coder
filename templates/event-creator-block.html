@@ -9,224 +9,126 @@
     <li class="tablinks" id="textselect_button">
       <a href="#">Text Select</a>
     </li>
+    <li class="tablinks" id="preset_button">
+      <a href="#">Preset</a>
+    </li>
     <!-- 
-   /* To Be Implemented: search of past events and related events in Solr DB. */
-   <li class="tablinks" id="relatedevents_button">
-     <a href="#">Related</a>
-   </li>
-   -->
+	 /* To Be Implemented: search of past events and related events in Solr DB. */
+	 <li class="tablinks" id="relatedevents_button">
+	   <a href="#">Related</a>
+	 </li>
+	 -->
   </ul>
   <div class="tab-content">
     <div class="tab-pane" id="basicinfo_block">
       <form> 
         <div class="form-group">
+          <label for="article-desc">Provide a short description of this article.</label>
+          <textarea class="form-control form-control-sm" name="article-desc" id="info_article-desc">{{ curr['article-desc']|safe }}</textarea>
+	  
           <label for="desc">Provide a short description of this event.</label>
           <textarea class="form-control form-control-sm" name="desc" id="info_desc">{{ curr['desc']|safe }}</textarea>
-        </div>
-    
-        <div class="form-group">
-          
-          <label for="start-date">Start date (yyyy-mm-dd)</label>
+	  
+          <label for="start-date">Start date</label>
           <div id="start-date-picker" class="input-group date">
-            <input
-              class="form-control"
-              type="text"
-              name="start-date"
-              id="info_start-date"
-              value="{{ curr['start-date'] }}"
-            />
+            <input class="form-control" type="text" name="start-date" id="info_start-date" value="{{ curr['start-date'] }}" />
             <span class="input-group-addon">
               <span class="glyphicon glyphicon-calendar"></span>
             </span>
           </div>
-          
-          <div class="form-check">
-            <label class="form-check-label">
-              <input
-                class="form-check-input basic-info"
-                type="checkbox"
-                name="start-date-estimated"
-                id="info_start-date-estimated"
-                value="yes"
-                {{ 'checked' if 'yes' in curr['start-date-estimated'] else '' }}
-              />
-              Start date estimated
-            </label>
-          </div>
 
-          <div class="form-check">
-            <label class="form-check-label">
-              <input
-                class="form-check-input basic-info"
-                type="checkbox"
-                name="future-event"
-                id="info_future-event"
-                value="yes"
-                {{ 'checked' if 'yes' in curr['future-event'] else '' }}
-              />
-              Article describes this as a future event
-            </label>
-          </div>
-
-        </div>
-    
-        <div class="form-group">
-
-          <label for="end-date">End date (yyyy-mm-dd)</label>
+          <label for="end-date">End date</label>
           <div id="end-date-picker" class="input-group date">
-            <input 
-              class="form-control"
-              type="text"
-              name="end-date"
-              id="info_end-date"
-              value="{{ curr['end-date'] }}"
-            />
+            <input class="form-control" type="text" name="end-date" id="info_end-date" value="{{ curr['end-date'] }}" />
             <span class="input-group-addon">
               <span class="glyphicon glyphicon-calendar"></span>
             </span>
           </div>
 
-          <div class="form-check">
-            <label class="form-check-label">
-              <input
-                class="form-check-input basic-info"
-                type="checkbox"
-                name="end-date-estimated"
-                id="info_end-date-estimated"
-                value="yes"
-                {{ 'checked' if 'yes' in curr['end-date-estimated'] else '' }}
-              />
-              End date estimated
-            </label>
-          </div>
-
-          <div class="form-check">
-            <label class="form-check-label">
-              <input
-                class="form-check-input basic-info"
-                type="checkbox"
-                name="event-ongoing"
-                id="info_event-ongoing"
-                value="yes"
-                {{ 'checked' if 'yes' in curr['event-ongoing'] else '' }}
-              />
-              Article describes this as an ongoing event
-            </label>
-          </div>
-
+          <label for="location">Location (City, State/Province, Country)</label>
+          <input class="form-control" type="text" name="location" id="info_location" value="{{ curr['location'] }}" />
         </div>
-
-        <div class="form-group">
-
-          <label for="state">State/Province/Territory</label>
-          <select class="form-control" name="state" id="info_state">
-            <option value="">Select one</option>
-              {% for value, text in state_and_territory_vals.iteritems() %}
-              <option value="{{ value }}" {% if curr['state'] == value %}{{ 'selected' }}{% endif %}>{{ text }}</option>
-              {% endfor %}
-          </select>
-
-          <label for="city">City/Town</label>
-          <input
-            class="form-control"
-            type="text"
-            name="city"
-            id="info_city"
-            value="{{ curr['city'] }}"
-          />
-
-          <div class="form-check">
-            <label class="form-check-label">
-              <input
-                class="form-check-input basic-info"
-                type="checkbox"
-                name="location-unspecified"
-                id="info_location-unspecified"
-                value="yes"
-                {{ 'checked' if 'yes' in curr['location-unspecified'] else '' }}
-              />
-              No location specified
-            </label>
-          </div>
-
-        </div>
-
-        <div class="form-group">
-          <label>Duplicate event</label>
-          <div class="form-check">
-            <label class="form-check-label">
-              <input
-                class="form-check-input basic-info"
-                type="checkbox"
-                name="duplicate-event"
-                id="info_duplicate-event"
-                value="yes"
-                {{ 'checked' if 'yes' in curr['duplicate-event'] else '' }}
-              />
-              I have previously coded this exact event
-            </label>
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label for="basic-info-uncertain">Which if any of the "Basic Info" items needs special review?</label>
-          <input 
-            class="form-control"
-            type="text"
-            name="basic-info-uncertain"
-            id="info_basic-info-uncertain"
-            value="{{ curr['basic-info-uncertain'] }}" 
-          />
-        </div>
-
       </form>
     </div>
     
     <div class="tab-pane" id="yes-no_block">
       <form>
-        {% for question, values in yes_no_vars.iteritems() %}
-        <div class="form-group">
-              <label>{{ question|safe }}</label>
-              {% for list_items in values %}
-              <div class="form-check">
-                <label class="form-check-label" id="l_info_{{ list_items[0] }}">
-                  <input type="checkbox" id="info_{{ list_items[0] }}" value="{{ list_items[0] }}" {{ 'checked' if curr[list_items[0]] and (curr[list_items[0]] == 'yes' or curr[list_items[0]][0] =='yes') else '' }} /> {{ list_items[1]|safe }}
-                </label>
-              </div>
-              {% endfor %}
-        </div>
-        {% endfor %}
-
-        <div class="form-group">
-          <label for="yesno-uncertain">Which if any of the "Yes/No" items needs special review?</label>
-          <input class="form-control" type="text" name="yesno-uncertain" id="info_yesno-uncertain" value="{{ curr['yesno-uncertain'] }}" />
-        </div>
-
+	<div class="form-group">
+          <label>Is the start date exact or approximate?</label>
+          <div class="form-check">
+            <label class="form-check-label">
+              <input class="form-check-input basic-info" type="radio" name="date-est" id="info_date-est" value="exact" {{ 'checked' if curr['date-est'] == 'exact' else '' }} /> Exact
+            </label>
+          </div>
+	  
+          <div class="form-check">
+            <label class="form-check-label">
+              <input class="form-check-input basic-info" type="radio" name="date-est" id="info_date-est" value="approximate" {{ 'checked' if curr['date-est'] == 'approximate' else '' }} /> Approximate
+            </label>
+          </div>
+          <p></p>
+          <label>Does this event span one day or more than one day?</label>
+          <div class="form-check">
+            <label class="form-check-label">
+              <input class="form-check-input basic-info" type="radio" name="duration" id="info_duration" value="one" {{ 'checked' if curr['duration'] == 'one' else '' }} /> One
+            </label>              
+          </div>
+          <div class="form-check">
+            <label class="form-check-label">
+              <input class="form-check-input basic-info" type="radio" name="duration" id="info_duration" value="more-than-one" {{ 'checked' if curr['duration'] == 'more-than-one' else '' }} /> More than one
+            </label>            
+          </div>
+	</div>
+	{% for question, values in yes_no_vars.iteritems() %}
+	<div class="form-group">
+          <label>{{ question|safe }}</label>
+          {% for list_items in values %}
+          <div class="form-check">
+            <label class="form-check-label" id="l_info_{{ list_items[0] }}">
+              <input type="checkbox" id="info_{{ list_items[0] }}" value="{{ list_items[0] }}" {{ 'checked' if curr[list_items[0]] and (curr[list_items[0]] == 'yes' or curr[list_items[0]][0] =='yes') else '' }} /> {{ list_items[1]|safe }}
+            </label>
+          </div>
+          {% endfor %}
+	</div>
+	{% endfor %}
       </form>
     </div>
 
     <div class="tab-pane" id="textselect_block">
-      <div class="form-group">
-        <span class="instructions">Highlight text and click <a class="glyphicon glyphicon-plus"></a> for the relevant category.</span>
-        {% for k,v in vars %}
-        <div id="block_{{ k }}" class="varblock">
-          <div class="vartitle">
-            <span>{{ v }}</span> 
-            <a id="collapse-down_{{ k }}" class="glyphicon glyphicon-chevron-down" style="display:none;"></a>
-            <a id="collapse-up_{{ k }}" class="glyphicon glyphicon-chevron-up"></a>
-            <a id="add_{{ k }}" class="glyphicon glyphicon-plus"></a>
-          </div>
-          <div id="list_{{ k }}" class="varlist"></div>
+      <span class="instructions">Highlight text and click <a class="glyphicon glyphicon-plus"></a> for the relevant category.</span>
+      {% for k,v in vars %}
+      <div id="block_{{ k }}" class="varblock">
+        <div class="vartitle">
+          <span>{{ v }}</span> 
+          <a id="collapse-down_{{ k }}" class="glyphicon glyphicon-chevron-down" style="display:none;"></a>
+          <a id="collapse-up_{{ k }}" class="glyphicon glyphicon-chevron-up"></a>
+          <a id="add_{{ k }}" class="glyphicon glyphicon-plus"></a>
         </div>
-        {% endfor %}
+        <div id="list_{{ k }}" class="varlist"></div>
       </div>
+      {% endfor %}
 
-      <div class="form-group">
-        <label for="textselect-uncertain">Which if any of the "Text Select" items needs special review?</label>
-        <input class="form-control" type="text" name="textselect-uncertain" id="info_textselect-uncertain" value="{{ curr['textselect-uncertain'] }}" />
-      </div>
-
+      <label for="persons-freeform">Persons Freeform</label>
+      <textarea class="form-control form-control-sm" name="persons-freeform" id="info_persons-freeform" 
+        placeholder="e.g. Name1 / Title1 / Institution1">{{ curr['persons-freeform']|safe }}</textarea>
     </div> <!-- tab-pane --> 
+
+    <div class="tab-pane" id="preset_block">
+      <div class="form">
+	{% for k,v in v1 %}
+	<input type="radio" name="varevent" id="varevent_{{ k }}" value="{{ k }}" /> <label for="varevent_{{ k }}" id="l_varevent_{{ k }}">{{ v }}</label><br />
+	<div class="options preset-scrollable" id="options_{{ k }}">
+	  {% for option in opts[k] %}
+          <div class="form-check">
+            <label class="form-check-label">
+              <input class="form-check-input" type="checkbox" id="dd_{{ k }}_{{ option|hashcode }}" {{ 'checked' if option in curr[k] else '' }} value="{{ option }}" /> {{ option }}
+            </label>
+          </div>
+	  {% endfor %}
+	</div>      
+	{% endfor %}
+      </div>
+    </div>
 
   </div> <!-- tab-content -->
   <button type="submit" class="btn btm-primary" id="save">Save</button>

@@ -12,9 +12,11 @@
 	    <table class="table table-condensed table-striped" id="list">
 	      <thead>
 		<tr>
-		  <th>&nbsp;</th>
-		  <th class="col-xs-8">Title</th>
-		  <th class="col-xs-2">Last updated</th>
+		  <th class="col-xs-1">&nbsp;</th>
+		  <th class="col-xs-5">Title</th>
+      <th class="col-xs-4">Publication</th>
+      <th class="col-xs-1">Publication date</th>
+		  <th class="col-xs-1">Last updated</th>
 		</tr>
 	     </thead>
 	     <tbody>
@@ -27,40 +29,42 @@
                  {% elif pn == 'ec' %}
                  <td><a href="{{ url_for('eventCreator', aid = aq.article_id) }}" target="_blank">{{ aq.article_id }}</a></th>
                  {% endif %}
-		 <td>{{ am.title }}</td>
+		 <td>{{ am.title|safe }}</td>
+     <td>{{ am.publication|safe }}</td>
+     <td>{{ am.pub_date }}</td>
 		 <td>{{ aq.coded_dt.strftime('%Y-%m-%d %H:%M:%S') if aq.coded_dt else '' }}</td>
               </tr>
               {% endfor %}
             </tbody>
 	        </table>
           {% macro render_pagination(pagination) %}
-                  <ul class="pagination">
-                    <li>
-                      <a href="{{ url_for_other_page(pagination.page - 1)
-                        }}" aria-label="Previous">
-                        <span aria-hidden="true">&laquo;</span>
-                      </a>
-                    </li>
-                    {%- for page in pagination.iter_pages() %}
-                      {% if page %}
-                        {% if page != pagination.page %}
-                          <li><a href="{{ url_for_other_page(page=page) }}">{{ page }}</a></li>
-                        {% else %}
-                         <li class="active"><a href="#">{{ page }}<span class="sr-only"></span></a></li>
-                        {% endif %}
-                      {% else %}
-                        <li><span class=ellipsis>…</span></li>
-                      {% endif %}
-                    {%- endfor %}
-                    {% if pagination.has_next %}
-                    <li>
-                      <a href="{{ url_for_other_page(pagination.page + 1)
-                        }}" aria-label="Next">
-                        <span aria-hidden="true">&raquo;</span>
-                      </a>
-                    </li>
+              <ul class="pagination">
+                <li>
+                  <a href="{{ url_for_other_page(pagination.page - 1)
+                    }}" aria-label="Previous">
+                    <span aria-hidden="true">&laquo;</span>
+                  </a>
+                </li>
+                {%- for page in pagination.iter_pages() %}
+                  {% if page %}
+                    {% if page != pagination.page %}
+                      <li><a href="{{ url_for_other_page(page=page) }}">{{ page }}</a></li>
+                    {% else %}
+                      <li class="active"><a href="#">{{ page }}<span class="sr-only"></span></a></li>
                     {% endif %}
-                </ul>
+                  {% else %}
+                    <li><span class=ellipsis>…</span></li>
+                  {% endif %}
+                {%- endfor %}
+                {% if pagination.has_next %}
+                <li>
+                  <a href="{{ url_for_other_page(pagination.page + 1)
+                    }}" aria-label="Next">
+                    <span aria-hidden="true">&raquo;</span>
+                  </a>
+                </li>
+                {% endif %}
+            </ul>
           {% endmacro %}
 
           <!-- <nav>{{ render_pagination(pagination) }}</nav> -->

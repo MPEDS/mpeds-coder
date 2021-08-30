@@ -44,6 +44,9 @@ import pytz
 from flask import Flask, request, session, g, redirect, url_for, abort, make_response, render_template, flash, jsonify, Response, stream_with_context
 from flask_login import LoginManager, login_user, logout_user, current_user, login_required
 
+## jinja
+import jinja2
+
 ## article assignment library
 import assign_lib
 
@@ -77,6 +80,15 @@ def ordered_load(stream, Loader=yaml.Loader, object_pairs_hook=OrderedDict):
 # create our application
 app = Flask(__name__)
 app.config.from_pyfile('config.py')
+
+# customize template path
+# copy-pasta from https://stackoverflow.com/questions/13598363/how-to-dynamically-select-template-directory-to-be-used-in-flask
+if 'ADDITIONAL_TEMPLATE_DIR' in app.config and app.config.get('ADDITIONAL_TEMPLATE_DIR'):
+    template_loader = jinja2.ChoiceLoader([
+        jinja2.FileSystemLoader([app.config['ADDITIONAL_TEMPLATE_DIR']]),
+        app.jinja_loader])
+    app.jinja_loader = template_loader
+
 
 ## login stuff
 lm  = LoginManager()
@@ -134,18 +146,17 @@ vars.extend(v3[:])
 sv = ['comments', 'protest', 'multi', 'nous', 'ignore']
 
 ## yaml for yes/no variables
-yes_no_vars = yaml.load(open(app.config['WD'] + '/yes-no.yml', 'r'))
+yes_no_vars = yaml.load(open(app.config['WD'] + '/yes-no.yaml', 'r'))
 
 ## yaml for states/provinces/territories
-state_and_territory_vals = ordered_load(open(app.config['WD'] + '/states.yaml', 'r'))
-#state_and_territory_vals = OrderedDict([('b', 2), ('a', 1), ('c', 3)])
+if app.config['USE_STATES_AND_TERR']:
+    state_and_territory_vals = ordered_load(open(app.config['WD'] + '/states.yaml', 'r'))
+    #state_and_territory_vals = OrderedDict([('b', 2), ('a', 1), ('c', 3)])
+else:
+    state_and_territory_vals = dict()
 
 ## mark the single-valued items
-event_creator_single_value = ['article-desc', 'desc', 'start-date', 'end-date', 
-    'article-uncertain',
-    'location', 'duration', 'date-est',
-    'state', 'city', 'other-location', 
-    'basic-info-uncertain', 'yesno-uncertain', 'textselect-uncertain']
+event_creator_single_value = app.config['SINGLE_VALUE_VARS']
 
 event_creator_single_value.extend([[x[0] for x in v] for k, v in yes_no_vars.iteritems()])
 
@@ -205,8 +216,12 @@ def loadSolr(solr_id):
 
 ## prep any article for display
 def prepText(article):
-    fn    = article.filename
-    db_id = article.db_id
+    fn                 = article.filename
+    db_id              = article.db_id
+    atitle             = article.title
+    pub_date           = article.pub_date
+    publication        = article.publication
+    fulltext           = article.text
 
     metawords = ['DATE', 'PUBLICATION', 'LANGUAGE', 'DATELINE', 'SECTION',
     'EDITION', 'LENGTH', 'DATE', 'SEARCH_ID', 'Published', 'By', 'AP', 'UPI']
@@ -218,9 +233,13 @@ def prepText(article):
     paras = []
     path  = app.config['DOC_ROOT'] + fn
 
-    filename = str('INTERNAL_ID: %s' % fn)
+    filename = str('INTERNAL_ID: %s' % fn.encode('utf8'))
 
-    if app.config['SOLR'] == True:
+    if app.config['STORE_ARTICLES_INTERNALLY'] == True:
+        title = atitle
+        meta = [publication, pub_date, db_id]
+        paras = fulltext.split('<br/>')
+    elif app.config['SOLR'] == True:
         title, meta, paras = loadSolr(db_id)
         if title == 0:
             title = "Cannot find article in Solr."
@@ -292,6 +311,9 @@ def prepText(article):
             if p0 == paras[1]:
                 del paras[0]
 
+    ## remove HTML from every paragraph
+    paras = [re.sub(r'<[^>]*>', '', x) for x in paras]
+             
     ## paste together paragraphs, give them an ID
     all_paras = ""
     for i, text in enumerate(paras):
@@ -413,14 +435,10 @@ def load_user(id):
 
 ## views
 @app.route('/')
+@app.route('/index')
 @login_required
 def index():
     return render_template("index.html")
-
-@app.route('/codebook')
-@login_required
-def codebook():
-    return render_template("codebook.html")
 
 #####
 ##### Coding pages
@@ -873,7 +891,12 @@ def admin():
     pubs  = []
 
     ## get the available publications
-    if app.config['SOLR']:
+    if app.config['STORE_ARTICLES_INTERNALLY']:
+        pubquery = db_session.query(ArticleMetadata.publication).\
+                   distinct().\
+                   order_by(ArticleMetadata.publication)
+        pubs = [row.publication for row in pubquery]
+    elif app.config['SOLR']:
         url = '{}/select?q=Database:"University%20Wire"&rows=0&wt=json'.format(app.config['SOLR_ADDR'])
         fparams = 'facet=true&facet.field=PUBLICATION&facet.limit=1000'
 
@@ -1001,9 +1024,9 @@ def coderStats():
 @app.route('/publications')
 @app.route('/publications/<sort>')
 @login_required
-def publications(sort = 'tbc'):
+def publications(db):
     """
-      Geenerate list of all publications and all articles remaining. 
+      Generate list of all publications and all articles remaining. 
     """
     if current_user.authlevel < 3:
         return redirect(url_for('index'))
@@ -1019,13 +1042,13 @@ def publications(sort = 'tbc'):
     (
     SELECT SUBSTRING_INDEX(am.db_id, '_', 1) as publication, COUNT(*) AS in_queue
     FROM article_metadata am
-    WHERE am.db_name = 'uwire' AND am.id IN (SELECT article_id FROM event_creator_queue)
+    WHERE am.db_name = '%s' AND am.id IN (SELECT article_id FROM event_creator_queue)
     GROUP BY 1
 ) num RIGHT JOIN
 (
     SELECT SUBSTRING_INDEX(am.db_id, '_', 1) as publication, COUNT(*) AS total
     FROM article_metadata am
-    WHERE db_name = 'uwire'
+    WHERE db_name = '%s'
     GROUP BY 1
 ) dem ON num.publication = dem.publication
 ORDER BY to_be_coded DESC, total DESC
@@ -1113,14 +1136,14 @@ def userArticleListAdmin(coder_id, is_coded, pn, page = 1):
 
 
 ## generate report CSV file and store locally/download
-@app.route('/_generate_coder_stats')
+@app.route('/_generate_coder_stats', methods=['POST'])
 @login_required
 def generateCoderAudit():
     if current_user.authlevel < 3:
         return redirect(url_for('index'))
 
-    pn = request.args.get('pn')
-    action = request.args.get('action')
+    pn = request.form['pn']
+    action = request.form['action']
 
     # last_month = dt.datetime.now(tz = central) - dt.timedelta(weeks=4)
     users = {u.id: u.username for u in db_session.query(User).all()}
@@ -1190,7 +1213,7 @@ def generateCoderAudit():
         response.headers["mime-type"] = "text/csv"
         return response
     elif action == 'save':
-        filename = '%s/coder-table_%s.csv' % (app.config['WD'], dt.datetime.now().strftime('%Y-%m-%d'))
+        filename = '%s/exports/coder-table_%s.csv' % (app.config['WD'], dt.datetime.now().strftime('%Y-%m-%d_%H%M%S'))
         df.to_csv(filename, encoding = 'utf-8', index = False)
         return jsonify(result={"status": 200, "filename": filename})
     else:
@@ -1200,14 +1223,14 @@ def generateCoderAudit():
 ##### Internal calls
 #####
 
-@app.route('/_add_article_code/<pn>')
+@app.route('/_add_article_code/<pn>', methods=['POST'])
 @login_required
 def addArticleCode(pn):
     """ Adds a record to article coding table. """
-    aid  = int(request.args.get('article'))
-    var  = request.args.get('variable')
-    val  = request.args.get('value')
-    text = request.args.get('text')
+    aid  = int(request.form['article'])
+    var  = request.form['variable']
+    val  = request.form['value']
+    text = request.form.get('text')
     aqs  = []
     now  = dt.datetime.now(tz = central).replace(tzinfo = None)
 
@@ -1242,14 +1265,13 @@ def addArticleCode(pn):
     return make_response("", 200)
 
 
-@app.route('/_del_article_code/<pn>')
+@app.route('/_del_article_code/<pn>', methods=['POST'])
 @login_required
 def delArticleCode(pn):
     """ Deletes a record from article coding table. """
-    article  = request.args.get('article')
-    variable = request.args.get('variable')
-    value    = request.args.get('value')
-
+    article  = request.form['article']
+    variable = request.form['variable']
+    value    = request.form['value']
     if pn == 'ec':
         a = db_session.query(CoderArticleAnnotation).filter_by(
             article_id = article,
@@ -1271,16 +1293,16 @@ def delArticleCode(pn):
         return make_response("", 404)
 
 
-@app.route('/_change_article_code/<pn>')
+@app.route('/_change_article_code/<pn>', methods=['POST'])
 @login_required
 def changeArticleCode(pn):
     """ 
         Changes a radio button or text input/area by removing all prior
         values, adds one new one.
     """
-    article  = request.args.get('article')
-    variable = request.args.get('variable')
-    value    = request.args.get('value')
+    article  = request.form['article']
+    variable = request.form['variable']
+    value    = request.form['value']
 
     ## delete all prior values
     a = db_session.query(CoderArticleAnnotation).filter_by(
@@ -1302,14 +1324,14 @@ def changeArticleCode(pn):
     return jsonify(result={"status": 200})
 
 
-@app.route('/_add_code/<pn>')
+@app.route('/_add_code/<pn>', methods=['POST'])
 @login_required
 def addCode(pn):
-    aid  = int(request.args.get('article'))
-    var  = request.args.get('variable')
-    val  = request.args.get('value')
-    ev   = request.args.get('event')
-    text = request.args.get('text')
+    aid  = int(request.form['article'])
+    var  = request.form['variable']
+    val  = request.form['value']
+    ev   = request.form['event']
+    text = request.form.get('text')
     aqs  = []
     now  = dt.datetime.now(tz = central).replace(tzinfo = None)
 
@@ -1378,14 +1400,40 @@ def addCode(pn):
     return make_response("", 200)
 
 
-@app.route('/_del_code/<pn>')
+@app.route('/_del_event', methods=['POST'])
+@login_required
+def delEvent():
+    """ Delete an event. """
+    # if current_user.authlevel < 2:
+    #     return redirect(url_for('index'))
+
+    eid = int(request.form['event'])
+    pn  = request.form['pn'];
+
+    model = None
+    if pn == '2':
+        model = CodeSecondPass
+    elif pn == 'ec':
+        model = CodeEventCreator
+    else:
+        return make_response("Invalid model.", 404)
+
+    db_session.query(model).filter_by(event_id = eid).delete()
+    db_session.query(Event).filter_by(id = eid).delete()
+
+    db_session.commit()
+
+    return make_response("Delete succeeded.", 200)
+
+
+@app.route('/_del_code/<pn>', methods=['POST'])
 @login_required
 def delCode(pn):
     """ Deletes a record from coding tables. """
-    article  = request.args.get('article')
-    variable = request.args.get('variable')
-    value    = request.args.get('value')
-    event    = request.args.get('event')
+    article  = request.form['article']
+    variable = request.form['variable']
+    value    = request.form['value']
+    event    = request.form['event']
 
     if False:
         pass
@@ -1415,28 +1463,30 @@ def delCode(pn):
     else:
         return make_response("Invalid model", 404)
 
-    if len(a) > 0:
+    if len(a) == 1:
         for o in a:
             db_session.delete(o)
 
         db_session.commit()
 
         return jsonify(result={"status": 200})
+    elif len(a) > 1:
+        return make_response(" Leave duplicates in so we can collect data on this bug.", 500)
     else:
         return make_response("", 404)
 
 
-@app.route('/_change_code/<pn>')
+@app.route('/_change_code/<pn>', methods=['GET', 'POST'])
 @login_required
 def changeCode(pn):
     """ 
         Changes a radio button by removing all prior values, adds one new one. 
         Only implemented for event creator right now.
     """
-    article  = request.args.get('article')
-    variable = request.args.get('variable')
-    value    = request.args.get('value')
-    event    = request.args.get('event')
+    article  = request.form['article']
+    variable = request.form['variable']
+    value    = request.form['value']
+    event    = request.form['event']
 
     ## delete all prior values
     a = db_session.query(CodeEventCreator).filter_by(
@@ -1459,36 +1509,10 @@ def changeCode(pn):
     return jsonify(result={"status": 200})
 
 
-@app.route('/_del_event')
-@login_required
-def delEvent():
-    """ Delete an event. """
-    # if current_user.authlevel < 2:
-    #     return redirect(url_for('index'))
-
-    eid = int(request.args.get('event'))
-    pn  = request.args.get('pn');
-
-    model = None
-    if pn == '2':
-        model = CodeSecondPass
-    elif pn == 'ec':
-        model = CodeEventCreator
-    else:
-        return make_response("Invalid model.", 404)
-
-    db_session.query(model).filter_by(event_id = eid).delete()
-    db_session.query(Event).filter_by(id = eid).delete()
-
-    db_session.commit()
-
-    return make_response("Delete succeeded.", 200)
-
-
-@app.route('/_mark_ec_done')
+@app.route('/_mark_ec_done', methods=['POST'])
 @login_required
 def markECDone():
-    article_id = request.args.get('article_id')
+    article_id = request.form['article_id']
     coder_id   = current_user.id
     now        = dt.datetime.now(tz = central).replace(tzinfo = None)
 
@@ -1502,13 +1526,13 @@ def markECDone():
     return jsonify(result={"status": 200})
 
 
-@app.route('/_mark_sp_done')
+@app.route('/_mark_sp_done', methods=['POST'])
 @login_required
 def markSPDone():
     if current_user.authlevel < 2:
         return redirect(url_for('index'))
 
-    article_id = request.args.get('article_id')
+    article_id = request.form['article_id']
     coder_id   = current_user.id
     now        = dt.datetime.now(tz = central).replace(tzinfo = None)
 
@@ -1586,9 +1610,11 @@ def getEvents():
         elif pn =='ec':
             if len(rvar['desc']) > 0 and len(rvar['desc'][0]) > 0:
                 ev['repr'] = ", ".join(rvar['desc'])
-                ## No longer necessary with article-level description
-            #elif len(rvar['article-desc']) > 0 and len(rvar['article-desc'][0]) > 0:
-                #ev['repr'] = "(no event description): " + ", ".join(rvar['article-desc'])
+            ## No longer necessary with article-level description
+            elif (len(rvar['article-desc']) > 0
+                  and len(rvar['article-desc'][0]) > 0
+                  and not app.config['ANNOTATE_ARTICLE_LEVEL']):
+                ev['repr'] = "(no event description): " + ", ".join(rvar['article-desc'])
             else:
                 ev['repr'] = "(no event description)"
 
@@ -1925,13 +1951,13 @@ def highlightVar():
 ##### ADMIN TOOLS
 #####
 
-@app.route('/_add_user')
+@app.route('/_add_user', methods=['POST'])
 @login_required
 def addUser():
     if current_user.authlevel < 3:
         return redirect(url_for('index'))
 
-    username = request.args.get('username')
+    username = request.form['username']
 
     ## validate
     if not re.match(r'[A-Za-z0-9_]+', username):
@@ -1954,19 +1980,19 @@ def addUser():
     return jsonify(result={"status": 200, "password": password})
 
 
-@app.route('/_assign_articles')
+@app.route('/_assign_articles', methods=['POST'])
 @login_required
 def assignArticles():
     if current_user.authlevel < 3:
         return redirect(url_for('index'))
 
-    num     = request.args.get('num')
-    db_name = request.args.get('db')
-    pub     = request.args.get('pub')
-    ids     = request.args.get('ids')
-    users   = request.args.get('users')
-    same    = request.args.get('same')
-    group_size = request.args.get('group_size')
+    num     = request.form['num']
+    db_name = request.form['db']
+    pub     = request.form['pub']
+    ids     = request.form['ids']
+    users   = request.form['users']
+    same    = request.form['same']
+    group_size = request.form['group_size']
     
     ## input validations
     if num == '' and ids == '':
@@ -2062,15 +2088,15 @@ def assignArticles():
     return make_response('%d articles assigned successfully.' % n_added, 200)
 
 
-@app.route('/_transfer_articles')
+@app.route('/_transfer_articles', methods=['POST'])
 @login_required
 def transferArticles():
     if current_user.authlevel < 3:
         return redirect(url_for('index'))
 
-    num        = request.args.get('num')
-    from_users = request.args.get('from_users')
-    to_users   = request.args.get('to_users')
+    num        = request.form['num']
+    from_users = request.form['from_users']
+    to_users   = request.form['to_users']
 
     try:
         num = int(num)
