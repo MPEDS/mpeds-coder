@@ -1125,8 +1125,7 @@ def userArticleListAdmin(coder_id, is_coded, pn, page = 1):
         pagination = pagination)
 
 
-## generate report CSV file and store locally/download
-@app.route('/_generate_coder_stats', methods=['POST'])
+## generate report CSV file and store locally/download@app.route('/_generate_coder_stats', methods=['POST'])
 @login_required
 def generateCoderAudit():
     if current_user.authlevel < 3:
