@@ -107,13 +107,17 @@
         <div id="list_{{ k }}" class="varlist"></div>
       </div>
       {% endfor %}
+
+      <label for="persons-freeform">Persons Freeform</label>
+      <textarea class="form-control form-control-sm" name="persons-freeform" id="info_persons-freeform" 
+        placeholder="e.g. Name1 / Title1 / Institution1">{{ curr['persons-freeform']|safe }}</textarea>
     </div> <!-- tab-pane --> 
 
     <div class="tab-pane" id="preset_block">
       <div class="form">
 	{% for k,v in v1 %}
 	<input type="radio" name="varevent" id="varevent_{{ k }}" value="{{ k }}" /> <label for="varevent_{{ k }}" id="l_varevent_{{ k }}">{{ v }}</label><br />
-	<div class="options" id="options_{{ k }}">
+	<div class="options preset-scrollable" id="options_{{ k }}">
 	  {% for option in opts[k] %}
           <div class="form-check">
             <label class="form-check-label">

@@ -4,7 +4,10 @@
                   border: 1px solid #AACBE2; }
 .error          { background: #F0D6D6; padding: 0.5em; }
 
-.sticky { width:250px; }
+.control-panel {
+	max-height: calc(100vh - 80px);
+	overflow-y: auto;
+}
 
 label, select, option, input {
 	font-size: 0.85em;
@@ -172,6 +175,11 @@ label.form-check-label {
 	color: #777;
 	font-weight: normal;
 	margin: 0px;
+}
+
+.preset-scrollable {
+    height: 350px;
+    overflow-y:auto;
 }
 
 .varblock p:hover {
