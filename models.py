@@ -1,5 +1,6 @@
-from sqlalchemy import Boolean, Column, DateTime, Integer, String, Unicode, ForeignKey, UniqueConstraint, Text, Date, UnicodeText
-from sqlalchemy.orm import relationship, backref, deferred
+
+from sqlalchemy import Boolean, Column, Date, DateTime, Integer, String, Unicode, ForeignKey, UniqueConstraint, Text, UnicodeText
+from sqlalchemy.orm import relationship, backref
 from flask_login import UserMixin
 from database import Base
 import datetime as dt
@@ -7,6 +8,27 @@ import pytz
 from pytz import timezone
 
 central = timezone('US/Central')
+
+class CoderArticleAnnotation(Base):
+    __tablename__ = 'coder_article_annotation'
+    id         = Column(Integer, primary_key=True)
+    article_id = Column(Integer, ForeignKey('article_metadata.id'), nullable = False)
+    variable   = Column(String(100), nullable = False)
+    value      = Column(Text, nullable = False)
+    text       = Column(UnicodeText)
+    coder_id   = Column(Integer, ForeignKey('user.id'))
+    timestamp  = Column(DateTime)
+
+    def __init__(self, article_id, variable, value, coder_id, text = None):
+        self.article_id = article_id
+        self.variable   = variable
+        self.value      = value
+        self.text       = text
+        self.coder_id   = coder_id
+        self.timestamp  = dt.datetime.now(tz = central).replace(tzinfo = None)
+
+    def __repr__(self):
+        return '<CoderArticleAnnotation %r>' % (self.id)
 
 class CodeFirstPass(Base):
     __tablename__ = 'coder_first_pass'
@@ -58,8 +80,8 @@ class CodeEventCreator(Base):
     article_id = Column(Integer, ForeignKey('article_metadata.id'), nullable = False)
     event_id   = Column(Integer, ForeignKey('event.id'), nullable = False)
     variable   = Column(String(100), nullable = False)
-    value      = Column(String(2000), nullable = False)
-    text       = Column(Unicode(2000))
+    value      = Column(Text, nullable = False)
+    text       = Column(UnicodeText)
     coder_id   = Column(Integer, ForeignKey('user.id'))
     timestamp  = Column(DateTime)
 

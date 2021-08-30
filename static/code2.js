@@ -17,7 +17,7 @@ var selectCheckbox = function(e) {
   }
 
   req = $.ajax({
-    type: "GET",
+    type: "POST",
     url:  $SCRIPT_ROOT + '/_' + action + '_code/2',
     data: {
       article:  aid,
@@ -85,7 +85,7 @@ var modifyEvent = function(e) {
       // save comments
       var comments = $('#eventblock_' + event_id + ' #comments').val();
       req = $.ajax({
-        type: "GET",
+        type: "POST",
         url:  $SCRIPT_ROOT + '/_add_code/2',
         data: {
           article:  aid,
@@ -130,7 +130,7 @@ var deleteEvent = function(e) {
   }
 
   req = $.ajax({
-    type: "GET",
+    type: "POST",
     url:  $SCRIPT_ROOT + '/_del_event',
     data: {
       event: eid
@@ -220,7 +220,7 @@ var addCode = function(e) {
   }
 
   req = $.ajax({
-    type: "GET",
+    type: "POST",
     url:  $SCRIPT_ROOT + '/_add_code/2',
     data: {
       article:  aid,
@@ -263,7 +263,7 @@ $(function(){ // document ready
   $('.mark-done').each(function() {
     $(this).click(function() {
       var req = $.ajax({
-          type: "GET",
+          type: "POST",
           url:  $SCRIPT_ROOT + '/_mark_sp_done',
           data: {
             article_id: aid
@@ -292,7 +292,7 @@ $(function(){ // document ready
     }
 
     req = $.ajax({
-      type: "GET",
+      type: "POST",
       url:  $SCRIPT_ROOT + '/_add_code/2',
       data: {
         article:  aid,
@@ -305,7 +305,7 @@ $(function(){ // document ready
       $('#flash-error').hide();
 
       var req = $.ajax({
-          type: "GET",
+          type: "POST",
           url:  $SCRIPT_ROOT + '/_mark_sp_done',
           data: {
             article_id: aid
