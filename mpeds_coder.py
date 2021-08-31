@@ -51,9 +51,9 @@ from sqlalchemy.sql import select
 ## app-specific
 from database import db_session
 
-from models import ArticleMetadata, ArticleQueue, CanonicalEvent, CanonicalEventLink, CoderArticleAnnotation, \
-CodeFirstPass, CodeSecondPass, CodeEventCreator, \
-Event, EventMetadata, EventCreatorQueue, RecentEvent, RecentCanonicalEvent, SecondPassQueue, User
+from models import ArticleMetadata, ArticleQueue, CanonicalEvent, CanonicalEventLink, \
+    CoderArticleAnnotation, CodeFirstPass, CodeSecondPass, CodeEventCreator, \
+    Event, EventMetadata, EventCreatorQueue, RecentEvent, RecentCanonicalEvent, SecondPassQueue, User
 
 ##### Enable OrderedDict with PyYAML
 ##### Copy-pasta from https://stackoverflow.com/a/21912744 on 2019-12-12
@@ -613,13 +613,13 @@ def adj():
     #####
     canonical_event['key'] = canonical_event_key
 
-    rs = db_session.query(CanonicalEvent, CanonicalEventLink, CodeEventCreator).\
+    ces = db_session.query(CanonicalEvent, CanonicalEventLink, CodeEventCreator).\
         join(CanonicalEventLink, CanonicalEvent.id == CanonicalEventLink.canonical_id).\
         join(CodeEventCreator, CanonicalEventLink.cec_id == CodeEventCreator.id).\
         filter(CanonicalEvent.key == canonical_event_key).all()
 
     ## we're only interested in the CEC data
-    for _, _, cec  in rs:
+    for _, _, cec in ces:
         ## create a new list if it doesn't exist
         if not canonical_event.get(cec.variable):
             canonical_event[cec.variable] = []
@@ -631,9 +631,18 @@ def adj():
             canonical_event[cec.variable].append(cec.value)
 
     ## and some of the CE data
-    canonical_event['key'] = rs[0][0].key
-    canonical_event['notes'] = rs[0][0].notes
-    canonical_event['status'] = rs[0][0].status
+    canonical_event['key'] = ces[0][0].key
+    canonical_event['notes'] = ces[0][0].notes
+    canonical_event['status'] = ces[0][0].status
+
+    #####
+    ## Recent events
+    #####
+
+    ## Get five recent events
+    recent_events = [x[0] for x in db_session.query(EventMetadata, RecentEvent).\
+        join(EventMetadata, EventMetadata.event_id == RecentEvent.event_id).\
+        order_by(desc(RecentEvent.last_accessed)).limit(5).all()]
 
     #####
     ## Get the canonical event in the left pane 
@@ -646,14 +655,6 @@ def adj():
     # grid_events = db_session.query(CodeEventCreator).\
     #     filter(CodeEventCreator.event_id.in_(grid_query)).\
     #     join(EventMetadata, CodeEventCreator.event_id == EventMetadata.event_id).all()
-
-    ## get the most recent events
-    ## TK: Fix this
-    recent_events = []
-    # recent_events = db_session.query(RecentEvent).\
-    #     join(EventMetadata.event_id).\
-    #     order_by(desc(RecentEvent.last_accessed)).\
-    #     limit(10)
 
     ## assess how wide the columns should be
     grid_width = None
@@ -678,11 +679,12 @@ def adj():
 
     return render_template("adj.html", 
         events        = events, 
-        recent_events = recent_events,
         grid_query    = grid_query,
         grid_events   = grid_events,
         grid_width    = grid_width,
         grid_vars     = grid_vars,
+        recent_events = recent_events,
+#        recent_canonical_events = recent_canonical_events,
         canonical_event = canonical_event)
 
 

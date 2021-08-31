@@ -122,27 +122,27 @@
                 <div class="subtab-pane" id="cand-search_block">
                     <div class="cand-event-group">                
                         {% for e in events %}
-                        <div class="event-desc" id="cand-event_{{ e }}">
+                        <div class="event-desc" id="cand-event_{{ e.event_id }}">
                             <div class="row">
                                 <div class="col-sm-6">
                                     <b>start_date:</b> {{e.start_date}}</br>
                                     <b>location:</b> {{e.location | safe }}<br/>
                                     <b>title:</b> {{e.title | safe }}<br/>
                                 </div>
-                                <div class="col-sm-3" id="cand-event-metadata_21644">
+                                <div class="col-sm-3">
                                     <b>event_id:</b> {{ e.event_id }}<br/>
                                     <b>article_id:</b> 
                                         <a href="http://cliff.ssc.wisc.edu/campus_protest_dev/event_creator/{{e.article_id}}" 
                                            target="_blank"
                                            title="{{ e.publication }} ({{ e.pub_date }}) --- {{ e.article_desc|safe }}">{{e.article_id}}</a><br/>
                                     <b>coder:</b> {{ e.coder_id }} <br/>
-                                    <!-- {% if e < 21652 %}
+                                </div>
+                                <div class="col-sm-3">
+                                    {% if e.event_id in grid_events.keys() %}
                                         <b class="text-muted">In the expanded view</b> <a href="#" class="glyphicon glyphicon-remove"></a><br/>
                                     {% else %}
-                                    {% endif %} -->
-                                </div>
-                                <div class="col-sm-3" id="cand-event-metadata_21644">
-                                    <b><a href="#">Add to Expand <span class="glyphicon glyphicon-plus"></span></a></b><br/>
+                                        <b><a href="#">Add to Expand <span class="glyphicon glyphicon-plus"></span></a></b><br/>
+                                    {% endif %}
                                 </div>
                             </div>
                             <div class="row">
@@ -175,21 +175,24 @@
                 </div>
                 <div class="subtab-pane" id="cand-recent_block" style="display:none;">
                     <div class="cand-event-group">                
-                        {% for e in (21644, 21646) %}
-                        <div class="event-desc" id="cand-event_{{ e }}">
+                        {% for e in recent_events %}
+                        <div class="event-desc" id="recent-cand-event_{{ e.event_id }}">
                             <div class="row">
-                                <div class="col-sm-8">
-                                    <b>start_date:</b> 2016-05-24</br>
-                                    <b>location:</b> Chicago, Illinois, USA<br/>
-                                    <b>title:</b> Protesters shut down Yiannopoulos speech<br/>
-                                    <b>publication:</b> The Depaulia: DePaul University<br/>
-                                    <b>pub_date:</b> 2016-05-24<br/>
+                                <div class="col-sm-6">
+                                    <b>start_date:</b> {{e.start_date}}</br>
+                                    <b>location:</b> {{e.location | safe }}<br/>
+                                    <b>title:</b> {{e.title | safe }}<br/>
                                 </div>
-                                <div class="col-sm-4" id="cand-event-metadata_21644">
-                                    <b>event_id:</b> {{ e }}<br/>
-                                    <b>article_id:</b> <a href="http://cliff.ssc.wisc.edu/campus_protest_dev/event_creator/6628" target="_blank">6628</a><br/>
-                                    <b>coder:</b> amritpal <br/>
-                                    {% if e < 21652 %}
+                                <div class="col-sm-3">
+                                    <b>event_id:</b> {{ e.event_id }}<br/>
+                                    <b>article_id:</b> 
+                                        <a href="http://cliff.ssc.wisc.edu/campus_protest_dev/event_creator/{{e.article_id}}" 
+                                            target="_blank"
+                                            title="{{ e.publication }} ({{ e.pub_date }}) --- {{ e.article_desc|safe }}">{{e.article_id}}</a><br/>
+                                    <b>coder:</b> {{ e.coder_id }} <br/>
+                                </div>
+                                <div class="col-sm-3">
+                                    {% if e.event_id in grid_events.keys() %}
                                         <b class="text-muted">In the expanded view</b> <a href="#" class="glyphicon glyphicon-remove"></a><br/>
                                     {% else %}
                                         <b><a href="#">Add to Expand <span class="glyphicon glyphicon-plus"></span></a></b><br/>
@@ -198,7 +201,7 @@
                             </div>
                             <div class="row">
                                 <div class="col-sm-12">
-                                    <b>desc:</b> Protesters disrupted an event held by Milo Yiannopoulos. A group of protesters stormed the stage and interrupted Yiannopoulos, blowing whistles, and speaking out against Yiannopoulos. A group of about 100 protesters stood outside the doors of the event. Police were called to the Student Center and arrived soon after, but didn't intervene. Protestors followed Yiannopoulos as he marched around campus to protest the disruption, and continued to be drowned out by noise. <br/>
+                                    <b>desc:</b> {{ e.desc | safe }}<br/>
                                 </div>
                             </div>
                         </div>
@@ -218,27 +221,8 @@
                                        placeholder = "Key..."/>
                             </div>    
                         </div>
-                    </form>                     
-                    <nav aria-label="cand-event-pagination">
-                        <ul class="pagination">
-                          <li class="page-item">
-                            <a class="page-link" href="#" aria-label="Previous">
-                              <span aria-hidden="true">&laquo;</span>
-                              <span class="sr-only">Previous</span>
-                            </a>
-                          </li>
-                          <li class="page-item"><a class="page-link" href="#">1</a></li>
-                          <li class="page-item"><a class="page-link" href="#">2</a></li>
-                          <li class="page-item"><a class="page-link" href="#">3</a></li>
-                          <li class="page-item">
-                            <a class="page-link" href="#" aria-label="Next">
-                              <span aria-hidden="true">&raquo;</span>
-                              <span class="sr-only">Next</span>
-                            </a>
-                          </li>
-                        </ul>
-                    </nav>
-                    <div class="event-desc" id="canonical-event_3">
+                    </form>
+                    <div class="event-desc" id="canonical-event_{{ canonical_event['key'] }}">
                         <div class="row">
                             <div class="col-sm-8">
                                 <b>key: </b> {{ canonical_event['key']|safe }}</br>
@@ -248,7 +232,12 @@
                             <div class="col-sm-4">
                                 <b>Status:</b> {{ canonical_event['status'] }}<br/>
                                 <b>Last edited:</b> {{ canonical_event['last_updated'] }}<br/>
-                                <b><a href="#">Edit <span class="glyphicon glyphicon-pencil"></span></a></b>
+                                <!-- TK: Change the logic such that we check if this is the active canonical event -->
+                                {% if canonical_event['key'] == canonical_event['key'] %}
+                                    <b class="text-muted">Current active event</b> <a href="#" class="glyphicon glyphicon-remove-sign" alt="Remove as active event"></a>
+                                {% else %}
+                                    <b><a href="#">Make active event <span class="glyphicon glyphicon-export"></span></a></b>
+                                {% endif %}
                             </div>
                         </div>
                         <div class="row">
