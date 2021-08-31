@@ -613,7 +613,6 @@ def adj():
     #####
     canonical_event['key'] = canonical_event_key
 
-    ## TK: This doesn't work yet.
     rs = db_session.query(CanonicalEvent, CanonicalEventLink, CodeEventCreator).\
         join(CanonicalEventLink, CanonicalEvent.id == CanonicalEventLink.canonical_id).\
         join(CodeEventCreator, CanonicalEventLink.cec_id == CodeEventCreator.id).\
@@ -636,6 +635,14 @@ def adj():
     canonical_event['notes'] = rs[0][0].notes
     canonical_event['status'] = rs[0][0].status
 
+    #####
+    ## Get the canonical event in the left pane 
+    #####
+    # search_canonical_events = db_session.query(CanonicalEvent, CanonicalEventLink, CodeEventCreator).\
+    #     join(CanonicalEventLink, CanonicalEvent.id == CanonicalEventLink.canonical_id).\
+    #     join(CodeEventCreator, CanonicalEventLink.cec_id == CodeEventCreator.id).\
+    #     filter(CanonicalEvent.key == canonical_event_key).all()
+    
     # grid_events = db_session.query(CodeEventCreator).\
     #     filter(CodeEventCreator.event_id.in_(grid_query)).\
     #     join(EventMetadata, CodeEventCreator.event_id == EventMetadata.event_id).all()

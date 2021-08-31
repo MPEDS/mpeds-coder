@@ -1,7 +1,6 @@
 from sqlalchemy import Column, Date, DateTime, Integer, String, Unicode, ForeignKey, UniqueConstraint, Text, UnicodeText
 from sqlalchemy.orm import relationship, backref
 from flask_login import UserMixin
-from sqlalchemy.orm.relationships import RelationshipProperty
 from database import Base
 import datetime as dt
 from pytz import timezone
@@ -28,28 +27,6 @@ class CoderArticleAnnotation(Base):
 
     def __repr__(self):
         return '<CoderArticleAnnotation %r>' % (self.id)
-
-
-class AdjudicatorEdit(Base):
-    __tablename__ = 'adjudicator_edit'
-    id        = Column(Integer, primary_key=True)
-    coder_id  = Column(Integer, ForeignKey('user.id'))
-    cec_id    = Column(Integer, ForeignKey('coder_event_creator.id'))
-    value     = Column(Text, nullable = False)
-    text      = Column(UnicodeText)
-    timestamp = Column(DateTime)
-
-    UniqueConstraint('coder_id', 'cec_id', name = 'unique1')
-
-    def __init__(self, coder_id, cec_id, value, text = None):
-        self.coder_id  = coder_id
-        self.cec_id    = cec_id
-        self.value     = value
-        self.text      = text
-        self.timestamp = dt.datetime.now(tz = central).replace(tzinfo = None)
-
-    def __repr__(self):
-        return '<AdjudicatorEdit %r>' % (self.id)
 
 
 class CanonicalEvent(Base):
