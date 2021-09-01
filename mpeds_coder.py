@@ -565,6 +565,7 @@ def eventCreator(aid):
 @app.route('/adj')
 @login_required
 def adj():
+    """ Initial rendering for adjudication page."""
     filter = request.form.get('filter')
     sort = request.form.get('sort')
 
@@ -686,6 +687,11 @@ def adj():
         recent_events = recent_events,
 #        recent_canonical_events = recent_canonical_events,
         canonical_event = canonical_event)
+
+
+@app.route('/_add_canonical', methods = ['GET', 'POST'])
+def _add_canonical():
+    return render_template('form-edit.html')
 
 
 class Pagination(object):

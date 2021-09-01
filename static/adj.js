@@ -67,4 +67,35 @@ $(function(){
       $("#adj-pane-event-constructor").removeClass("col-md-12");
       $("#adj-pane-event-constructor").addClass("col-md-6");
     });
+
+    // Modal listeners
+    $('#new_canonical').click(function () {
+      var url = $(this).data('url');
+      $.get(url, function (data) {
+        console.log(data);
+        $('#modal-container .modal-content').html(data);
+        $('#modal-container').modal('show');
+        // $('#submit').click(function (event) {
+        //     event.preventDefault();
+        //     $.post(url, data = $('#ModalForm').serialize(), function (
+        //         data) {
+        //         if (data.status == 'ok') {
+        //             $('#Modal').modal('hide');
+        //             location.reload();
+        //         } else {
+        //             var obj = JSON.parse(data);
+        //             for (var key in obj) {
+        //                 if (obj.hasOwnProperty(key)) {
+        //                     var value = obj[key];
+        //                 }
+        //             }
+        //             $('.help-block').remove()
+        //             $('<p class="help-block">' + value + '</p>')
+        //                 .insertAfter('#' + key);
+        //             $('.form-group').addClass('has-error')
+        //         }
+        //     })
+        // });
+      })
+    });
 });

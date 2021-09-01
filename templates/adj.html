@@ -7,8 +7,17 @@
 <script src="{{ url_for('static', filename='adj.js') }}" type="text/javascript"></script>
 <div class="container-fluid">
   <div class="row">
+    <!-- error flash-->
     <div class="col-sm-12">
         <div class="error" id="flash-error" style="display:none;"></div>
+    </div>
+    <!-- Modal -->
+    <div class="modal fade" id="modal-container" tabindex="-1" role="dialog" aria-labelledby="FormModal" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <!-- Content goes here -->
+            </div>
+        </div>
     </div>
   </div>
   <div class="row">
@@ -297,7 +306,10 @@
     </div>
     <div class="col-sm-7 adj-pane" id="adj-pane-expanded-view">
         <a id="cand-events-show" style="display:none;" href="#">Show Events &raquo;</a>
-        <h4>Expanded Event View | <a href="#">New Canonical Event</a></h4>
+        <h4>Expanded Event View | 
+            <a id="new_canonical" data-toggle="modal" 
+                data-url="{{ url_for('_add_canonical') }}" 
+                data-target="my_modal" herf="#">New Canonical Event</a></h4>
         <div id="expanded-event-view-metadata" class="sticky-top">
             <div class="row expanded-event-variable-group">
                 <div class="col-sm-1 expanded-event-variable-name">metadata</div>
@@ -324,25 +336,19 @@
                 {% endfor %}
                 <!-- The Canonical Event Metadata -->
                 <div class="col-sm-{{ grid_width }} expanded-event-variable-col">
-                    <label>Canonical Event <a class="glyphicon glyphicon-trash" href="#" title="Delete canonical event"></a></label>
-                    <div class="expanded-event-variable expanded-event-variable canonical" id="expanded-event-canonical-key_1">
+                    <label>Canonical Event 
+                        <a class="glyphicon glyphicon-trash" href="#" title="Delete canonical event"></a>
+                        <a class="glyphicon glyphicon-remove-sign" href="#" title="Remove from grid"></a>
+                    </label>
+                    {% for var in ['key', 'notes', 'status'] %}
+                    <div class="expanded-event-variable expanded-event-variable canonical" id="expanded-event-canonical-{{ var }}">
                         <div class="sticky-top data-buttons">
-                            <a class="glyphicon glyphicon-pencil" title="Edit"></a> <a class="glyphicon glyphicon-info-sign" title="Info"></a>
+                            <a class="glyphicon glyphicon-pencil" title="Edit"></a> 
+                            <a class="glyphicon glyphicon-info-sign" title="Info"></a>
                         </div>
-                        <b>Key: </b> {{ canonical_event['key'] }}<br />
+                        <b>{{ var|title }}: </b> {{ canonical_event[var]|safe }}<br />
                     </div>
-                    <div class="expanded-event-variable expanded-event-variable canonical">
-                        <div class="sticky-top data-buttons">
-                            <a class="glyphicon glyphicon-pencil" title="Edit"></a> <a class="glyphicon glyphicon-info-sign" title="Info"></a>
-                        </div>
-                        <b>Notes: </b>{{ canonical_event['notes']|safe }}<br />
-                    </div>
-                    <div class="expanded-event-variable expanded-event-variable canonical">
-                        <div class="sticky-top data-buttons">
-                            <a class="glyphicon glyphicon-pencil" title="Edit"></a> <a class="glyphicon glyphicon-info-sign" title="Info"></a>
-                        </div>
-                        <b>Status: </b>{{ canonical_event['status'] }}<br />
-                    </div>
+                    {% endfor %}
                 </div>
             </div>
         </div>
