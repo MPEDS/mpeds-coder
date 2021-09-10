@@ -292,7 +292,7 @@ class ArticleQueue(Base):
     id         = Column(Integer, primary_key=True)
     article_id = Column(Integer, ForeignKey('article_metadata.id'), nullable = False)
     coder_id   = Column(Integer, ForeignKey('user.id'), nullable = False)
-    coded_dt  = Column(DateTime)
+    coded_dt   = Column(DateTime)
 
     UniqueConstraint('article_id', 'coder_id', name = 'unique1')
 
