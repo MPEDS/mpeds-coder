@@ -30,7 +30,11 @@ var changeSubTab = function(e) {
 
 // MAIN -- document ready 
 $(function(){ 
-    $("#filters_block").show();
+    // Show search block first
+    $("#search_block").show();
+
+    // Turn auto completes on
+    $('.basicAutoComplete').autoComplete();
 
     // Add listener to tab links 
     $(".tablinks").each(function(){
@@ -43,7 +47,7 @@ $(function(){
     });
 
     // hide pane 1 + make other panes bigger
-    $("#cand-events-hide").click(function(){
+    $("#cand-events-hide").click(function() {
       $("#adj-pane-cand-events").hide();
       $("#cand-events-hide").hide();
       $("#cand-events-show").show();
@@ -56,7 +60,7 @@ $(function(){
     });
 
     // hide pane 1 + make other panes bigger
-    $("#cand-events-show").click(function(){
+    $("#cand-events-show").click(function() {
       $("#cand-events-show").hide();
       $("#cand-events-hide").show();
       $("#adj-pane-cand-events").show();
@@ -72,30 +76,35 @@ $(function(){
     $('#new_canonical').click(function () {
       var url = $(this).data('url');
       $.get(url, function (data) {
-        console.log(data);
         $('#modal-container .modal-content').html(data);
         $('#modal-container').modal('show');
-        // $('#submit').click(function (event) {
-        //     event.preventDefault();
-        //     $.post(url, data = $('#ModalForm').serialize(), function (
-        //         data) {
-        //         if (data.status == 'ok') {
-        //             $('#Modal').modal('hide');
-        //             location.reload();
-        //         } else {
-        //             var obj = JSON.parse(data);
-        //             for (var key in obj) {
-        //                 if (obj.hasOwnProperty(key)) {
-        //                     var value = obj[key];
-        //                 }
-        //             }
-        //             $('.help-block').remove()
-        //             $('<p class="help-block">' + value + '</p>')
-        //                 .insertAfter('#' + key);
-        //             $('.form-group').addClass('has-error')
-        //         }
-        //     })
-        // });
+
+        // form submission listener
+        $('#modal-submit').click(function (event) {
+          event.preventDefault();
+          req = $.ajax({
+            type: "POST",
+            url: url.replace('view', 'add'),
+            data: $('#modal-form').serialize()
+          });
+        
+          req.done(function() {
+            $("#modal-flash").text("Added successfully.");
+            $("#modal-flash").removeClass("alert-danger");
+            $("#modal-flash").addClass("alert-success");
+            $("#modal-flash").show();
+
+            // $('#modal-container').modal('hide');
+            location.reload();
+          });
+
+          req.fail(function() {
+            // TK: Replace next line with the response text.
+            $("#modal-flash").text(req.responseText);
+            $("#modal-flash").addClass("alert-danger");
+            $("#modal-flash").show();
+          });
+        });
       })
     });
 });

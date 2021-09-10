@@ -380,7 +380,11 @@ footer {
 	overflow-y: scroll;
 }
 
-span.adj-variable {
+.adj-variable-group .form-row div {
+	margin: 0 -10px;
+}
+
+/* span.adj-variable {
 	display: inline-block;	
 	border: 1px solid #CCC;
 	border-radius: 5px;
@@ -388,7 +392,7 @@ span.adj-variable {
 	padding: 2px;
 	font-size: 0.8em;
 }
-
+ */
 .adj-pane {
 	/* padding-right: 2px; */
 	border-right: 1px solid #CCC;

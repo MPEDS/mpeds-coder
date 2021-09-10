@@ -565,7 +565,7 @@ def eventCreator(aid):
 @app.route('/adj')
 @login_required
 def adj():
-    """ Initial rendering for adjudication page."""
+    """ Rendering for adjudication page."""
     filter = request.form.get('filter')
     sort = request.form.get('sort')
 
@@ -678,8 +678,26 @@ def adj():
     grid_vars.extend([x[0] for x in event_creator_vars])
     grid_vars.extend(['form', 'issue', 'racial-issue', 'target'])
 
+    #####
+    ## Data for search
+    #####
+    filter_fields = [
+        "---",
+        "article_desc",
+        "article_id",
+        "desc",
+        "event_id",
+        "location",
+        "start_date",
+        "end_date",
+        "publication",
+        "pub_date",
+        "title"
+    ]
+
     return render_template("adj.html", 
-        events        = events, 
+        events        = events,
+        filter_fields = filter_fields,
         grid_query    = grid_query,
         grid_events   = grid_events,
         grid_width    = grid_width,
@@ -689,9 +707,32 @@ def adj():
         canonical_event = canonical_event)
 
 
-@app.route('/_add_canonical', methods = ['GET', 'POST'])
-def _add_canonical():
-    return render_template('form-edit.html')
+@app.route('/modal_edit/<form_type>/<mode>', methods = ['GET', 'POST'])
+@login_required
+def modal_edit(form_type, mode = None, id = None):
+    """ Handler for modal display and form submission. """
+    if mode == 'add':
+        key   = request.form['canonical-event-key']
+        notes = request.form['canonical-event-notes']
+
+    if mode == 'add':
+        ## Key already exists
+        qs = db_session.query(CanonicalEvent).filter(CanonicalEvent.key == key).all()
+        if len(qs) > 0: 
+            return make_response("Key already exists.", 400)
+        
+        ## Otherwise, add with no issues
+        db_session.add(CanonicalEvent(coder_id = current_user.id, key = key, notes = notes))
+        db_session.commit()
+
+        return jsonify(result={"status": 200}) 
+    elif mode == 'edit':
+        ### TK: add logic which loads existing items for edit
+        pass
+    elif mode == 'view':
+        return render_template('modal.html', form_type = form_type)
+    else:
+        return make_response("Illegal action.", 400)
 
 
 class Pagination(object):
