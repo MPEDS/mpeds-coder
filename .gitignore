@@ -43,4 +43,4 @@ config.py
 *.xlsx
 
 # logs
-*.log
+*.logsetup.py
