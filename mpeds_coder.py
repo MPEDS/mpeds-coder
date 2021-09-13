@@ -619,22 +619,23 @@ def adj():
         join(CodeEventCreator, CanonicalEventLink.cec_id == CodeEventCreator.id).\
         filter(CanonicalEvent.key == canonical_event_key).all()
 
-    ## we're only interested in the CEC data
-    for _, _, cec in ces:
-        ## create a new list if it doesn't exist
-        if not canonical_event.get(cec.variable):
-            canonical_event[cec.variable] = []
+    if ces:
+        for _, _, cec in ces:
+            ## create a new list if it doesn't exist
+            if not canonical_event.get(cec.variable):
+                canonical_event[cec.variable] = []
 
-        ## insert in record
-        if cec.text is not None:
-            canonical_event[cec.variable].append(cec.text)
-        else:
-            canonical_event[cec.variable].append(cec.value)
+            ## insert in record
+            if cec.text is not None:
+                canonical_event[cec.variable].append(cec.text)
+            else:
+                canonical_event[cec.variable].append(cec.value)
 
-    ## and some of the CE data
-    canonical_event['key'] = ces[0][0].key
-    canonical_event['notes'] = ces[0][0].notes
-    canonical_event['status'] = ces[0][0].status
+        ## and some of the CE data
+        canonical_event['id'] = ces[0][0].id
+        canonical_event['key'] = ces[0][0].key
+        canonical_event['notes'] = ces[0][0].notes
+        canonical_event['status'] = ces[0][0].status
 
     #####
     ## Recent events
@@ -722,6 +723,33 @@ def modal_edit(form_type, mode = None, id = None):
         return render_template('modal.html', form_type = form_type)
     else:
         return make_response("Illegal action.", 400)
+
+
+@app.route('/_del_canonical_event', methods = ['POST'])
+@login_required
+def del_canonical_event():
+    """ Deletes the canonical event and related CEC links from the database."""
+    id = request.form['id']
+
+    cels = db_session.query(CanonicalEventLink)\
+        .filter(CanonicalEventLink.canonical_id == id).all()
+    rces = db_session.query(RecentCanonicalEvent)\
+        .filter(RecentCanonicalEvent.canonical_id == id).all()
+    ce = db_session.query(CanonicalEvent)\
+        .filter(CanonicalEvent.id == id).first()
+
+    ## remove these first to avoid FK error
+    for cel in cels:
+        db_session.delete(cel)
+    for rce in rces:
+        db_session.delete(rce)
+    db_session.commit()
+
+    ## delete the actual event
+    db_session.delete(ce)
+    db_session.commit()
+    
+    return make_response("Canonical event deleted.", 200)
 
 
 class Pagination(object):
@@ -1535,9 +1563,6 @@ def addCode(pn):
 @login_required
 def delEvent():
     """ Delete an event. """
-    # if current_user.authlevel < 2:
-    #     return redirect(url_for('index'))
-
     eid = int(request.form['event'])
     pn  = request.form['pn'];
 

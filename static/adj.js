@@ -30,6 +30,7 @@ var changeSubTab = function(e) {
 
 var removeCanonical = function(e) {
   $('.canonical').each(function() {
+    // $(this).fadeOut("fast");
     $(this).remove();
     
     // hide the buttons
@@ -98,21 +99,42 @@ $(function(){
         return;
       }
 
-      // TK: remove from the database via Ajax call
+      var canonical_event_id = $('div.canonical-event-metadata').attr('id').split('_')[1];
 
-      // if true, remove canonical event data from the DOM
-      removeCanonical();
+      // remove from the database via Ajax call
+      var req = $.ajax({
+        url: $SCRIPT_ROOT + '/_del_canonical_event',
+        type: "POST",
+        data: {
+          id: canonical_event_id
+        }
+      })
+      .done(function() {
+        removeCanonical();
+
+        $('#flash').text(req.responseText);
+        $('#flash').removeClass('alert-danger');
+        $('#flash').addClass('alert-success');
+
+        $('#flash').fadeIn(1000);
+        $('#flash').fadeOut(2000);
+      })
+      .fail(function() { 
+        $('#flash').text(req.responseText);
+        $('#flash').removeClass('alert-success');
+        $('#flash').addClass('alert-danger');
+        $('#flash').show();
+      });
     });
 
     // Remove canonical event from grid
     $('div.canonical-event-metadata a.glyphicon-remove-sign').click(function () {
-      var r = confirm("Are you sure you want to remove the canonical event from the grid?" +
-        "\nThis DOES NOT delete the current canonical event.");
+      // var r = confirm("Are you sure you want to remove the canonical event from the grid?" +
+      //   "\nThis DOES NOT delete the current canonical event.");
 
-      if (r == false) {
-        return;
-      }
-      
+      // if (r == false) {
+      //   return;
+      // }
       removeCanonical();
     });
 
@@ -130,9 +152,8 @@ $(function(){
             type: "POST",
             url: url.replace('view', 'add'),
             data: $('#modal-form').serialize()
-          });
-        
-          req.done(function() {
+          })
+          .done(function() {
             $("#modal-flash").text("Added successfully.");
             $("#modal-flash").removeClass("alert-danger");
             $("#modal-flash").addClass("alert-success");
@@ -140,9 +161,8 @@ $(function(){
 
             // $('#modal-container').modal('hide');
             location.reload();
-          });
-
-          req.fail(function() {
+          })
+          .fail(function() {
             $("#modal-flash").text(req.responseText);
             $("#modal-flash").addClass("alert-danger");
             $("#modal-flash").show();
