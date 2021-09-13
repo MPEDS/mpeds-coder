@@ -657,16 +657,6 @@ def adj():
     #     filter(CodeEventCreator.event_id.in_(grid_query)).\
     #     join(EventMetadata, CodeEventCreator.event_id == EventMetadata.event_id).all()
 
-    ## assess how wide the columns should be
-    grid_width = None
-    grid_len   = len(grid_query)
-    if grid_len == 1:
-        grid_width = 5
-    elif grid_len == 2:
-        grid_width = 3
-    else:
-        grid_width = 2
-
     grid_vars = []
     for i in event_creator_single_value:
         if type(i) == list:
@@ -700,7 +690,6 @@ def adj():
         filter_fields = filter_fields,
         grid_query    = grid_query,
         grid_events   = grid_events,
-        grid_width    = grid_width,
         grid_vars     = grid_vars,
         recent_events = recent_events,
 #        recent_canonical_events = recent_canonical_events,

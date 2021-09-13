@@ -28,6 +28,19 @@ var changeSubTab = function(e) {
   return false;
 }
 
+var removeCanonical = function(e) {
+  $('.canonical').each(function() {
+    $(this).remove();
+    
+    // hide the buttons
+    $('div.canonical-event-metadata a').each(function() {
+        $(this).hide();
+    });
+  });
+
+  return false;
+}
+
 // MAIN -- document ready 
 $(function(){ 
     // Show search block first
@@ -72,6 +85,37 @@ $(function(){
       $("#adj-pane-event-constructor").addClass("col-md-6");
     });
 
+    //
+    // Grid listeners
+    // TK: Move these to somewhere else 
+    // since the grid is created dynamically and won't be created on load
+    //
+    
+    // Delete canonical event 
+    $('div.canonical-event-metadata a.glyphicon-trash').click(function () {
+      var r = confirm("Are you sure you want to delete the current canonical event?")
+      if (r == false) {
+        return;
+      }
+
+      // TK: remove from the database via Ajax call
+
+      // if true, remove canonical event data from the DOM
+      removeCanonical();
+    });
+
+    // Remove canonical event from grid
+    $('div.canonical-event-metadata a.glyphicon-remove-sign').click(function () {
+      var r = confirm("Are you sure you want to remove the canonical event from the grid?" +
+        "\nThis DOES NOT delete the current canonical event.");
+
+      if (r == false) {
+        return;
+      }
+      
+      removeCanonical();
+    });
+
     // Modal listeners
     $('#new_canonical').click(function () {
       var url = $(this).data('url');
@@ -99,7 +143,6 @@ $(function(){
           });
 
           req.fail(function() {
-            // TK: Replace next line with the response text.
             $("#modal-flash").text(req.responseText);
             $("#modal-flash").addClass("alert-danger");
             $("#modal-flash").show();
