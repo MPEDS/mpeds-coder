@@ -9,7 +9,7 @@
 <div class="container-fluid">
   <div class="row">
     <!-- flash -->
-    <div class="col-sm-12"><div id="flash" style="display:none;"></div></div>
+    <div class="col-sm-12"><div class="flash" style="display:none;"></div></div>
     <!-- Modal -->
     <div class="modal fade" id="modal-container" tabindex="-1" role="dialog" aria-labelledby="FormModal" aria-hidden="true">
         <div class="modal-dialog" role="document">
@@ -233,7 +233,7 @@
                             </div>    
                         </div>
                     </form>
-                    <div class="event-desc" id="canonical-event_{{ canonical_event['key'] }}">
+                    <div class="event-desc" id="canonical-event_{{ canonical_event['id'] }}">
                         <div class="row">
                             <div class="col-sm-8">
                                 <b>key: </b> {{ canonical_event['key']|safe }}</br>
@@ -243,12 +243,8 @@
                             <div class="col-sm-4">
                                 <b>Status:</b> {{ canonical_event['status'] }}<br/>
                                 <b>Last edited:</b> {{ canonical_event['last_updated'] }}<br/>
-                                <!-- TK: Change the logic such that we check if this is the active canonical event -->
-                                {% if canonical_event['key'] == canonical_event['key'] %}
-                                    <b class="text-muted">Current active event</b> <a href="#" class="glyphicon glyphicon-remove-sign" alt="Remove as active event"></a>
-                                {% else %}
-                                    <b><a href="#">Make active event <span class="glyphicon glyphicon-export"></span></a></b>
-                                {% endif %}
+                                <b class="ce-isactive text-muted">Current active event</b>
+                                <b class="ce-makeactive" style="display:none;"><a href="#">Make active event <span class="glyphicon glyphicon-export"></span></a></b>
                             </div>
                         </div>
                         <div class="row">

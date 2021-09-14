@@ -39,7 +39,7 @@ var removeCanonical = function(e) {
     });
   });
 
-  return false;
+  return;
 }
 
 // MAIN -- document ready 
@@ -112,30 +112,27 @@ $(function(){
       .done(function() {
         removeCanonical();
 
-        $('#flash').text(req.responseText);
-        $('#flash').removeClass('alert-danger');
-        $('#flash').addClass('alert-success');
+        $('.flash').text(req.responseText);
+        $('.flash').removeClass('alert-danger');
+        $('.flash').addClass('alert-success');
+        $('.flash').show()
 
-        $('#flash').fadeIn(1000);
-        $('#flash').fadeOut(2000);
+        $('.flash').fadeOut(3000);
       })
       .fail(function() { 
-        $('#flash').text(req.responseText);
-        $('#flash').removeClass('alert-success');
-        $('#flash').addClass('alert-danger');
-        $('#flash').show();
+        $('.flash').text(req.responseText);
+        $('.flash').removeClass('alert-success');
+        $('.flash').addClass('alert-danger');
+        $('.flash').show();
       });
     });
 
     // Remove canonical event from grid
     $('div.canonical-event-metadata a.glyphicon-remove-sign').click(function () {
-      // var r = confirm("Are you sure you want to remove the canonical event from the grid?" +
-      //   "\nThis DOES NOT delete the current canonical event.");
-
-      // if (r == false) {
-      //   return;
-      // }
+      var canonical_event_id = $('div.canonical-event-metadata').attr('id').split('_')[1];
       removeCanonical();
+      $('#canonical-event_' + canonical_event_id + ' b.ce-isactive').hide();
+      $('#canonical-event_' + canonical_event_id + ' b.ce-makeactive').show();
     });
 
     // Modal listeners

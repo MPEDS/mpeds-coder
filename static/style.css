@@ -1,8 +1,6 @@
 .metanav        { text-align: right; font-size: 0.8em; padding: 0.3em;
                   margin-bottom: 1em; background: #fafafa; }
-.flash          { background: #CEE5F5; padding: 0.5em;
-                  border: 1px solid #AACBE2; }
-.error          { background: #F0D6D6; padding: 0.5em; }
+.flash          { padding: 0.5em; }
 
 .control-panel {
 	max-height: calc(100vh - 80px);
