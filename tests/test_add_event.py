@@ -2,14 +2,10 @@
 import csv
 import os
 import random
-import sys
-import time
 import unittest
 import yaml
 
-sys.path.insert(0, os.path.abspath('.'))
-
-from database import db_session
+from context import database
 from models import CodeEventCreator, Event
 
 from sqlalchemy import desc
@@ -39,10 +35,10 @@ class EventAddTest(unittest.TestCase):
                 users[row[0]] = row[1]
 
         ## Delete all the test entries
-        q = db_session.query(CodeEventCreator).\
+        q = database.db_session.query(CodeEventCreator).\
             filter(CodeEventCreator.coder_id == 2)
         q.delete()
-        db_session.commit()
+        database.db_session.commit()
 
         self.driver.get("http://cliff.ssc.wisc.edu/campus_protest_dev")
 
@@ -69,17 +65,17 @@ class EventAddTest(unittest.TestCase):
         print("TEAR DOWN")
 
         ## remove all test codings
-        cecs = db_session.query(CodeEventCreator).filter(CodeEventCreator.coder_id == 2)
+        cecs = database.db_session.query(CodeEventCreator).filter(CodeEventCreator.coder_id == 2)
 
         ## remove all the test events
-        events = db_session.query(Event).filter(Event.id.in_([x.event_id for x in cecs]))
+        events = database.db_session.query(Event).filter(Event.id.in_([x.event_id for x in cecs]))
 
         cecs.delete()
         events.delete()
-        db_session.commit()
+        database.db_session.commit()
 
         ## close the session
-        db_session.close()
+        database.db_session.close()
 
         ## shut down firefox
         self.driver.quit()
@@ -98,7 +94,7 @@ class EventAddTest(unittest.TestCase):
         self.driver.find_element_by_id("info_start-date").click()
 
         ## get the fields from the database
-        q = db_session.query(CodeEventCreator).\
+        q = database.db_session.query(CodeEventCreator).\
             filter(CodeEventCreator.coder_id == 2)
         texts = [x.value for x in q]
 
@@ -116,7 +112,7 @@ class EventAddTest(unittest.TestCase):
         ## changes focus to start-date
         self.driver.find_element_by_id("info_start-date").click()
 
-        for a in db_session.query(CodeEventCreator).filter(CodeEventCreator.coder_id == 2).all():
+        for a in database.db_session.query(CodeEventCreator).filter(CodeEventCreator.coder_id == 2).all():
             d[a.variable] = a.value
 
         self.assertIn("2020-07-20", d["start-date"])
@@ -141,7 +137,7 @@ class EventAddTest(unittest.TestCase):
             el = self.driver.find_element_by_id('info_{}'.format(variable))
             el.click()
 
-        qs = db_session.query(CodeEventCreator).filter(CodeEventCreator.coder_id == 2).all()
+        qs = database.db_session.query(CodeEventCreator).filter(CodeEventCreator.coder_id == 2).all()
 
         for q in qs:
             self.assertEqual(test_dict[q.variable], q.value)
@@ -205,7 +201,7 @@ class EventAddTest(unittest.TestCase):
             self.assertIsNot(selected_text, "")
 
         vals = {}
-        qs = db_session.query(CodeEventCreator).filter(CodeEventCreator.coder_id == 2).all()
+        qs = database.db_session.query(CodeEventCreator).filter(CodeEventCreator.coder_id == 2).all()
 
         ## ensure that the number of fields stored is equal
         self.assertEqual(len(qs), len(test_fields))
@@ -248,7 +244,7 @@ class EventAddTest(unittest.TestCase):
                 ## append to stored value dict
                 d[variable].append(value)
 
-        qs = db_session.query(CodeEventCreator).filter(CodeEventCreator.coder_id == 2).all()
+        qs = database.db_session.query(CodeEventCreator).filter(CodeEventCreator.coder_id == 2).all()
 
         ## ensure that the number of fields stored 
         ## is equal to number of fields * number selected (4 * 3 = 12)
