@@ -569,15 +569,14 @@ def adj():
     filter = request.form.get('filter')
     sort = request.form.get('sort')
 
-    ## TK: These are placeholders which will be gathered from queries later
+    ## TODO: These are placeholders which will be gathered from queries later
     query1 = 'Chicago'
     query2 = '2016-05-24'
-    canonical_event = {}
     canonical_event_key = 'Milo_Chicago_2016'
     grid_query  = [6031, 6032, 21644, 21646]
     grid_events = {x: {} for x in grid_query}
 
-    ## TK: Move to YAML
+    ## TODO: Move to YAML
     single_vals = ['event_id', 'coder_id', 'article_id', 'publication', 'pub_date', 'title']
 
     ## perform the query on the web
@@ -609,33 +608,7 @@ def adj():
         else:
             grid_events[field.event_id][field.variable].append(field.value)
 
-    #####
-    ## Get the canonical event
-    #####
-    canonical_event['key'] = canonical_event_key
-
-    ces = db_session.query(CanonicalEvent, CanonicalEventLink, CodeEventCreator).\
-        join(CanonicalEventLink, CanonicalEvent.id == CanonicalEventLink.canonical_id).\
-        join(CodeEventCreator, CanonicalEventLink.cec_id == CodeEventCreator.id).\
-        filter(CanonicalEvent.key == canonical_event_key).all()
-
-    if ces:
-        for _, _, cec in ces:
-            ## create a new list if it doesn't exist
-            if not canonical_event.get(cec.variable):
-                canonical_event[cec.variable] = []
-
-            ## insert in record
-            if cec.text is not None:
-                canonical_event[cec.variable].append(cec.text)
-            else:
-                canonical_event[cec.variable].append(cec.value)
-
-        ## and some of the CE data
-        canonical_event['id'] = ces[0][0].id
-        canonical_event['key'] = ces[0][0].key
-        canonical_event['notes'] = ces[0][0].notes
-        canonical_event['status'] = ces[0][0].status
+    canonical_event = _load_canonical_event(key = canonical_event_key)
 
     #####
     ## Recent events
@@ -717,12 +690,72 @@ def modal_edit(form_type, mode = None, id = None):
 
         return jsonify(result={"status": 200}) 
     elif mode == 'edit':
-        ### TK: add logic which loads existing items for edit
+        ### TODO: add logic which loads existing items for edit
         pass
     elif mode == 'view':
         return render_template('modal.html', form_type = form_type)
     else:
         return make_response("Illegal action.", 400)
+
+
+@app.route('/_load_canonical_event')
+@login_required
+def _load_canonical_event(id = None, key = None):
+    """Loads the canonical event and related CEC links from the database."""
+    if not id and not key:
+        return make_response("Need to provide either a key or an id.", 400)
+
+    canonical_event = {}
+
+    ces = None
+    if id:
+        canonical_event['id'] = id
+        ces = db_session.query(CanonicalEvent, CanonicalEventLink, CodeEventCreator).\
+            join(CanonicalEventLink, CanonicalEvent.id == CanonicalEventLink.canonical_id).\
+            join(CodeEventCreator, CanonicalEventLink.cec_id == CodeEventCreator.id).\
+            filter(CanonicalEvent.id == id).all()
+    else:
+        canonical_event['key'] = key
+        ces = db_session.query(CanonicalEvent, CanonicalEventLink, CodeEventCreator).\
+            join(CanonicalEventLink, CanonicalEvent.id == CanonicalEventLink.canonical_id).\
+            join(CodeEventCreator, CanonicalEventLink.cec_id == CodeEventCreator.id).\
+            filter(CanonicalEvent.key == key).all()
+
+    if not ces:
+        return make_response("No canonical event found.", 404) 
+
+    for _, _, cec in ces:
+        ## create a new list if it doesn't exist
+        if not canonical_event.get(cec.variable):
+            canonical_event[cec.variable] = []
+
+        ## insert in record
+        if cec.text is not None:
+            canonical_event[cec.variable].append(cec.text)
+        else:
+            canonical_event[cec.variable].append(cec.value)
+
+    ## and some of the CE data
+    canonical_event['id'] = ces[0][0].id
+    canonical_event['key'] = ces[0][0].key
+    canonical_event['notes'] = ces[0][0].notes
+    canonical_event['status'] = ces[0][0].status
+
+    return canonical_event
+
+
+@app.route('/load_canonical_event_metadata', methods = ['POST'])
+@login_required
+def load_canonical_event_metadata():
+    id = request.form['id']
+    key = request.form['key']
+
+    """Loads the canonical event and returns the metadata only."""
+    canonical_event = _load_canonical_event(id, key)
+
+    return render_template('canonical-event-metadata.html',
+        canonical_event = canonical_event)
+
 
 
 @app.route('/_del_canonical_event', methods = ['POST'])
@@ -960,7 +993,7 @@ def _pubCount():
 
         I hate everything and am just going to do this in pandas
         get all the articles in the database.
-        TK: One day, convert this to a pure sqlalchemy solution.
+        TODO: One day, convert this to a pure sqlalchemy solution.
     """
 
     df_am = pd.DataFrame([(x.id, x.db_name, x.db_id)  for x in db_session.query(ArticleMetadata).all()],\
@@ -1093,7 +1126,7 @@ def admin():
         coded[user]['completed'] = count
 
     ## get number of unassigned articles
-    ## TK: Eventually generate this count for publications
+    ## TODO: Eventually generate this count for publications
     unassigned = []
     #all_metadata = db_session.query(ArticleMetadata).all()
     #assigned_metadata = db_session.query(EventCreatorQueue).all()
@@ -1200,7 +1233,7 @@ def publications(db):
     if current_user.authlevel < 3:
         return redirect(url_for('index'))
 
-    ## TK: Write code to sort by selected attribute
+    ## TODO: Write code to sort by selected attribute
     
     query = """
     SELECT REPLACE(REPLACE(dem.publication, '-', ' '), '   ', ' - ') as publication, 
@@ -2128,7 +2161,7 @@ def addUser():
     db_session.add(User(username = username, password = password, authlevel = 1))
     db_session.commit()
 
-    ## TK: Send email to admin to have notice of new account
+    ## TODO: Send email to admin to have notice of new account
 
     return jsonify(result={"status": 200, "password": password})
 

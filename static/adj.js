@@ -3,7 +3,7 @@
 var changeTab = function(e, level = "") {
     var eid = $(e.target).parent().attr("id").split("_")[0];
 
-    // TK: Add error checking
+    // TODO: Add error checking
 
     // Get all elements with class="tablinks" and remove the class "active"
     $("." + level + "tablinks").each(function() {
@@ -30,7 +30,6 @@ var changeSubTab = function(e) {
 
 var removeCanonical = function(e) {
   $('.canonical').each(function() {
-    // $(this).fadeOut("fast");
     $(this).remove();
     
     // hide the buttons
@@ -39,6 +38,8 @@ var removeCanonical = function(e) {
     });
   });
 
+  // remove metadata ID
+  $('.canonical-event-metadata').attr('id', null);
   return;
 }
 
@@ -46,9 +47,6 @@ var removeCanonical = function(e) {
 $(function(){ 
     // Show search block first
     $("#search_block").show();
-
-    // Turn auto completes on
-    $('.basicAutoComplete').autoComplete();
 
     // Add listener to tab links 
     $(".tablinks").each(function(){
@@ -86,11 +84,99 @@ $(function(){
       $("#adj-pane-event-constructor").addClass("col-md-6");
     });
 
-    //
+    // Modal listeners
+    $('#new_canonical').click(function () {
+      var url = $(this).data('url');
+      $.get(url, function (data) {
+        $('#modal-container .modal-content').html(data);
+        $('#modal-container').modal('show');
+
+        // form submission listener
+        $('#modal-submit').click(function (event) {
+          event.preventDefault();
+          req = $.ajax({
+            type: "POST",
+            url: url.replace('view', 'add'),
+            data: $('#modal-form').serialize()
+          })
+          .done(function() {
+            $("#modal-flash").text("Added successfully.");
+            $("#modal-flash").removeClass("alert-danger");
+            $("#modal-flash").addClass("alert-success");
+            $("#modal-flash").show();
+
+            // $('#modal-container').modal('hide');
+            location.reload();
+          })
+          .fail(function() {
+            $("#modal-flash").text(req.responseText);
+            $("#modal-flash").addClass("alert-danger");
+            $("#modal-flash").show();
+          });
+        });
+      })
+    });
+
+    // ********************************
+    // Search box listeners
+    // TODO: Move these to somewhere else
+    // since the searches are created dynamically
+    // ********************************
+
+    // listeners to make the current canonical ID active
+    $('b.ce-makeactive').each(function () {
+      $(this).click(function () {
+        // get id from parent
+        var canonical_event_id = $(this).closest('.event-desc').attr('id').split('_')[1];
+
+        // remove the old event
+        removeCanonical();
+
+        // load metadata block
+        req = $.ajax({
+          type: "POST",
+          url:  $SCRIPT_ROOT + '/load_canonical_event_metadata',
+          data: {
+            id: canonical_event_id,
+            key: null
+          },
+          beforeSend: function () {
+            $('.flash').addClass('alert-info');
+            $('.flash').text("Loading...");
+            $('.flash').show();
+            }
+        })
+        .done(function() {
+          // add text to the column
+          $('.canonical-event-metadata').append(req.responseText);
+          
+          // toggle search buttons
+          $('#search-canonical-event_' + canonical_event_id + ' b.ce-isactive').show();
+          $('#search-canonical-event_' + canonical_event_id + ' b.ce-makeactive').hide();
+
+          // show canonical event buttons
+          $('div.canonical-event-metadata a').each(function() {
+              $(this).show();
+          });          
+
+          // re-add ID
+          $('.canonical-event-metadata').attr('id', 'canonical-event-metadata_' + str(canonical_event_id));
+          $('.flash').hide();
+        })
+        .fail(function() {
+          $('.flash').text(req.responseText);
+          $('.flash').removeClass('alert-success');
+          $('.flash').addClass('alert-danger');
+          $('.flash').show();          
+        });
+      });
+    });
+
+    // ********************************
     // Grid listeners
-    // TK: Move these to somewhere else 
+    // TODO: Move these to somewhere else 
     // since the grid is created dynamically and won't be created on load
-    //
+    // ********************************
     
     // Delete canonical event 
     $('div.canonical-event-metadata a.glyphicon-trash').click(function () {
@@ -131,40 +217,9 @@ $(function(){
     $('div.canonical-event-metadata a.glyphicon-remove-sign').click(function () {
       var canonical_event_id = $('div.canonical-event-metadata').attr('id').split('_')[1];
       removeCanonical();
-      $('#canonical-event_' + canonical_event_id + ' b.ce-isactive').hide();
-      $('#canonical-event_' + canonical_event_id + ' b.ce-makeactive').show();
-    });
 
-    // Modal listeners
-    $('#new_canonical').click(function () {
-      var url = $(this).data('url');
-      $.get(url, function (data) {
-        $('#modal-container .modal-content').html(data);
-        $('#modal-container').modal('show');
-
-        // form submission listener
-        $('#modal-submit').click(function (event) {
-          event.preventDefault();
-          req = $.ajax({
-            type: "POST",
-            url: url.replace('view', 'add'),
-            data: $('#modal-form').serialize()
-          })
-          .done(function() {
-            $("#modal-flash").text("Added successfully.");
-            $("#modal-flash").removeClass("alert-danger");
-            $("#modal-flash").addClass("alert-success");
-            $("#modal-flash").show();
-
-            // $('#modal-container').modal('hide');
-            location.reload();
-          })
-          .fail(function() {
-            $("#modal-flash").text(req.responseText);
-            $("#modal-flash").addClass("alert-danger");
-            $("#modal-flash").show();
-          });
-        });
-      })
+      // Change the buttons in the search section      
+      $('#search-canonical-event_' + canonical_event_id + ' b.ce-isactive').hide();
+      $('#search-canonical-event_' + canonical_event_id + ' b.ce-makeactive').show();
     });
 });
