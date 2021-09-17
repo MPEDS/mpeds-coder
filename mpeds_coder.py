@@ -131,9 +131,7 @@ sv = ['comments', 'protest', 'multi', 'nous', 'ignore']
 yes_no_vars = yaml.load(open(app.config['WD'] + '/yes-no.yaml', 'r'))
 
 ## mark the single-valued items
-event_creator_single_value = ['article-desc', 'desc', 'start-date', 'end-date', 
-                              'location', 'duration', 'date-est', 'persons-freeform']
-
+event_creator_single_value = app.config['SINGLE_VALUE_VARS']
 event_creator_single_value.extend([[x[0] for x in v] for k, v in yes_no_vars.iteritems()])
 
 ## metadata for Solr
@@ -311,7 +309,7 @@ def prepText(article):
 def validate( x ):
     """ replace newlines, returns, and tabs with blank space """
     if x:
-        if type(x) == unicode:
+        if type(x) == str.unicode:
             x = string.replace(x, "\n", " ")
             x = string.replace(x, "\r", " ")
             x = string.replace(x, "\t", " ")
@@ -562,52 +560,44 @@ def eventCreator(aid):
 ##### Adjudication
 #####
 
-@app.route('/adj')
+@app.route('/adj', methods = ['GET'])
 @login_required
 def adj():
     """ Rendering for adjudication page."""
     filter = request.form.get('filter')
     sort = request.form.get('sort')
 
+    ce_key_arg = request.args.get('canonical_event_key')
+    ce_ids = request.args.get('cand_events')
+    cand_event_ids = []
+
+    ## TODO: Add validation
+    if ce_ids:
+        cand_event_ids = [int(x) for x in ce_ids.split(',')]
+    else:
+        ## example data
+        cand_event_ids = [6031, 6032, 21644, 21646]
+
+    ## TODO: Add validation
+    if ce_key_arg:
+        canonical_event_key = ce_key_arg
+    else:
+        ## example data
+        canonical_event_key = 'Milo_Chicago_2016'
+
     ## TODO: These are placeholders which will be gathered from queries later
     query1 = 'Chicago'
     query2 = '2016-05-24'
-    canonical_event_key = 'Milo_Chicago_2016'
-    grid_query  = [6031, 6032, 21644, 21646]
-    grid_events = {x: {} for x in grid_query}
-
-    ## TODO: Move to YAML
-    single_vals = ['event_id', 'coder_id', 'article_id', 'publication', 'pub_date', 'title']
 
     ## perform the query on the web
-    events = db_session.query(EventMetadata).\
+    search_events = db_session.query(EventMetadata).\
         filter(EventMetadata.location.like('%{}%'.format(query1)),
             EventMetadata.start_date == query2).all()
 
-    ## load in metadata
-    for metadata in db_session.query(EventMetadata).\
-        filter(EventMetadata.event_id.in_(grid_query)).all():
-        for field in single_vals:
-            grid_events[metadata.event_id][field] = metadata.__getattribute__(field)
+    ## load the candidate events for the grd
+    cand_events = _load_candidate_events(cand_event_ids)
 
-    #####
-    ## Get the candidate events
-    #####
-    for field in db_session.query(CodeEventCreator).\
-        filter(CodeEventCreator.event_id.in_(grid_query)).all():
-        if field.variable in single_vals:
-            continue
-
-        ## create a new list if it doesn't exist
-        if not grid_events[field.event_id].get(field.variable):
-            grid_events[field.event_id][field.variable] = []
-        
-        ## insert in record
-        if field.text is not None:
-            grid_events[field.event_id][field.variable].append(field.text)
-        else:
-            grid_events[field.event_id][field.variable].append(field.value)
-
+    ## load the canonical event for the grid
     canonical_event = _load_canonical_event(key = canonical_event_key)
 
     #####
@@ -619,28 +609,10 @@ def adj():
         join(EventMetadata, EventMetadata.event_id == RecentEvent.event_id).\
         order_by(desc(RecentEvent.last_accessed)).limit(5).all()]
 
-    #####
-    ## Get the canonical event in the left pane 
-    #####
     # search_canonical_events = db_session.query(CanonicalEvent, CanonicalEventLink, CodeEventCreator).\
     #     join(CanonicalEventLink, CanonicalEvent.id == CanonicalEventLink.canonical_id).\
     #     join(CodeEventCreator, CanonicalEventLink.cec_id == CodeEventCreator.id).\
-    #     filter(CanonicalEvent.key == canonical_event_key).all()
-    
-    # grid_events = db_session.query(CodeEventCreator).\
-    #     filter(CodeEventCreator.event_id.in_(grid_query)).\
-    #     join(EventMetadata, CodeEventCreator.event_id == EventMetadata.event_id).all()
-
-    grid_vars = []
-    for i in event_creator_single_value:
-        if type(i) == list:
-            for j in i:
-                grid_vars.append(j)
-        else:
-            grid_vars.append(i)
-
-    grid_vars.extend([x[0] for x in event_creator_vars])
-    grid_vars.extend(['form', 'issue', 'racial-issue', 'target'])
+    #     filter(CanonicalEvent.key == canonical_event_key).all()    
 
     #####
     ## Data for search
@@ -660,48 +632,70 @@ def adj():
     ]
 
     return render_template("adj.html", 
-        events        = events,
+        search_events = search_events,
         filter_fields = filter_fields,
-        grid_query    = grid_query,
-        grid_events   = grid_events,
-        grid_vars     = grid_vars,
+        cand_events   = cand_events,
+        grid_vars     = _make_grid_vars(),
         recent_events = recent_events,
 #        recent_canonical_events = recent_canonical_events,
         canonical_event = canonical_event)
 
 
-@app.route('/modal_edit/<form_type>/<mode>', methods = ['GET', 'POST'])
+@app.route('/load_adj_grid', methods = ['GET'])
 @login_required
-def modal_edit(form_type, mode = None, id = None):
-    """ Handler for modal display and form submission. """
-    if mode == 'add':
-        key   = request.form['canonical-event-key']
-        notes = request.form['canonical-event-notes']
+def load_adj_grid():
+    """Loads the grid for the expanded event view and renders it."""
+    canonical_event_key = request.args.get('canonical_event_key')
+    cand_event_ids = [int(x) for x in request.args.get('cand_events').split(',')]
 
-    if mode == 'add':
-        ## Key already exists
-        qs = db_session.query(CanonicalEvent).filter(CanonicalEvent.key == key).all()
-        if len(qs) > 0: 
-            return make_response("Key already exists.", 400)
+    cand_events = _load_candidate_events(cand_event_ids)
+    canonical_event = _load_canonical_event(key = canonical_event_key)
+
+    return render_template('adj-grid.html',
+        canonical_event = canonical_event,
+        cand_events = cand_events,
+        grid_vars = _make_grid_vars())
+
+
+@app.route('/_load_candidate_events')
+@login_required
+def _load_candidate_events(cand_event_ids):
+    """Helper function to load candidate events from the database.
+    Returns a dict of candidate events, keyed by id."""
+    cand_events = {x: {} for x in cand_event_ids}
+
+    ## load in metadata
+    for metadata in db_session.query(EventMetadata).\
+        filter(EventMetadata.event_id.in_(cand_event_ids)).all():
+        for field in app.config['ADJ_SINGLE_VALUE_VARS']:
+            cand_events[metadata.event_id][field] = metadata.__getattribute__(field)
+
+    #####
+    ## Get the candidate events
+    #####
+    for field in db_session.query(CodeEventCreator).\
+        filter(CodeEventCreator.event_id.in_(cand_event_ids)).all():
+        if field.variable in app.config['ADJ_SINGLE_VALUE_VARS']:
+            continue
+
+        ## create a new list if it doesn't exist
+        if not cand_events[field.event_id].get(field.variable):
+            cand_events[field.event_id][field.variable] = []
         
-        ## Otherwise, add with no issues
-        db_session.add(CanonicalEvent(coder_id = current_user.id, key = key, notes = notes))
-        db_session.commit()
-
-        return jsonify(result={"status": 200}) 
-    elif mode == 'edit':
-        ### TODO: add logic which loads existing items for edit
-        pass
-    elif mode == 'view':
-        return render_template('modal.html', form_type = form_type)
-    else:
-        return make_response("Illegal action.", 400)
+        ## insert in record
+        if field.text is not None:
+            cand_events[field.event_id][field.variable].append(field.text)
+        else:
+            cand_events[field.event_id][field.variable].append(field.value)
+    
+    return cand_events
 
 
 @app.route('/_load_canonical_event')
 @login_required
 def _load_canonical_event(id = None, key = None):
-    """Loads the canonical event and related CEC links from the database."""
+    """Loads the canonical event and related CEC links from the database.
+       To be displayed in the expanded event view grid."""
     if not id and not key:
         return make_response("Need to provide either a key or an id.", 400)
 
@@ -744,20 +738,6 @@ def _load_canonical_event(id = None, key = None):
     return canonical_event
 
 
-@app.route('/load_canonical_event_metadata', methods = ['POST'])
-@login_required
-def load_canonical_event_metadata():
-    id = request.form['id']
-    key = request.form['key']
-
-    """Loads the canonical event and returns the metadata only."""
-    canonical_event = _load_canonical_event(id, key)
-
-    return render_template('canonical-event-metadata.html',
-        canonical_event = canonical_event)
-
-
-
 @app.route('/_del_canonical_event', methods = ['POST'])
 @login_required
 def del_canonical_event():
@@ -783,6 +763,51 @@ def del_canonical_event():
     db_session.commit()
     
     return make_response("Canonical event deleted.", 200)
+
+
+@app.route('/_make_grid_vars')
+@login_required
+def _make_grid_vars():
+    """Helper function which returns grid variables."""
+    grid_vars = []
+    for i in event_creator_single_value:
+        if type(i) == list:
+            for j in i:
+                grid_vars.append(j)
+        else:
+            grid_vars.append(i)
+
+    grid_vars.extend([x[0] for x in event_creator_vars])
+    grid_vars.extend(['form', 'issue', 'racial-issue', 'target'])
+
+    return grid_vars
+
+@app.route('/modal_edit/<form_type>/<mode>', methods = ['GET', 'POST'])
+@login_required
+def modal_edit(form_type, mode = None, id = None):
+    """ Handler for modal display and form submission. """
+    if mode == 'add':
+        key   = request.form['canonical-event-key']
+        notes = request.form['canonical-event-notes']
+
+    if mode == 'add':
+        ## Key already exists
+        qs = db_session.query(CanonicalEvent).filter(CanonicalEvent.key == key).all()
+        if len(qs) > 0: 
+            return make_response("Key already exists.", 400)
+        
+        ## Otherwise, add with no issues
+        db_session.add(CanonicalEvent(coder_id = current_user.id, key = key, notes = notes))
+        db_session.commit()
+
+        return jsonify(result={"status": 200}) 
+    elif mode == 'edit':
+        ### TODO: add logic which loads existing items for edit
+        pass
+    elif mode == 'view':
+        return render_template('modal.html', form_type = form_type)
+    else:
+        return make_response("Illegal action.", 400)
 
 
 class Pagination(object):

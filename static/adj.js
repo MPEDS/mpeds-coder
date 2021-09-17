@@ -126,19 +126,29 @@ $(function(){
     // listeners to make the current canonical ID active
     $('b.ce-makeactive').each(function () {
       $(this).click(function () {
-        // get id from parent
-        var canonical_event_id = $(this).closest('.event-desc').attr('id').split('_')[1];
+        // get key and id from event-desc
+        var search_canonical_event = $(this).closest('.event-desc');
+        var canonical_event_id  = search_canonical_event.attr('id').split('_')[1];
+        var canonical_event_key = search_canonical_event.attr('data-key');
+        var candidate_event_ids = [];
 
+        var cand_events = document.getElementsByClassName('candidate-event');
+        // get the current candidate events
+        for (var i = 0; i < cand_events.length; i++) {
+          candidate_event_ids.push($(cand_events[i]).attr('id').split('_')[1]);
+        }
+        
+        var cand_events_str = candidate_event_ids.join();
         // remove the old event
         removeCanonical();
 
         // load metadata block
         req = $.ajax({
-          type: "POST",
-          url:  $SCRIPT_ROOT + '/load_canonical_event_metadata',
+          type: "GET",
+          url:  $SCRIPT_ROOT + '/load_adj_grid',
           data: {
-            id: canonical_event_id,
-            key: null
+            canonical_event_key: canonical_event_key,
+            cand_events: cand_events_str
           },
           beforeSend: function () {
             $('.flash').addClass('alert-info');
@@ -147,20 +157,23 @@ $(function(){
             }
         })
         .done(function() {
-          // add text to the column
-          $('.canonical-event-metadata').append(req.responseText);
+          // reload the grid
+          // TODO: Need to readd listeners to the grid
+          $('#adj-grid').html(req.responseText);
+
+          // reset URL params
+          let searchParams = new URLSearchParams(window.location.search);
+          searchParams.delete('canonical_event_key');
+          searchParams.append('canonical_event_key', canonical_event_key);
           
+          searchParams.delete('cand_events');
+          searchParams.append('cand_events', cand_events_str);
+
           // toggle search buttons
           $('#search-canonical-event_' + canonical_event_id + ' b.ce-isactive').show();
           $('#search-canonical-event_' + canonical_event_id + ' b.ce-makeactive').hide();
 
-          // show canonical event buttons
-          $('div.canonical-event-metadata a').each(function() {
-              $(this).show();
-          });          
-
-          // re-add ID
-          $('.canonical-event-metadata').attr('id', 'canonical-event-metadata_' + str(canonical_event_id));
+          // get rid of loading flash 
           $('.flash').hide();
         })
         .fail(function() {
