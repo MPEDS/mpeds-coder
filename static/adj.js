@@ -162,12 +162,15 @@ $(function(){
           $('#adj-grid').html(req.responseText);
 
           // reset URL params
-          let searchParams = new URLSearchParams(window.location.search);
-          searchParams.delete('canonical_event_key');
-          searchParams.append('canonical_event_key', canonical_event_key);
+          let search_params = new URLSearchParams(window.location.search);
+          search_params.delete('canonical_event_key');
+          search_params.append('canonical_event_key', canonical_event_key);
           
-          searchParams.delete('cand_events');
-          searchParams.append('cand_events', cand_events_str);
+          search_params.delete('cand_events');
+          search_params.append('cand_events', cand_events_str);
+          
+          var new_url = 'adj?' + search_params.toString();
+          window.history.pushState({path: new_url}, '', new_url);
 
           // toggle search buttons
           $('#search-canonical-event_' + canonical_event_id + ' b.ce-isactive').show();
