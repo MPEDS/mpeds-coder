@@ -659,6 +659,116 @@ def load_adj_grid():
         grid_vars = _make_grid_vars())
 
 
+@app.route('/del_canonical_event', methods = ['POST'])
+@login_required
+def del_canonical_event():
+    """ Deletes the canonical event and related CEC links from the database."""
+    id = request.form['id']
+
+    cels = db_session.query(CanonicalEventLink)\
+        .filter(CanonicalEventLink.canonical_id == id).all()
+    rces = db_session.query(RecentCanonicalEvent)\
+        .filter(RecentCanonicalEvent.canonical_id == id).all()
+    ce = db_session.query(CanonicalEvent)\
+        .filter(CanonicalEvent.id == id).first()
+
+    ## remove these first to avoid FK error
+    for cel in cels:
+        db_session.delete(cel)
+    for rce in rces:
+        db_session.delete(rce)
+    db_session.commit()
+
+    ## delete the actual event
+    db_session.delete(ce)
+    db_session.commit()
+    
+    return make_response("Canonical event deleted.", 200)
+
+
+@app.route('/add_canonical_record', methods = ['POST'])
+@login_required
+def add_canonical_record():
+    """ Adds a link between a candidate event piece of data and a canonical event. """
+    canonical_event_id = int(request.form['canonical_event_id'])
+    is_link = int(request.form['is_link'])
+    cec_id = None
+    record = None
+
+    ## for the link, create a new CEC and link it back to the canonical event
+    if is_link:
+        article_id = request.form['article_id']
+        event_id = request.form['event_id']
+        db_session.add(CodeEventCreator(article_id, event_id, 'link', 'yes', current_user.id))
+        cec = db_session.commit()
+        cec_id = cec.id
+    else:
+        ## for a regular commit, just get the CEC id
+        cec_id = int(request.form['cec_id'])
+
+        ## grab it from the database
+        record = db_session.query(CodeEventCreator)\
+            .filter(CodeEventCreator.id == cec_id).first()
+
+        ## if it's fake, toss it
+        if not record:
+            return make_response("No such CEC record.", 404)
+
+        ## if it exists, toss it
+        dupe_check = db_session.query(CanonicalEventLink)\
+            .filter(
+                CanonicalEventLink.cec_id == cec_id, 
+                CanonicalEventLink.canonical_id == canonical_event_id)\
+            .all()
+
+        if dupe_check:
+            return make_response("Record already exists.", 404)
+        
+    ## commit
+    db_session.add(CanonicalEventLink(current_user.id, canonical_event_id, cec_id))
+    db_session.commit()
+
+    ## for link, just return true
+    if is_link:
+        return jsonify(result={"status": 200})
+    else:
+        ## otherwise, return the template for the canonical cell
+        return render_template('canonical-cell.html', 
+            var = record.variable, 
+            value = record.value) 
+
+
+@app.route('/modal_edit/<form_type>/<mode>', methods = ['GET', 'POST'])
+@login_required
+def modal_edit(form_type, mode = None, id = None):
+    """ Handler for modal display and form submission. """
+    if mode == 'add':
+        key   = request.form['canonical-event-key']
+        notes = request.form['canonical-event-notes']
+
+    if mode == 'add':
+        ## Key already exists
+        qs = db_session.query(CanonicalEvent).filter(CanonicalEvent.key == key).all()
+        if len(qs) > 0: 
+            return make_response("Key already exists.", 400)
+        
+        ## Otherwise, add with no issues
+        db_session.add(CanonicalEvent(coder_id = current_user.id, key = key, notes = notes))
+        db_session.commit()
+
+        return jsonify(result={"status": 200}) 
+    elif mode == 'edit':
+        ### TODO: add logic which loads existing items for edit
+        pass
+    elif mode == 'view':
+        return render_template('modal.html', form_type = form_type)
+    else:
+        return make_response("Illegal action.", 400)
+
+
+#####
+# Adjudication helper functions
+#####
 @app.route('/_load_candidate_events')
 @login_required
 def _load_candidate_events(cand_event_ids):
@@ -666,29 +776,32 @@ def _load_candidate_events(cand_event_ids):
     Returns a dict of candidate events, keyed by id."""
     cand_events = {x: {} for x in cand_event_ids}
 
-    ## load in metadata
-    for metadata in db_session.query(EventMetadata).\
-        filter(EventMetadata.event_id.in_(cand_event_ids)).all():
-        for field in app.config['ADJ_SINGLE_VALUE_VARS']:
-            cand_events[metadata.event_id][field] = metadata.__getattribute__(field)
+    # ## load in metadata
+    # for metadata in db_session.query(EventMetadata).\
+    #     filter(EventMetadata.event_id.in_(cand_event_ids)).all():
+    #     for field in app.config['ADJ_SINGLE_VALUE_VARS']:
+    #         cand_events[metadata.event_id][field] = metadata.__getattribute__(field)
 
     #####
     ## Get the candidate events
     #####
     for field in db_session.query(CodeEventCreator).\
         filter(CodeEventCreator.event_id.in_(cand_event_ids)).all():
+        ## single valued elements
         if field.variable in app.config['ADJ_SINGLE_VALUE_VARS']:
-            continue
-
-        ## create a new list if it doesn't exist
-        if not cand_events[field.event_id].get(field.variable):
-            cand_events[field.event_id][field.variable] = []
-        
-        ## insert in record
-        if field.text is not None:
-            cand_events[field.event_id][field.variable].append(field.text)
+            cand_events[field.event_id][field.variable] = (field.value, field.id, field.timestamp)
         else:
-            cand_events[field.event_id][field.variable].append(field.value)
+            ## create a new list if it doesn't exist
+            if not cand_events[field.event_id].get(field.variable):
+                cand_events[field.event_id][field.variable] = []
+            
+            ## insert in record
+            if field.text is not None:
+                value = field.text
+            else:
+                value = field.value
+
+            cand_events[field.event_id][field.variable].append((value, field.id, field.timestamp))
     
     return cand_events
 
@@ -740,33 +853,6 @@ def _load_canonical_event(id = None, key = None):
     return canonical_event
 
 
-@app.route('/_del_canonical_event', methods = ['POST'])
-@login_required
-def del_canonical_event():
-    """ Deletes the canonical event and related CEC links from the database."""
-    id = request.form['id']
-
-    cels = db_session.query(CanonicalEventLink)\
-        .filter(CanonicalEventLink.canonical_id == id).all()
-    rces = db_session.query(RecentCanonicalEvent)\
-        .filter(RecentCanonicalEvent.canonical_id == id).all()
-    ce = db_session.query(CanonicalEvent)\
-        .filter(CanonicalEvent.id == id).first()
-
-    ## remove these first to avoid FK error
-    for cel in cels:
-        db_session.delete(cel)
-    for rce in rces:
-        db_session.delete(rce)
-    db_session.commit()
-
-    ## delete the actual event
-    db_session.delete(ce)
-    db_session.commit()
-    
-    return make_response("Canonical event deleted.", 200)
-
-
 @app.route('/_make_grid_vars')
 @login_required
 def _make_grid_vars():
@@ -783,33 +869,6 @@ def _make_grid_vars():
     grid_vars.extend(['form', 'issue', 'racial-issue', 'target'])
 
     return grid_vars
-
-@app.route('/modal_edit/<form_type>/<mode>', methods = ['GET', 'POST'])
-@login_required
-def modal_edit(form_type, mode = None, id = None):
-    """ Handler for modal display and form submission. """
-    if mode == 'add':
-        key   = request.form['canonical-event-key']
-        notes = request.form['canonical-event-notes']
-
-    if mode == 'add':
-        ## Key already exists
-        qs = db_session.query(CanonicalEvent).filter(CanonicalEvent.key == key).all()
-        if len(qs) > 0: 
-            return make_response("Key already exists.", 400)
-        
-        ## Otherwise, add with no issues
-        db_session.add(CanonicalEvent(coder_id = current_user.id, key = key, notes = notes))
-        db_session.commit()
-
-        return jsonify(result={"status": 200}) 
-    elif mode == 'edit':
-        ### TODO: add logic which loads existing items for edit
-        pass
-    elif mode == 'view':
-        return render_template('modal.html', form_type = form_type)
-    else:
-        return make_response("Illegal action.", 400)
 
 
 class Pagination(object):

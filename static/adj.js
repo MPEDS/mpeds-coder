@@ -78,7 +78,7 @@ var getCandidates = function(to_exclude = '') {
  */
 var reloadGrid = function(canonical_event_key = null, cand_events_str = null) {
   // reload grid
-  req = $.ajax({
+  var req = $.ajax({
     type: "GET",
     url:  $SCRIPT_ROOT + '/load_adj_grid',
     data: {
@@ -92,8 +92,7 @@ var reloadGrid = function(canonical_event_key = null, cand_events_str = null) {
       }
   })
   .done(function() {
-    // reload the grid
-    // TODO: Need to re-add listeners to the grid
+    // add HTML to grid
     $('#adj-grid').html(req.responseText);
 
     // reset URL params
@@ -107,10 +106,12 @@ var reloadGrid = function(canonical_event_key = null, cand_events_str = null) {
     var new_url = 'adj?' + search_params.toString();
     window.history.pushState({path: new_url}, '', new_url);
 
+    // reinitiatize grid listeners
     initializeGridListeners();
 
     // get rid of loading flash 
-    $('.flash').hide();    
+    $('.flash').hide();
+    $('.flash').removeClass('alert-info');
     return true;
   })
   .fail(function() {
@@ -128,8 +129,55 @@ var reloadGrid = function(canonical_event_key = null, cand_events_str = null) {
  * Need to perform this on load and on reload of grid.
  */
 var initializeGridListeners = function() {
-    // Remove candidate event from grid
-    $('.remove-candidate').click(function() {
+  
+  /**
+   * Additions
+   */
+
+  // add a value to current canonical event
+  $('.add-val').each(function() {
+    $(this).click(function() {
+      var canonical_event_id = $('div.canonical-event-metadata').attr('id').split('_')[1];
+      var variable = $(this).closest('.expanded-event-variable').attr('id').split('_')[0];
+
+      // No canonical event, so error
+      if (canonical_event_id == '') {
+        $('.flash').addClass('alert-danger');
+        $('.flash').text("Please select a canonical event first.");
+        $('.flash').show();
+        $('.flash').fadeOut(5000);
+        return;
+      }
+
+      var req = $.ajax({
+        type: 'POST',
+        url: $SCRIPT_ROOT + '/add_canonical_record',
+        data: {
+          canonical_event_id: canonical_event_id,
+          cec_id: $(this).attr('data-key'),
+          is_link: 0
+        }
+      })
+      .done(function() {
+        // add block to the canonical event variable
+        $('#canonical-event_' + variable).append(req.responseText);
+      })
+      .fail(function() {
+        // error
+        $('.flash').addClass('alert-danger');
+        $('.flash').text(req.responseText);
+        $('.flash').show();
+        $('.flash').fadeOut(5000);
+      });
+    }); 
+  });
+
+  /**
+   * Deletions and removals
+   */
+
+  // Remove candidate event from grid
+  $('.remove-candidate').click(function() {
       // get current canonical key, if it exists
       var canonical_event_key = $('div.canonical-event-metadata');
       if (canonical_event_key) {
@@ -164,7 +212,7 @@ var initializeGridListeners = function() {
       }
     })
     .done(function() {
-      removeCanonical();
+      reloadGrid('', getCandidates());
 
       $('.flash').text(req.responseText);
       $('.flash').removeClass('alert-danger');
