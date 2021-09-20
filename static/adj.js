@@ -1,5 +1,10 @@
 
-// Change main tabs
+/**
+ * 
+ * @param {*} e - Event
+ * @param {*} level - Level of the tab (main, sub, etc.)
+ * @returns false
+ */
 var changeTab = function(e, level = "") {
     var eid = $(e.target).parent().attr("id").split("_")[0];
 
@@ -22,7 +27,11 @@ var changeTab = function(e, level = "") {
     return false;
 }
 
-// For changing subtab menus
+/**
+ * Wrapper to change subtabs 
+ * @param {*} e - Event
+ * @returns false
+ * */ 
 var changeSubTab = function(e) {
   changeTab(e, "sub");
   return false;
@@ -41,6 +50,58 @@ var removeCanonical = function(e) {
   // remove metadata ID
   $('.canonical-event-metadata').attr('id', null);
   return;
+}
+
+/**
+ * Reloads the grid for adding and removing candidate and canonical events.
+ * @param {string} canonical_event_key - Desired canonical event record.
+ * @param {string} cand_events_str - Desired candidate events.
+ * @returns false on failure, true on success
+ */
+var reloadGrid = function(canonical_event_key = null, cand_events_str = null) {
+  // reload grid
+  req = $.ajax({
+    type: "GET",
+    url:  $SCRIPT_ROOT + '/load_adj_grid',
+    data: {
+      canonical_event_key: canonical_event_key,
+      cand_events: cand_events_str
+    },
+    beforeSend: function () {
+      $('.flash').addClass('alert-info');
+      $('.flash').text("Loading...");
+      $('.flash').show();
+      }
+  })
+  .done(function() {
+    // reload the grid
+    // TODO: Need to re-add listeners to the grid
+    $('#adj-grid').html(req.responseText);
+
+    // reset URL params
+    let search_params = new URLSearchParams(window.location.search);
+    search_params.delete('canonical_event_key');
+    search_params.append('canonical_event_key', canonical_event_key);
+    
+    search_params.delete('cand_events');
+    search_params.append('cand_events', cand_events_str);
+    
+    var new_url = 'adj?' + search_params.toString();
+    window.history.pushState({path: new_url}, '', new_url);
+
+    // get rid of loading flash 
+    $('.flash').hide();
+    return true;
+  })
+  .fail(function() {
+    $('.flash').text(req.responseText);
+    $('.flash').removeClass('alert-success');
+    $('.flash').addClass('alert-danger');
+    $('.flash').show();
+    
+    return false;
+  });
+
 }
 
 // MAIN -- document ready 
@@ -130,61 +191,24 @@ $(function(){
         var search_canonical_event = $(this).closest('.event-desc');
         var canonical_event_id  = search_canonical_event.attr('id').split('_')[1];
         var canonical_event_key = search_canonical_event.attr('data-key');
-        var candidate_event_ids = [];
 
-        var cand_events = document.getElementsByClassName('candidate-event');
         // get the current candidate events
+        var candidate_event_ids = []; 
+        var cand_events = document.getElementsByClassName('candidate-event');
         for (var i = 0; i < cand_events.length; i++) {
           candidate_event_ids.push($(cand_events[i]).attr('id').split('_')[1]);
         }
         
-        var cand_events_str = candidate_event_ids.join();
-        // remove the old event
-        removeCanonical();
+        var success = reloadGrid(
+          canonical_event_key = canonical_event_key, 
+          cand_events_str = candidate_event_ids.join()
+        );
 
-        // load metadata block
-        req = $.ajax({
-          type: "GET",
-          url:  $SCRIPT_ROOT + '/load_adj_grid',
-          data: {
-            canonical_event_key: canonical_event_key,
-            cand_events: cand_events_str
-          },
-          beforeSend: function () {
-            $('.flash').addClass('alert-info');
-            $('.flash').text("Loading...");
-            $('.flash').show();
-            }
-        })
-        .done(function() {
-          // reload the grid
-          // TODO: Need to readd listeners to the grid
-          $('#adj-grid').html(req.responseText);
-
-          // reset URL params
-          let search_params = new URLSearchParams(window.location.search);
-          search_params.delete('canonical_event_key');
-          search_params.append('canonical_event_key', canonical_event_key);
-          
-          search_params.delete('cand_events');
-          search_params.append('cand_events', cand_events_str);
-          
-          var new_url = 'adj?' + search_params.toString();
-          window.history.pushState({path: new_url}, '', new_url);
-
+        if (success) {
           // toggle search buttons
           $('#search-canonical-event_' + canonical_event_id + ' b.ce-isactive').show();
           $('#search-canonical-event_' + canonical_event_id + ' b.ce-makeactive').hide();
-
-          // get rid of loading flash 
-          $('.flash').hide();
-        })
-        .fail(function() {
-          $('.flash').text(req.responseText);
-          $('.flash').removeClass('alert-success');
-          $('.flash').addClass('alert-danger');
-          $('.flash').show();          
-        });
+        }
       });
     });
 
@@ -194,6 +218,34 @@ $(function(){
     // since the grid is created dynamically and won't be created on load
     // ********************************
     
+    // Remove candidate event from grid
+    $('.remove-candidate').click(function() {
+        // get current canonical key, if it exists
+        var canonical_event_key = $('div.canonical-event-metadata');
+        if (canonical_event_key) {
+          canonical_event_key = canonical_event_key.attr('data-key');
+        }
+
+        // the current event to exclude
+        var cand_metadata = $(this).closest('.candidate-event');
+        var curr_cand = cand_metadata.attr('id').split('_')[1];
+
+        // get the current candidate events, minus the one that was clicked
+        var candidate_event_ids = []; 
+        var cand_events = document.getElementsByClassName('candidate-event');
+        for (var i = 0; i < cand_events.length; i++) {
+          var id = $(cand_events[i]).attr('id').split('_')[1];
+          if (id != curr_cand) {
+            candidate_event_ids.push(id);
+          }
+        }
+        
+        reloadGrid(
+            canonical_event_key = canonical_event_key, 
+            cand_event_str = candidate_event_ids.join()
+        );
+    });
+
     // Delete canonical event 
     $('div.canonical-event-metadata a.glyphicon-trash').click(function () {
       var r = confirm("Are you sure you want to delete the current canonical event?")
