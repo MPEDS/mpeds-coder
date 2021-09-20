@@ -17,6 +17,9 @@
   </div>
   <div class="row">
     <div class="col-sm-5 adj-pane" id="adj-pane-cand-events">
+        <a href="{{ url_for('adj', cand_events = '6031,6032,21644,21646', canonical_event_key = 'Milo_Chicago_2016') }}">
+            Example page
+        </a><br/>
         <a id="cand-events-hide" href="#">&laquo; Hide Pane</a>
         <h4>Event Selection</h4>
         <ul class="nav nav-tabs" id="adj-tabselecter">
@@ -227,6 +230,8 @@
                             </div>    
                         </div>
                     </form>
+                    <!-- TODO: Change this to be associated with the search key -->
+                    {% if canonical_event is not none %}
                     <div class="event-desc" 
                         id="search-canonical-event_{{ canonical_event['id'] }}"
                         data-key="{{ canonical_event['key']|safe }}">
@@ -252,6 +257,7 @@
                             </div>
                         </div>
                     </div>
+                    {% endif %}
                 </div>
             </div>
             <div class="tab-pane" id="relationships_block">
@@ -307,7 +313,13 @@
                 data-url="{{ url_for('modal_edit', form_type = 'canonical', mode = 'view') }}" 
                 data-target="my_modal" href="#">New Canonical Event</a></h4>
         <div id="adj-grid">
-            {% include 'adj-grid.html' %}
+            {% if canonical_event is none and cand_events.keys()|length == 0 %}
+                <p class="info-block bg-info text-info">
+                    Get started by selected or adding events.
+                </p>
+            {% else %}
+                {% include 'adj-grid.html' %}
+            {% endif %}
         </div>
       </div>
   </div>

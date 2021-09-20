@@ -569,21 +569,17 @@ def adj():
 
     ce_key_arg = request.args.get('canonical_event_key')
     ce_ids = request.args.get('cand_events')
+
     cand_event_ids = []
+    canonical_event_key = None
 
     ## TODO: Add validation
     if ce_ids:
         cand_event_ids = [int(x) for x in ce_ids.split(',')]
-    else:
-        ## example data
-        cand_event_ids = [6031, 6032, 21644, 21646]
 
     ## TODO: Add validation
     if ce_key_arg:
         canonical_event_key = ce_key_arg
-    else:
-        ## example data
-        canonical_event_key = 'Milo_Chicago_2016'
 
     ## TODO: These are placeholders which will be gathered from queries later
     query1 = 'Chicago'
@@ -594,7 +590,7 @@ def adj():
         filter(EventMetadata.location.like('%{}%'.format(query1)),
             EventMetadata.start_date == query2).all()
 
-    ## load the candidate events for the grd
+    ## load the candidate events for the grid
     cand_events = _load_candidate_events(cand_event_ids)
 
     ## load the canonical event for the grid
@@ -644,13 +640,19 @@ def adj():
 @app.route('/load_adj_grid', methods = ['GET'])
 @login_required
 def load_adj_grid():
-    """Loads the grid for the expanded event view and renders it."""
+    """Loads the grid for the expanded event view and renders it.""" 
+    cand_event_ids = []
+
+    ce_ids = request.args.get('cand_events')
     canonical_event_key = request.args.get('canonical_event_key')
-    cand_event_ids = [int(x) for x in request.args.get('cand_events').split(',')]
+    
+    if ce_ids:
+        cand_event_ids = [int(x) for x in ce_ids.split(',')]
 
     cand_events = _load_candidate_events(cand_event_ids)
     canonical_event = _load_canonical_event(key = canonical_event_key)
 
+    print(cand_events)
     return render_template('adj-grid.html',
         canonical_event = canonical_event,
         cand_events = cand_events,
@@ -697,7 +699,7 @@ def _load_canonical_event(id = None, key = None):
     """Loads the canonical event and related CEC links from the database.
        To be displayed in the expanded event view grid."""
     if not id and not key:
-        return make_response("Need to provide either a key or an id.", 400)
+        return None
 
     canonical_event = {}
 
@@ -716,7 +718,7 @@ def _load_canonical_event(id = None, key = None):
             filter(CanonicalEvent.key == key).all()
 
     if not ces:
-        return make_response("No canonical event found.", 404) 
+        return None
 
     for _, _, cec in ces:
         ## create a new list if it doesn't exist
