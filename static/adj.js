@@ -138,7 +138,7 @@ var initializeGridListeners = function() {
   $('.add-val').each(function() {
     $(this).click(function() {
       var canonical_event_id = $('div.canonical-event-metadata').attr('id').split('_')[1];
-      var variable = $(this).closest('.expanded-event-variable').attr('id').split('_')[0];
+      var variable = $(this).closest('.expanded-event-variable').attr('data-var').split('_')[0];
 
       // No canonical event, so error
       if (canonical_event_id == '') {
@@ -159,8 +159,13 @@ var initializeGridListeners = function() {
         }
       })
       .done(function() {
+        // remove the none block if it exists
+        $('#canonical-event_' + variable + ' .none').remove();
+
         // add block to the canonical event variable
         $('#canonical-event_' + variable).append(req.responseText);
+
+        // TODO: Re-add delete button listener
       })
       .fail(function() {
         // error
@@ -175,6 +180,35 @@ var initializeGridListeners = function() {
   /**
    * Deletions and removals
    */
+
+  // remove value from current canonical event
+  $('.remove-canonical').click(function (e) {
+    var cel_id = $(this).closest('.expanded-event-variable').attr('data-key');
+
+    var req = $.ajax({
+      type: 'POST',
+      url: $SCRIPT_ROOT + '/del_canonical_record',
+      data: {
+        cel_id: cel_id,
+        is_link: 0
+      }
+    })
+    .done(function() {
+      // remove block
+      // TODO: This doesn't work! why not?
+      console.log($(e.current_target));
+      console.log($(this).closest('.expanded-event-variable'));
+
+      // TODO: add (none) block, if necessary
+    })
+    .fail(function() {
+      // error
+      $('.flash').addClass('alert-danger');
+      $('.flash').text(req.responseText);
+      $('.flash').show();
+      $('.flash').fadeOut(5000);
+    });
+  });
 
   // Remove candidate event from grid
   $('.remove-candidate').click(function() {

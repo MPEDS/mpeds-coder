@@ -239,7 +239,11 @@
                             <div class="col-sm-8">
                                 <b>key:</b> {{ canonical_event['key']|safe }}</br>
                                 <b>start_date:</b> {{ canonical_event['start_date'] }}</br>
-                                <b>location:</b> {{ canonical_event['location'][0] }}
+                                {% if canonical_event['location'] %}
+                                  <b>location:</b> {{ canonical_event['location'][0] }}
+                                {% else %}
+                                  <b>location:</b>
+                                {% endif %}
                             </div>
                             <div class="col-sm-4">
                                 <b>Status:</b> {{ canonical_event['status'] }}<br/>

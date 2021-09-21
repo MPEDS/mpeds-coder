@@ -699,8 +699,13 @@ def add_canonical_record():
     if is_link:
         article_id = request.form['article_id']
         event_id = request.form['event_id']
-        db_session.add(CodeEventCreator(article_id, event_id, 'link', 'yes', current_user.id))
-        cec = db_session.commit()
+
+        ## TODO: don't actually do this, because it attaches a new user to the event_id
+        cec = db_session.add(CodeEventCreator(article_id, event_id, 'link', 'yes', current_user.id))
+        db_session.commit()
+
+        ## refresh to get the new ID
+        ## TODO: This doesn't work. need to do another query based on above.
         cec_id = cec.id
     else:
         ## for a regular commit, just get the CEC id
@@ -728,14 +733,62 @@ def add_canonical_record():
     db_session.add(CanonicalEventLink(current_user.id, canonical_event_id, cec_id))
     db_session.commit()
 
+    ## retrieve cel for timestamp
+    cel = db_session.query(CanonicalEventLink)\
+        .filter(
+            CanonicalEventLink.coder_id == current_user.id,
+            CanonicalEventLink.canonical_id == canonical_event_id,
+            CanonicalEventLink.cec_id == cec_id
+    ).first()
+
     ## for link, just return true
     if is_link:
         return jsonify(result={"status": 200})
     else:
-        ## otherwise, return the template for the canonical cell
+        ## otherwise, return the template
+        value = record.value
+        if record.text is not None:
+            value = record.text
         return render_template('canonical-cell.html', 
             var = record.variable, 
-            value = record.value) 
+            value = value,
+            timestamp = cel.timestamp,
+            cel_id = cel.id) 
+
+
+@app.route('/del_canonical_record', methods = ['POST'])
+@login_required
+def del_canonical_record():
+    """ Removes the link between a candidate event piece of data and a canonical event. """
+    is_link = int(request.form['is_link'])
+    record = None
+
+    ## for the link, get the CEC too and queue to delete
+    if is_link:
+        event_id = request.form['event_id']
+        link_cec = db_session.query(CodeEventCreator)\
+            .filter(
+                CodeEventCreator.event_id == event_id,
+                CodeEventCreator.variable == 'link'
+            ).first()
+        db_session.delete(link_cec)
+
+    ## for a regular commit, just get the CEL id
+    cel_id = int(request.form['cel_id'])
+
+    ## grab it from the database
+    cel = db_session.query(CanonicalEventLink)\
+        .filter(CanonicalEventLink.id == cel_id).first()
+
+    ## if it's fake, toss it
+    if not cel:
+        return make_response("No such CEL record.", 404)
+        
+    ## delete and commit
+    db_session.delete(cel)
+    db_session.commit()
+
+    return jsonify(result={"status": 200})
 
 
 @app.route('/modal_edit/<form_type>/<mode>', methods = ['GET', 'POST'])
@@ -833,16 +886,19 @@ def _load_canonical_event(id = None, key = None):
     if not ces:
         return None
 
-    for _, _, cec in ces:
+    for _, cel, cec in ces:
         ## create a new list if it doesn't exist
         if not canonical_event.get(cec.variable):
             canonical_event[cec.variable] = []
 
         ## insert in record
+        value = None
         if cec.text is not None:
-            canonical_event[cec.variable].append(cec.text)
+            value = cec.text
         else:
-            canonical_event[cec.variable].append(cec.value)
+            value = cec.value
+
+        canonical_event[cec.variable].append((cel.id, value, cel.timestamp))
 
     ## and some of the CE data
     canonical_event['id'] = ces[0][0].id
