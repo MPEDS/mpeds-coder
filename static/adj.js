@@ -37,21 +37,6 @@ var changeSubTab = function(e) {
   return false;
 }
 
-var removeCanonical = function(e) {
-  $('.canonical').each(function() {
-    $(this).remove();
-    
-    // hide the buttons
-    $('div.canonical-event-metadata a').each(function() {
-        $(this).hide();
-    });
-  });
-
-  // remove metadata ID
-  $('.canonical-event-metadata').attr('id', null);
-  return;
-}
-
 /**
  * Gets the current candidate events in the grid
  * @param {str} to_exclude - candidates to exclude
