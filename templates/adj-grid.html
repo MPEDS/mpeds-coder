@@ -1,35 +1,38 @@
-{% set cand_buttons = [
-    ('plus-sign', 'Add all values', 'add-all-val'), 
-    ('link', 'Link to canonical event', 'link'), 
-    ('flag', 'Flag for later', 'flag'), 
-    ('check', 'Mark completed', 'completed'), 
-    ('remove-sign', 'Remove from grid', 'remove-candidate')
-] -%}
 <div id="expanded-event-view-metadata" class="sticky-top">
     <div class="row expanded-event-variable-group">
         <div class="col-sm-1 expanded-event-variable-name">metadata</div>
         {% for event_id in cand_events.keys()|sort %}
         <!-- Candidate Event Metadata -->
         <div class="col-sm-2 expanded-event-variable-col candidate-event" 
-            id="candidate-event-metadata_{{ event_id }}">
+            id="candidate-event-metadata_{{ event_id }}"
+            data-event="{{ event_id }}"
+            data-article="{{ cand_events[event_id]['metadata']['article_id'] }}"
+            data-coder="{{ cand_events[event_id]['metadata']['coder_id'] }}">
             <label>
                 Event {{ event_id }} <br/> 
                 Actions: 
-                {% for symbol, alt, opt in cand_buttons %}
-                    <a class="glyphicon glyphicon-{{ symbol }} {{ opt }}" title="{{ alt }}" ></a> 
-                {% endfor %}
+                <a class="glyphicon glyphicon-plus-sign add-all-val" title="Add all values" ></a> 
+                {% if event_id in links %}
+                    <a class="glyphicon glyphicon-link text-danger remove-link" 
+                       title="Remove link to canonical event"></a> 
+                {% else %}
+                    <a class="glyphicon glyphicon-link link" title="Link to canonical event" ></a> 
+                {% endif %}
+                <a class="glyphicon glyphicon-flag flag" title="Flag for later"></a> 
+                <a class="glyphicon glyphicon-check completed" title="Mark completed"></a> 
+                <a class="glyphicon glyphicon-remove-sign remove-candidate" title="Remove from grid"></a> 
             </label> 
             <div class="expanded-event-variable expanded-event-variable-metadata" 
                 id="expanded-event-metadata_{{ event_id }}">
-                <b>title:</b> {{ cand_events[event_id]['title'] | safe }}<br/>
-                <b>publication:</b> {{ cand_events[event_id]['publication'] | safe }}<br/>
-                <b>pub_date:</b> {{ cand_events[event_id]['pub_date'] }}<br/>
+                <b>title:</b> {{ cand_events[event_id]['metadata']['title'] | safe }}<br/>
+                <b>publication:</b> {{ cand_events[event_id]['metadata']['publication'] | safe }}<br/>
+                <b>pub_date:</b> {{ cand_events[event_id]['metadata']['pub_date'] }}<br/>
                 <b>article_id:</b>
-                    <a href="{{ url_for('eventCreator', aid = cand_events[event_id]['article_id']) }}"
-                     target="_blank">
-                        {{ cand_events[event_id]['article_id'] }}
+                    <a href="{{ url_for('eventCreator', aid = cand_events[event_id]['metadata']['article_id']) }}"
+                       target="_blank">
+                        {{ cand_events[event_id]['metadata']['article_id'] }}
                     </a><br/>
-                <b>coder:</b> {{ cand_events[event_id]['coder_id'] }} <br/>
+                <b>coder:</b> {{ cand_events[event_id]['metadata']['coder_id'] }} <br/>
             </div>
         </div>
         {% endfor %}
@@ -83,7 +86,7 @@
         <!-- Canonical Event Fields -->
         <div class="col-sm-2 expanded-event-variable-col canonical-event" id="canonical-event_{{ var }}">
             {% if canonical_event and canonical_event[var]|length > 0 %}
-            {% for cel_id, value, timestamp in canonical_event[var] %}
+            {% for cel_id, value, timestamp, _ in canonical_event[var] %}
                 {% include 'canonical-cell.html' %}
             {% endfor %}
             {% else %}

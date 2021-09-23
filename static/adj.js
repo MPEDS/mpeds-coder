@@ -72,8 +72,8 @@ var getCandidates = function(to_exclude = '') {
 
 /**
  * Reloads the grid for adding and removing candidate and canonical events.
- * @param {string} canonical_event_key - Desired canonical event record.
- * @param {string} cand_events_str - Desired candidate events.
+ * @param {str} canonical_event_key - Desired canonical event record.
+ * @param {str} cand_events_str - Desired candidate events.
  * @returns false on failure, true on success
  */
 var reloadGrid = function(canonical_event_key = null, cand_events_str = null) {
@@ -114,10 +114,7 @@ var reloadGrid = function(canonical_event_key = null, cand_events_str = null) {
     $('.flash').removeClass('alert-info');
     return true;
   })
-  .fail(function() {
-    makeError(req.responseText);    
-    return false;
-  });
+  .fail(function() { return makeError(req.responseText); });
 }
 
 /**
@@ -135,8 +132,7 @@ var removeCanonical = function (e) {
     type: 'POST',
     url: $SCRIPT_ROOT + '/del_canonical_record',
     data: {
-      cel_id: cel_id,
-      is_link: 0
+      cel_id: cel_id
     }
   })
   .done(function() {
@@ -144,11 +140,20 @@ var removeCanonical = function (e) {
     $(block_id).remove();
     return true;
   })
-  .fail(function() {
-    // error
-    makeError(req.responseText);
-    return false;
-  });
+  .fail(function() { return makeError(req.responseText); });
+}
+
+/**
+ * Makes an success flash message.
+ * @param {str} msg - Message to show. 
+ */
+ var makeSuccess = function(msg) {
+  $('.flash').removeClass('alert-danger');
+  $('.flash').addClass('alert-success');
+  $('.flash').text(msg);
+  $('.flash').show();
+  $('.flash').fadeOut(5000);
+  return true;
 }
 
 /**
@@ -156,10 +161,12 @@ var removeCanonical = function (e) {
  * @param {str} msg - Message to show. 
  */
 var makeError = function(msg) {
+  $('.flash').removeClass('alert-success');
   $('.flash').addClass('alert-danger');
   $('.flash').text(msg);
   $('.flash').show();
   $('.flash').fadeOut(5000);
+  return false;
 }
 
 /**
@@ -170,18 +177,16 @@ var initializeGridListeners = function() {
   /**
    * Additions
    */
-  // add a value to current canonical event
+
+  // Add a value to current canonical event
   $('.add-val').click(function(e) {
     var canonical_event_id = $('div.canonical-event-metadata').attr('id').split('_')[1];
     var variable = $(e.target).closest('.expanded-event-variable').attr('data-var').split('_')[0];
 
     // No canonical event, so error
     if (canonical_event_id == '') {
-      $('.flash').addClass('alert-danger');
-      $('.flash').text("Please select a canonical event first.");
-      $('.flash').show();
-      $('.flash').fadeOut(5000);
-      return;
+      makeError("Please select a canonical event first.");
+      return false;
     }
 
     var req = $.ajax({
@@ -189,8 +194,7 @@ var initializeGridListeners = function() {
       url: $SCRIPT_ROOT + '/add_canonical_record',
       data: {
         canonical_event_id: canonical_event_id,
-        cec_id: $(e.target).attr('data-key'),
-        is_link: 0
+        cec_id: $(e.target).attr('data-key')
       }
     })
     .done(function() {
@@ -209,10 +213,43 @@ var initializeGridListeners = function() {
       $(cells[cells.length - 1]).find('a.remove-canonical').click(removeCanonical);
       return true;
     })
-    .fail(function() {
-      makeError(req.responseText);
+    .fail(function() { return makeError(req.responseText); });
+  });
+
+  // Link this event candidate event to the current canonical event
+  $('.link').click(function(e) {
+    var canonical_event_id = $('div.canonical-event-metadata').attr('id').split('_')[1];
+    var column = $(e.target).closest('.candidate-event');
+
+    // No canonical event, so error
+    if (canonical_event_id == '') {
+      makeError("Please select a canonical event first.");
       return false;
-    });
+    }
+
+    // TODO: Eventually change the way we get the coder ID
+    var event_id = column.attr('data-event');
+    var coder_name = column.attr('data-coder');
+    var article_id = column.attr('data-article');
+
+    var req = $.ajax({
+      type: 'POST',
+      url: $SCRIPT_ROOT + '/add_canonical_link',
+      data: {
+        canonical_event_id: canonical_event_id,
+        event_id: event_id,
+        coder_name: coder_name,
+        article_id: article_id
+      }
+    })
+    .done(function() { return makeSuccess("Link added successfully."); })
+    .fail(function() { return makeError(req.responseText); });
+  });
+
+  // Flag for later
+  $('.flag').click(function(e) {
+
+
   });
 
   /**
@@ -259,19 +296,9 @@ var initializeGridListeners = function() {
     })
     .done(function() {
       reloadGrid('', getCandidates());
-
-      $('.flash').text(req.responseText);
-      $('.flash').removeClass('alert-danger');
-      $('.flash').addClass('alert-success');
-      $('.flash').show()
-
-      $('.flash').fadeOut(3000);
-      return true;
+      return makeSuccess(req.responseText);
     })
-    .fail(function() { 
-      makeError(req.responseText);
-      return false;
-    });
+    .fail(function() { return makeError(req.responseText); });
   });
 
   // Remove canonical event from grid
