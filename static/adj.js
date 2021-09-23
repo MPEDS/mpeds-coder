@@ -115,13 +115,51 @@ var reloadGrid = function(canonical_event_key = null, cand_events_str = null) {
     return true;
   })
   .fail(function() {
-    $('.flash').text(req.responseText);
-    $('.flash').removeClass('alert-success');
-    $('.flash').addClass('alert-danger');
-    $('.flash').show();
-    
+    makeError(req.responseText);    
     return false;
   });
+}
+
+/**
+ * Removes the block from the canonical record.
+ * @param {event} e - event 
+ * @returns true if successful, false otherwise.
+ */
+var removeCanonical = function (e) {
+  var target = $(this).closest('.expanded-event-variable');
+  var cel_id = target.attr('data-key');
+  var variable = target.attr('data-var');
+  var block_id = '#canonical-' + variable + '_' + cel_id;
+
+  var req = $.ajax({
+    type: 'POST',
+    url: $SCRIPT_ROOT + '/del_canonical_record',
+    data: {
+      cel_id: cel_id,
+      is_link: 0
+    }
+  })
+  .done(function() {
+    // remove block
+    $(block_id).remove();
+    return true;
+  })
+  .fail(function() {
+    // error
+    makeError(req.responseText);
+    return false;
+  });
+}
+
+/**
+ * Makes an error flash message.
+ * @param {str} msg - Message to show. 
+ */
+var makeError = function(msg) {
+  $('.flash').addClass('alert-danger');
+  $('.flash').text(msg);
+  $('.flash').show();
+  $('.flash').fadeOut(5000);
 }
 
 /**
@@ -129,52 +167,52 @@ var reloadGrid = function(canonical_event_key = null, cand_events_str = null) {
  * Need to perform this on load and on reload of grid.
  */
 var initializeGridListeners = function() {
-  
   /**
    * Additions
    */
-
   // add a value to current canonical event
-  $('.add-val').each(function() {
-    $(this).click(function() {
-      var canonical_event_id = $('div.canonical-event-metadata').attr('id').split('_')[1];
-      var variable = $(this).closest('.expanded-event-variable').attr('data-var').split('_')[0];
+  $('.add-val').click(function(e) {
+    var canonical_event_id = $('div.canonical-event-metadata').attr('id').split('_')[1];
+    var variable = $(e.target).closest('.expanded-event-variable').attr('data-var').split('_')[0];
 
-      // No canonical event, so error
-      if (canonical_event_id == '') {
-        $('.flash').addClass('alert-danger');
-        $('.flash').text("Please select a canonical event first.");
-        $('.flash').show();
-        $('.flash').fadeOut(5000);
-        return;
+    // No canonical event, so error
+    if (canonical_event_id == '') {
+      $('.flash').addClass('alert-danger');
+      $('.flash').text("Please select a canonical event first.");
+      $('.flash').show();
+      $('.flash').fadeOut(5000);
+      return;
+    }
+
+    var req = $.ajax({
+      type: 'POST',
+      url: $SCRIPT_ROOT + '/add_canonical_record',
+      data: {
+        canonical_event_id: canonical_event_id,
+        cec_id: $(e.target).attr('data-key'),
+        is_link: 0
       }
+    })
+    .done(function() {
+      // remove the none block if it exists
+      $('#canonical-event_' + variable + ' .none').remove();
 
-      var req = $.ajax({
-        type: 'POST',
-        url: $SCRIPT_ROOT + '/add_canonical_record',
-        data: {
-          canonical_event_id: canonical_event_id,
-          cec_id: $(this).attr('data-key'),
-          is_link: 0
-        }
-      })
-      .done(function() {
-        // remove the none block if it exists
-        $('#canonical-event_' + variable + ' .none').remove();
+      // make a block variable for the text and get ID
+      var block = req.responseText;
 
-        // add block to the canonical event variable
-        $('#canonical-event_' + variable).append(req.responseText);
+      // add block to the canonical event variable
+      $('#canonical-event_' + variable).append(block);
 
-        // TODO: Re-add delete button listener
-      })
-      .fail(function() {
-        // error
-        $('.flash').addClass('alert-danger');
-        $('.flash').text(req.responseText);
-        $('.flash').show();
-        $('.flash').fadeOut(5000);
-      });
-    }); 
+      // add remove listener by finding the last element 
+      // added to this group of canonical cells
+      var cells = $('#canonical-event_' + variable).children();
+      $(cells[cells.length - 1]).find('a.remove-canonical').click(removeCanonical);
+      return true;
+    })
+    .fail(function() {
+      makeError(req.responseText);
+      return false;
+    });
   });
 
   /**
@@ -182,33 +220,7 @@ var initializeGridListeners = function() {
    */
 
   // remove value from current canonical event
-  $('.remove-canonical').click(function (e) {
-    var cel_id = $(this).closest('.expanded-event-variable').attr('data-key');
-
-    var req = $.ajax({
-      type: 'POST',
-      url: $SCRIPT_ROOT + '/del_canonical_record',
-      data: {
-        cel_id: cel_id,
-        is_link: 0
-      }
-    })
-    .done(function() {
-      // remove block
-      // TODO: This doesn't work! why not?
-      console.log($(e.current_target));
-      console.log($(this).closest('.expanded-event-variable'));
-
-      // TODO: add (none) block, if necessary
-    })
-    .fail(function() {
-      // error
-      $('.flash').addClass('alert-danger');
-      $('.flash').text(req.responseText);
-      $('.flash').show();
-      $('.flash').fadeOut(5000);
-    });
-  });
+  $('.remove-canonical').click(removeCanonical);
 
   // Remove candidate event from grid
   $('.remove-candidate').click(function() {
@@ -254,12 +266,11 @@ var initializeGridListeners = function() {
       $('.flash').show()
 
       $('.flash').fadeOut(3000);
+      return true;
     })
     .fail(function() { 
-      $('.flash').text(req.responseText);
-      $('.flash').removeClass('alert-success');
-      $('.flash').addClass('alert-danger');
-      $('.flash').show();
+      makeError(req.responseText);
+      return false;
     });
   });
 
