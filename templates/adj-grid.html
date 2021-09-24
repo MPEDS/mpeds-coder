@@ -19,8 +19,19 @@
                 {% else %}
                     <a class="glyphicon glyphicon-link add-link" title="Link to canonical event" ></a> 
                 {% endif %}
-                <a class="glyphicon glyphicon-flag flag" title="Flag for later"></a> 
-                <a class="glyphicon glyphicon-check completed" title="Mark completed"></a> 
+                
+                {% if event_id in flags.keys() and flags[event_id] == 'for-review' %}
+                    <a class="glyphicon glyphicon-flag remove-flag text-danger" title="Remove flag"></a> 
+                {% else %}
+                    <a class="glyphicon glyphicon-flag add-flag" title="Flag for later"></a> 
+                {% endif %}
+                
+                {% if event_id in flags.keys() and flags[event_id] == 'completed' %}
+                    <a class="glyphicon glyphicon-check remove-completed text-danger" title="Remove completed"></a> 
+                {% else %}
+                    <a class="glyphicon glyphicon-check add-completed" title="Mark completed"></a> 
+                {% endif %}
+    
                 <a class="glyphicon glyphicon-remove-sign remove-candidate" title="Remove from grid"></a> 
             </label> 
             <div class="expanded-event-variable expanded-event-variable-metadata" 

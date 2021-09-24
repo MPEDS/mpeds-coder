@@ -37,6 +37,7 @@ var changeSubTab = function(e) {
   return false;
 }
 
+
 /**
  * Gets the current candidate events in the grid
  * @param {str} to_exclude - candidates to exclude
@@ -123,6 +124,36 @@ var removeCanonical = function () {
     // remove block
     $(block_id).remove();
     return true;
+  })
+  .fail(function() { return makeError(req.responseText); });
+}
+
+/**
+ * Toggles flags for candidate events.
+ * @param {Event} e - click event
+ * @param {str} operation - add or deletion operation. takes values 'add' or 'del'
+ * @param {str} flag - the flag to add to this event
+ * @returns true if success, false otherwise 
+ */
+var toggleFlag = function(e, operation, flag) {
+  if (operation != 'add' & operation != 'del') {
+    return false;
+  }
+
+  var column = $(e.target).closest('.candidate-event');
+  var req = $.ajax({
+    type: 'POST',
+    url: $SCRIPT_ROOT + '/' + operation + '_event_flag',
+    data: {
+      event_id: column.attr('data-event'), 
+      flag: flag
+    }
+  })
+  .done(function() { 
+    return reloadGrid(
+      canonical_event_key = $('div.canonical-event-metadata').attr('data-key'),
+      cand_event_str = getCandidates()
+    );
   })
   .fail(function() { return makeError(req.responseText); });
 }
@@ -228,11 +259,12 @@ var initializeGridListeners = function() {
     .fail(function() { return makeError(req.responseText); });
   });
 
-  // Add flag for later review
-  $('.add-flag').click(function(e) {
+  // add completed
+  // TODO: need to pass an arg to reload the grid minus the completed event
+  $('.add-completed').click(function(e) { toggleFlag(e, 'add', 'completed') });  
 
-
-  });
+  // add flag for later review
+  $('.add-flag').click(function(e) { toggleFlag(e, 'add', 'for-review') });
 
   /**
    * Deletions and removals
@@ -278,6 +310,12 @@ var initializeGridListeners = function() {
     })
     .fail(function() { return makeError(req.responseText); });    
   });
+
+  // Remove completed
+  $('.remove-completed').click(function(e) { toggleFlag(e, 'del', 'completed') });
+
+  // Remove flag
+  $('.remove-flag').click(function(e) { toggleFlag(e, 'del', 'for-review') });
 
   // Delete canonical event 
   $('div.canonical-event-metadata a.glyphicon-trash').click(function () {

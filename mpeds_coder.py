@@ -55,7 +55,8 @@ from database import db_session
 
 from models import ArticleMetadata, ArticleQueue, CanonicalEvent, CanonicalEventLink, \
     CoderArticleAnnotation, CodeFirstPass, CodeSecondPass, CodeEventCreator, \
-    Event, EventMetadata, EventCreatorQueue, RecentEvent, RecentCanonicalEvent, SecondPassQueue, User
+    Event, EventCreatorQueue, EventFlag, EventMetadata, \
+    RecentEvent, RecentCanonicalEvent, SecondPassQueue, User
 
 ##### Enable OrderedDict with PyYAML
 ##### Copy-pasta from https://stackoverflow.com/a/21912744 on 2019-12-12
@@ -601,6 +602,9 @@ def adj():
     ## links, keyed by event_id: cel_id
     links = {x[3]: x[0] for x in canonical_event['link']} if canonical_event_key else {}
 
+    ## load flags
+    flags = _load_event_flags(cand_event_ids)
+
     #####
     ## Recent events
     #####
@@ -638,6 +642,7 @@ def adj():
         cand_events   = cand_events,
         grid_vars     = _make_grid_vars(),
         links         = links,
+        flags         = flags,
         recent_events = recent_events,
 #        recent_canonical_events = recent_canonical_events,
         canonical_event = canonical_event)
@@ -649,8 +654,9 @@ def load_adj_grid():
     """Loads the grid for the expanded event view and renders it.""" 
     ce_ids = request.args.get('cand_events')
     canonical_event_key = request.args.get('canonical_event_key')
+    cand_event_ids = [int(x) for x in ce_ids.split(',')] if ce_ids else []
     
-    cand_events = _load_candidate_events([int(x) for x in ce_ids.split(',')] if ce_ids else [])
+    cand_events = _load_candidate_events(cand_event_ids)
     canonical_event = _load_canonical_event(key = canonical_event_key)
 
     ## links, keyed by event_id: cel_id
@@ -660,34 +666,8 @@ def load_adj_grid():
         canonical_event = canonical_event,
         cand_events = cand_events,
         links = links,
+        flags = _load_event_flags(cand_event_ids),
         grid_vars = _make_grid_vars())
-
-
-@app.route('/del_canonical_event', methods = ['POST'])
-@login_required
-def del_canonical_event():
-    """ Deletes the canonical event and related CEC links from the database."""
-    id = request.form['id']
-
-    cels = db_session.query(CanonicalEventLink)\
-        .filter(CanonicalEventLink.canonical_id == id).all()
-    rces = db_session.query(RecentCanonicalEvent)\
-        .filter(RecentCanonicalEvent.canonical_id == id).all()
-    ce = db_session.query(CanonicalEvent)\
-        .filter(CanonicalEvent.id == id).first()
-
-    ## remove these first to avoid FK error
-    for cel in cels:
-        db_session.delete(cel)
-    for rce in rces:
-        db_session.delete(rce)
-    db_session.commit()
-
-    ## delete the actual event
-    db_session.delete(ce)
-    db_session.commit()
-    
-    return make_response("Canonical event deleted.", 200)
 
 
 @app.route('/add_canonical_link', methods = ['POST'])
@@ -782,6 +762,49 @@ def add_canonical_record():
         cel_id = cel.id) 
 
 
+@app.route('/add_event_flag', methods = ['POST'])
+@login_required
+def add_event_flag():
+    """Adds a flag to a candidate event."""
+    event_id = int(request.form['event_id'])
+    flag = request.form['flag']
+
+    db_session.add(EventFlag(current_user.id, event_id, flag))
+    db_session.commit()
+
+    return make_response("Flag created.", 200)
+    
+
+######
+# Adjudicator Deletions
+######
+@app.route('/del_canonical_event', methods = ['POST'])
+@login_required
+def del_canonical_event():
+    """ Deletes the canonical event and related CEC links from the database."""
+    id = request.form['id']
+
+    cels = db_session.query(CanonicalEventLink)\
+        .filter(CanonicalEventLink.canonical_id == id).all()
+    rces = db_session.query(RecentCanonicalEvent)\
+        .filter(RecentCanonicalEvent.canonical_id == id).all()
+    ce = db_session.query(CanonicalEvent)\
+        .filter(CanonicalEvent.id == id).first()
+
+    ## remove these first to avoid FK error
+    for cel in cels:
+        db_session.delete(cel)
+    for rce in rces:
+        db_session.delete(rce)
+    db_session.commit()
+
+    ## delete the actual event
+    db_session.delete(ce)
+    db_session.commit()
+    
+    return make_response("Canonical event deleted.", 200)
+
+
 @app.route('/del_canonical_record', methods = ['POST'])
 @login_required
 def del_canonical_record():
@@ -817,6 +840,26 @@ def del_canonical_record():
         return make_response("Link removed.", 200)
     else:
         return make_response("Delete successful.", 200)
+
+
+@app.route('/del_event_flag', methods = ['POST'])
+@login_required
+def del_event_flag():
+    """Deletes a flag to a candidate event."""
+    event_id = int(request.form['event_id'])
+    flag = request.form['flag']
+
+    ef = db_session.query(EventFlag).\
+        filter(
+            EventFlag.coder_id == current_user.id, 
+            EventFlag.event_id == event_id, 
+            EventFlag.flag == flag
+        ).first()
+
+    db_session.delete(ef)
+    db_session.commit()
+
+    return make_response("Flag deleted.", 200)
 
 
 @app.route('/modal_edit/<form_type>/<mode>', methods = ['GET', 'POST'])
@@ -931,6 +974,18 @@ def _load_canonical_event(id = None, key = None):
     canonical_event['status'] = ces[0][0].status
 
     return canonical_event
+
+
+@app.route('/_load_event_flags')
+@login_required
+def _load_event_flags(events):
+    """Loads the event flags for candidate events."""
+    efs = db_session.query(EventFlag).\
+        filter(
+            EventFlag.event_id.in_(events),
+            EventFlag.coder_id == current_user.id
+        ).all()
+    return {x.event_id: x.flag for x in efs}
 
 
 @app.route('/_make_grid_vars')
