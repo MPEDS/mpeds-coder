@@ -599,7 +599,7 @@ def adj():
     canonical_event = _load_canonical_event(key = canonical_event_key)
 
     ## links, keyed by event_id: cel_id
-    links = {x[3]: x[0] for x in canonical_event['link']}
+    links = {x[3]: x[0] for x in canonical_event['link']} if canonical_event_key else {}
 
     #####
     ## Recent events
@@ -654,7 +654,7 @@ def load_adj_grid():
     canonical_event = _load_canonical_event(key = canonical_event_key)
 
     ## links, keyed by event_id: cel_id
-    links = {x[3]: x[0] for x in canonical_event['link']}
+    links = {x[3]: x[0] for x in canonical_event['link']} if canonical_event_key else {}
 
     return render_template('adj-grid.html',
         canonical_event = canonical_event,
