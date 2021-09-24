@@ -104,10 +104,9 @@ var reloadGrid = function(canonical_event_key = null, cand_events_str = null) {
 
 /**
  * Removes the block from the canonical record.
- * @param {event} e - event 
  * @returns true if successful, false otherwise.
  */
-var removeCanonical = function (e) {
+var removeCanonical = function () {
   var target = $(this).closest('.expanded-event-variable');
   var cel_id = target.attr('data-key');
   var variable = target.attr('data-var');
@@ -202,37 +201,35 @@ var initializeGridListeners = function() {
   });
 
   // Link this event candidate event to the current canonical event
-  $('.link').click(function(e) {
+  $('.add-link').click(function(e) {
     var canonical_event_id = $('div.canonical-event-metadata').attr('id').split('_')[1];
-    var column = $(e.target).closest('.candidate-event');
-
-    // No canonical event, so error
     if (canonical_event_id == '') {
       makeError("Please select a canonical event first.");
       return false;
     }
 
-    // TODO: Eventually change the way we get the coder ID
-    var event_id = column.attr('data-event');
-    var coder_name = column.attr('data-coder');
-    var article_id = column.attr('data-article');
-
+    var column = $(e.target).closest('.candidate-event');
     var req = $.ajax({
       type: 'POST',
       url: $SCRIPT_ROOT + '/add_canonical_link',
       data: {
         canonical_event_id: canonical_event_id,
-        event_id: event_id,
-        coder_name: coder_name,
-        article_id: article_id
+        event_id: column.attr('data-event'), 
+        coder_name: column.attr('data-coder'), // TODO: Change the way we get the coder ID
+        article_id: column.attr('data-article')
       }
     })
-    .done(function() { return makeSuccess("Link added successfully."); })
+    .done(function() { 
+      reloadGrid(
+        canonical_event_key = $('div.canonical-event-metadata').attr('data-key'),
+        cand_event_str = getCandidates()
+      );
+    })
     .fail(function() { return makeError(req.responseText); });
   });
 
-  // Flag for later
-  $('.flag').click(function(e) {
+  // Add flag for later review
+  $('.add-flag').click(function(e) {
 
 
   });
@@ -260,6 +257,26 @@ var initializeGridListeners = function() {
           canonical_event_key = canonical_event_key, 
           cand_event_str = getCandidates(to_exclude)
       );
+  });
+
+  // Remove the link to this canonical event
+  $('.remove-link').click(function (e) {
+    var req = $.ajax({
+      type: 'POST',
+      url: $SCRIPT_ROOT + '/del_canonical_record',
+      data: {
+        cel_id: $(e.target).attr('data-key'),
+        event_id: $(e.target).closest('.candidate-event').attr('data-event'),
+        is_link: 1
+      }
+    })
+    .done(function() {
+      reloadGrid(
+        canonical_event_key = $('div.canonical-event-metadata').attr('data-key'),
+        cand_event_str = getCandidates()
+      );
+    })
+    .fail(function() { return makeError(req.responseText); });    
   });
 
   // Delete canonical event 

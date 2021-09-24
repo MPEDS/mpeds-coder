@@ -12,11 +12,12 @@
                 Event {{ event_id }} <br/> 
                 Actions: 
                 <a class="glyphicon glyphicon-plus-sign add-all-val" title="Add all values" ></a> 
-                {% if event_id in links %}
+                {% if event_id in links.keys() %}
                     <a class="glyphicon glyphicon-link text-danger remove-link" 
-                       title="Remove link to canonical event"></a> 
+                       title="Remove link to canonical event"
+                       data-key="{{ links[event_id] if event_id in links else '' }}"></a> 
                 {% else %}
-                    <a class="glyphicon glyphicon-link link" title="Link to canonical event" ></a> 
+                    <a class="glyphicon glyphicon-link add-link" title="Link to canonical event" ></a> 
                 {% endif %}
                 <a class="glyphicon glyphicon-flag flag" title="Flag for later"></a> 
                 <a class="glyphicon glyphicon-check completed" title="Mark completed"></a> 
