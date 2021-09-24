@@ -153,7 +153,13 @@
                                     {% else %}
                                         <b><a href="#">Add to Expand <span class="glyphicon glyphicon-plus"></span></a></b><br/>
                                     {% endif %}
-                                    <span class="bg-danger">Flagged</span>
+                                    {% if e.event_id in flags %}
+                                        {% if flags[e.event_id] == 'for-review' %}
+                                            <b class="text-danger">Flagged</b>
+                                        {% elif flags[e.event_id] == 'completed' %}
+                                            <b class="text-success">Completed</b>
+                                        {% endif %}
+                                    {% endif %}
                                 </div>
                             </div>
                             <div class="row">
