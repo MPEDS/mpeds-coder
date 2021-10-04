@@ -150,9 +150,15 @@ var toggleFlag = function(e, operation, flag) {
     }
   })
   .done(function() { 
+    // remove this event if we're adding a completed flag
+    to_exclude = '';
+    if (operation == 'add' & flag == 'completed') {
+      to_exclude = column.attr('data-event');
+    }
+
     return reloadGrid(
       canonical_event_key = $('div.canonical-event-metadata').attr('data-key'),
-      cand_event_str = getCandidates()
+      cand_event_str = getCandidates(to_exclude)
     );
   })
   .fail(function() { return makeError(req.responseText); });
@@ -260,8 +266,9 @@ var initializeGridListeners = function() {
   });
 
   // add completed
-  // TODO: need to pass an arg to reload the grid minus the completed event
-  $('.add-completed').click(function(e) { toggleFlag(e, 'add', 'completed') });  
+  $('.add-completed').click(function(e) { 
+    toggleFlag(e, 'add', 'completed');  
+  });  
 
   // add flag for later review
   $('.add-flag').click(function(e) { toggleFlag(e, 'add', 'for-review') });
@@ -355,7 +362,7 @@ var initializeGridListeners = function() {
 }
 
 // MAIN -- document ready 
-$(function(){ 
+$(function () { 
     // Show search block first
     $("#search_block").show();
 
@@ -416,8 +423,13 @@ $(function(){
             $("#modal-flash").addClass("alert-success");
             $("#modal-flash").show();
 
-            // $('#modal-container').modal('hide');
-            location.reload();
+            $('#modal-container').modal('hide');
+
+            // update the grid with new canonical event
+            reloadGrid(
+              canonical_event_key = $("#modal-canonical-event-key").val(),
+              cand_events_str = getCandidates()
+            );
           })
           .fail(function() {
             $("#modal-flash").text(req.responseText);

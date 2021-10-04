@@ -39,7 +39,8 @@ from lxml import etree
 from pytz import timezone
 
 ## flask
-from flask import Flask, request, session, g, redirect, url_for, abort, make_response, render_template, flash, jsonify, Response, stream_with_context
+from flask import Flask, request, session, g, redirect, url_for, abort, make_response,\
+    render_template, flash, jsonify
 from flask_login import LoginManager, login_user, logout_user, current_user, login_required
 
 ## article assignment library
@@ -570,19 +571,13 @@ def adj():
     filter = request.form.get('filter')
     sort = request.form.get('sort')
 
-    ce_key_arg = request.args.get('canonical_event_key')
+    canonical_event_key = request.args.get('canonical_event_key')
     ce_ids = request.args.get('cand_events')
 
     cand_event_ids = []
-    canonical_event_key = None
 
-    ## TODO: Add validation
     if ce_ids:
         cand_event_ids = [int(x) for x in ce_ids.split(',')]
-
-    ## TODO: Add validation
-    if ce_key_arg:
-        canonical_event_key = ce_key_arg
 
     ## TODO: These are placeholders which will be gathered from queries later
     query1 = 'Chicago'
@@ -600,7 +595,9 @@ def adj():
     canonical_event = _load_canonical_event(key = canonical_event_key)
 
     ## links, keyed by event_id: cel_id
-    links = {x[3]: x[0] for x in canonical_event['link']} if canonical_event_key else {}
+    links = {}
+    if canonical_event_key and canonical_event and canonical_event.get('link'):
+        links = {x[3]: x[0] for x in canonical_event['link']}
 
     ## load flags
     flags = _load_event_flags(cand_event_ids)
@@ -660,7 +657,9 @@ def load_adj_grid():
     canonical_event = _load_canonical_event(key = canonical_event_key)
 
     ## links, keyed by event_id: cel_id
-    links = {x[3]: x[0] for x in canonical_event['link']} if canonical_event_key else {}
+    links = {}
+    if canonical_event_key and canonical_event and canonical_event.get('link'):
+        links = {x[3]: x[0] for x in canonical_event['link']}
 
     return render_template('adj-grid.html',
         canonical_event = canonical_event,
@@ -782,7 +781,7 @@ def add_event_flag():
 @login_required
 def del_canonical_event():
     """ Deletes the canonical event and related CEC links from the database."""
-    id = request.form['id']
+    id = int(request.form['id'])
 
     cels = db_session.query(CanonicalEventLink)\
         .filter(CanonicalEventLink.canonical_id == id).all()
@@ -809,8 +808,8 @@ def del_canonical_event():
 @login_required
 def del_canonical_record():
     """ Removes the link between a candidate event piece of data and a canonical event. """
-    is_link = int(request.form['is_link'])
     cel_id = int(request.form['cel_id'])
+    is_link = request.form['is_link'] if 'is_link' in request.form else None
 
     ## grab it from the database
     cel = db_session.query(CanonicalEventLink)\
@@ -847,16 +846,15 @@ def del_canonical_record():
 def del_event_flag():
     """Deletes a flag to a candidate event."""
     event_id = int(request.form['event_id'])
-    flag = request.form['flag']
 
-    ef = db_session.query(EventFlag).\
+    efs = db_session.query(EventFlag).\
         filter(
             EventFlag.coder_id == current_user.id, 
-            EventFlag.event_id == event_id, 
-            EventFlag.flag == flag
-        ).first()
+            EventFlag.event_id == event_id
+        ).all()
 
-    db_session.delete(ef)
+    for ef in efs:
+        db_session.delete(ef)
     db_session.commit()
 
     return make_response("Flag deleted.", 200)
@@ -864,13 +862,12 @@ def del_event_flag():
 
 @app.route('/modal_edit/<form_type>/<mode>', methods = ['GET', 'POST'])
 @login_required
-def modal_edit(form_type, mode = None, id = None):
+def modal_edit(form_type, mode = None):
     """ Handler for modal display and form submission. """
     if mode == 'add':
         key   = request.form['canonical-event-key']
         notes = request.form['canonical-event-notes']
 
-    if mode == 'add':
         ## Key already exists
         qs = db_session.query(CanonicalEvent).filter(CanonicalEvent.key == key).all()
         if len(qs) > 0: 
@@ -880,7 +877,11 @@ def modal_edit(form_type, mode = None, id = None):
         db_session.add(CanonicalEvent(coder_id = current_user.id, key = key, notes = notes))
         db_session.commit()
 
-        return jsonify(result={"status": 200}) 
+        ## Return new event and put the new ID in the header.
+        response = make_response("Canonical event created.", 200)
+        response.headers['canonical_event_id'] = \
+            db_session.query(CanonicalEvent).filter(CanonicalEvent.key == key).first().id
+        return response
     elif mode == 'edit':
         ### TODO: add logic which loads existing items for edit
         pass
@@ -935,23 +936,30 @@ def _load_canonical_event(id = None, key = None):
         return None
 
     canonical_event = {}
-
     ces = None
     if id:
         canonical_event['id'] = id
+        ce  = db_session.query(CanonicalEvent).filter(CanonicalEvent.id == id).first()
         ces = db_session.query(CanonicalEvent, CanonicalEventLink, CodeEventCreator).\
             join(CanonicalEventLink, CanonicalEvent.id == CanonicalEventLink.canonical_id).\
             join(CodeEventCreator, CanonicalEventLink.cec_id == CodeEventCreator.id).\
             filter(CanonicalEvent.id == id).all()
     else:
         canonical_event['key'] = key
+        ce  = db_session.query(CanonicalEvent).filter(CanonicalEvent.key == key).first()
         ces = db_session.query(CanonicalEvent, CanonicalEventLink, CodeEventCreator).\
             join(CanonicalEventLink, CanonicalEvent.id == CanonicalEventLink.canonical_id).\
             join(CodeEventCreator, CanonicalEventLink.cec_id == CodeEventCreator.id).\
             filter(CanonicalEvent.key == key).all()
 
-    if not ces:
+    if not ce:
         return None
+
+    ## load CE data
+    canonical_event['id'] = ce.id
+    canonical_event['key'] = ce.key
+    canonical_event['notes'] = ce.notes
+    canonical_event['status'] = ce.status
 
     for _, cel, cec in ces:
         ## create a new list if it doesn't exist
@@ -967,12 +975,6 @@ def _load_canonical_event(id = None, key = None):
 
         canonical_event[cec.variable].append((cel.id, value, cel.timestamp, cec.event_id))
 
-    ## and some of the CE data
-    canonical_event['id'] = ces[0][0].id
-    canonical_event['key'] = ces[0][0].key
-    canonical_event['notes'] = ces[0][0].notes
-    canonical_event['status'] = ces[0][0].status
-
     return canonical_event
 
 
@@ -986,6 +988,12 @@ def _load_event_flags(events):
             EventFlag.coder_id == current_user.id
         ).all()
     return {x.event_id: x.flag for x in efs}
+
+
+# @app.route('/_load_links')
+# @login_required
+# def _load_links(canonical_event_key):
+#     """Load links for a given canonical event."""
 
 
 @app.route('/_make_grid_vars')

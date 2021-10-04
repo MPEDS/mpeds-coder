@@ -245,11 +245,12 @@
                         <div class="row">
                             <div class="col-sm-8">
                                 <b>key:</b> {{ canonical_event['key']|safe }}</br>
-                                <b>start_date:</b> {{ canonical_event['start_date'] }}</br>
+                                {% if canonical_event['start_date'] %}
+                                    <b>start_date:</b> {{ canonical_event['start_date'] }}</br>
+                                {% endif %}
+
                                 {% if canonical_event['location'] %}
                                   <b>location:</b> {{ canonical_event['location'][0] }}
-                                {% else %}
-                                  <b>location:</b>
                                 {% endif %}
                             </div>
                             <div class="col-sm-4">
@@ -264,7 +265,9 @@
                         <div class="row">
                             <div class="col-sm-12">
                                 <b>notes: </b> {{ canonical_event['notes']|safe }}<br/>
-                                <b>desc:</b> {{ canonical_event['desc'][0]|safe }}
+                                {% if canonical_event['desc'] %}
+                                    <b>desc:</b> {{ canonical_event['desc']|safe }}</br>
+                                {% endif %}
                             </div>
                         </div>
                     </div>

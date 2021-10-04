@@ -25,14 +25,14 @@
                 {% else %}
                     <a class="glyphicon glyphicon-flag add-flag" title="Flag for later"></a> 
                 {% endif %}
-                
+
+                <a class="glyphicon glyphicon-remove-sign remove-candidate" title="Remove from grid"></a> 
+
                 {% if event_id in flags.keys() and flags[event_id] == 'completed' %}
                     <a class="glyphicon glyphicon-check remove-completed text-danger" title="Remove completed"></a> 
                 {% else %}
                     <a class="glyphicon glyphicon-check add-completed" title="Mark completed"></a> 
-                {% endif %}
-    
-                <a class="glyphicon glyphicon-remove-sign remove-candidate" title="Remove from grid"></a> 
+                {% endif %}    
             </label> 
             <div class="expanded-event-variable expanded-event-variable-metadata" 
                 id="expanded-event-metadata_{{ event_id }}">
