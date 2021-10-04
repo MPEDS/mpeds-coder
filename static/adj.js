@@ -335,7 +335,7 @@ var initializeGridListeners = function() {
 
     // remove from the database via Ajax call
     var req = $.ajax({
-      url: $SCRIPT_ROOT + '/_del_canonical_event',
+      url: $SCRIPT_ROOT + '/del_canonical_event',
       type: "POST",
       data: {
         id: canonical_event_id
