@@ -60,9 +60,6 @@
             </label>
             {% for var in ['key', 'notes'] %}
             <div class="expanded-event-variable expanded-event-variable canonical" id="expanded-event-canonical-{{ var }}">
-                <div class="sticky-top data-buttons">
-                    <a class="glyphicon glyphicon-info-sign" title="Info"></a>
-                </div>
                 <b>{{ var|title }}: </b> {{ canonical_event[var]|safe }}<br />
             </div>
             {% endfor %}                        
