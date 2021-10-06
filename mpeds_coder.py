@@ -972,7 +972,6 @@ def _load_canonical_event(id = None, key = None):
     canonical_event['id'] = ce.id
     canonical_event['key'] = ce.key
     canonical_event['notes'] = ce.notes
-    canonical_event['status'] = ce.status
 
     for _, cel, cec in ces:
         ## create a new list if it doesn't exist

@@ -35,7 +35,6 @@ class CanonicalEvent(Base):
     coder_id     = Column(Integer, ForeignKey('user.id'), nullable = False)
     key          = Column(Text, nullable = False)
     notes        = Column(UnicodeText)
-    status       = Column(Text)
     last_updated = Column(DateTime)
 
     UniqueConstraint('key', name = 'unique1')
