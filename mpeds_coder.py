@@ -599,9 +599,6 @@ def adj():
     if canonical_event_key and canonical_event and canonical_event.get('link'):
         links = {x[3]: x[0] for x in canonical_event['link']}
 
-    ## load flags
-    flags = _load_event_flags(cand_event_ids)
-
     #####
     ## Recent events
     #####
@@ -639,7 +636,7 @@ def adj():
         cand_events   = cand_events,
         grid_vars     = _make_grid_vars(),
         links         = links,
-        flags         = flags,
+        flags         = _load_event_flags(cand_event_ids),
         recent_events = recent_events,
 #        recent_canonical_events = recent_canonical_events,
         canonical_event = canonical_event)
@@ -648,7 +645,7 @@ def adj():
 @app.route('/load_adj_grid', methods = ['GET'])
 @login_required
 def load_adj_grid():
-    """Loads the grid for the expanded event view and renders it.""" 
+    """Loads the grid for the expanded event view and returns the template.""" 
     ce_ids = request.args.get('cand_events')
     canonical_event_key = request.args.get('canonical_event_key')
     cand_event_ids = [int(x) for x in ce_ids.split(',')] if ce_ids else []
@@ -860,11 +857,11 @@ def del_event_flag():
     return make_response("Flag deleted.", 200)
 
 
-@app.route('/modal_edit/<form_type>/<mode>', methods = ['GET', 'POST'])
+@app.route('/modal_edit/<variable>', methods = ['POST'])
 @login_required
-def modal_edit(form_type, mode = None):
+def modal_edit(variable):
     """ Handler for modal display and form submission. """
-    if mode == 'add':
+    if variable == 'canonical':
         key   = request.form['canonical-event-key']
         notes = request.form['canonical-event-notes']
 
@@ -878,17 +875,33 @@ def modal_edit(form_type, mode = None):
         db_session.commit()
 
         ## Return new event and put the new ID in the header.
-        response = make_response("Canonical event created.", 200)
-        response.headers['canonical_event_id'] = \
-            db_session.query(CanonicalEvent).filter(CanonicalEvent.key == key).first().id
-        return response
-    elif mode == 'edit':
-        ### TODO: add logic which loads existing items for edit
+        return make_response("Canonical event created.", 200)
+    elif variable.endswith('-date'):
+        ## TODO: Check if current candidate events have a dedicated dummy event?
+        ## I'm actually not sure what the logic of this should be.
+
+        ## TODO: Create a new event based off the candidate article 
+        ## if it doesn't exist. Add the text
         pass
-    elif mode == 'view':
-        return render_template('modal.html', form_type = form_type)
-    else:
-        return make_response("Illegal action.", 400)
+
+
+@app.route('/modal_view/<variable>', methods = ['GET'])
+@login_required
+def modal_view(variable):
+    """Returns the template for the modal, based on the variable."""
+    article_ids = []
+
+    ## for non-canonical adds, get the article IDs associated with current candidate events
+    if variable != 'canonical':
+        candidate_events = request.args.get('candidate_event_ids').split(',')
+        article_ids = [x.article_id for x in db_session.query(Event).filter(Event.id.in_(candidate_events)).all()]
+ 
+        ## get distinct values
+        article_ids = list(set(article_ids))
+
+    return render_template('modal.html', 
+        variable = variable, 
+        article_ids = article_ids)
 
 
 #####

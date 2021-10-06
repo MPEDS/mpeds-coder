@@ -1,6 +1,6 @@
 <div class="modal-header">
   <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-  <h4 class="modal-title" id="l_my_modal">Add Canonical Event</h4>
+  <h4 class="modal-title" id="l_my_modal">Add {{ variable|capitalize }}</h4>
 </div>
 <div class="modal-body">
   <div class="col-sm-12">
@@ -9,18 +9,35 @@
   <form id="modal-form"> 
     <div class="form-group col-sm-12">
         <div class="form-row">
+          {% if variable == 'canonical' %}
             <input class="form-control form-control-sm" 
-                  name="canonical-event-key"
-                  id="modal-canonical-event-key"
-                  type="text" 
-                  placeholder = "Canonical Event Key..."/>
+                    name="canonical-event-key"
+                    id="modal-canonical-event-key"
+                    type="text" 
+                    placeholder = "Canonical Event Key..."/>
+           {% else %}
+            <select class="form-control form-control-sm" 
+              name="article-select">
+                <option value="">Select article</option>
+                <!-- TODO Change to article_ids -->
+              {% for article_id in article_ids %}
+                <option value="{{ article_id }}">{{ article_id }}</option>
+              {% endfor %}
+            </select>
+          {% endif %}
         </div>
       </div>
       <div class="form-group col-sm-12">
         <div class="form-row">
+          {% if variable == 'canonical' %}
             <textarea class="form-control" 
               name="canonical-event-notes" 
               placeholder = "Notes..."></textarea>
+          {% else %}
+            <textarea class="form-control"
+              name="variable-text"
+              placeholder = "Enter text for {{ variable }}..."></textarea>
+          {% endif %}
         </div>
       </div>
     </div>

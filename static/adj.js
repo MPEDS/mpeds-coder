@@ -265,13 +265,29 @@ var initializeGridListeners = function() {
     .fail(function() { return makeError(req.responseText); });
   });
 
-  // add completed
-  $('.add-completed').click(function(e) { 
-    toggleFlag(e, 'add', 'completed');  
-  });  
+  // add completed flag to candidate event
+  $('.add-completed').click(function(e) { toggleFlag(e, 'add', 'completed'); });
 
-  // add flag for later review
-  $('.add-flag').click(function(e) { toggleFlag(e, 'add', 'for-review') });
+  // add further review flag to candidate event
+  $('.add-flag').click(function(e) { toggleFlag(e, 'add', 'for-review'); });
+
+  // add value to a new dummy event
+  $('.add-dummy').click(function(e) {
+    var variable = $(e.target).closest('.expanded-event-variable-name').attr('data-var');
+
+    var req = $.ajax({
+      type: 'GET',
+      url: $SCRIPT_ROOT + '/modal_view/' + variable,
+      data: {
+        candidate_event_ids: getCandidates()
+      }
+    })
+    .done(function() {
+      $('#modal-container .modal-content').html(req.responseText);
+      $('#modal-container').modal('show');
+    })
+    .fail(function() { return makeError("Could not load modal."); })
+  });
 
   /**
    * Deletions and removals
@@ -403,9 +419,8 @@ $(function () {
     });
 
     // Modal listeners
-    $('#new_canonical').click(function () {
-      var url = $(this).data('url');
-      $.get(url, function (data) {
+    $('#new-canonical').click(function () {;
+      $.get($SCRIPT_ROOT + '/modal_view/canonical', function (data) {
         $('#modal-container .modal-content').html(data);
         $('#modal-container').modal('show');
 
@@ -414,7 +429,7 @@ $(function () {
           event.preventDefault();
           req = $.ajax({
             type: "POST",
-            url: url.replace('view', 'add'),
+            url: $SCRIPT_ROOT + '/modal_edit/canonical',
             data: $('#modal-form').serialize()
           })
           .done(function() {

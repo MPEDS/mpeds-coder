@@ -1,3 +1,4 @@
+{% set var_adds = ['article-desc', 'desc', 'start-date', 'end-date', 'location'] -%}
 <div id="expanded-event-view-metadata" class="sticky-top">
     <div class="row expanded-event-variable-group">
         <div class="col-sm-1 expanded-event-variable-name">metadata</div>
@@ -71,8 +72,10 @@
 <div class="expanded-event-view">
     {% for var in grid_vars %} 
     <div class="row expanded-event-variable-group">
-        <div class="col-sm-1 expanded-event-variable-name">{{ var }} 
-            <a class="glyphicon glyphicon-plus" title="Add new value for this field" href=""></a>
+        <div class="col-sm-1 expanded-event-variable-name" data-var="{{ var }}">{{ var }} 
+            {% if var in var_adds %}
+                <a class="glyphicon glyphicon-plus add-dummy" title="Add new value for this field" href="#"></a>
+            {% endif %}
         </div>
         <!-- Candidate Event Fields -->
         {% for event_id in cand_events.keys()|sort %}
