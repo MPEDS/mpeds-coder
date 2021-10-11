@@ -52,24 +52,31 @@
         <div class="col-sm-2 expanded-event-variable-col canonical-event canonical-event-metadata"
              id="canonical-event-metadata_{{ canonical_event['id'] }}" 
              data-key="{{ canonical_event['key'] }}">
-            <label>Canonical Event<br/> 
-                <i>Actions:</i>
-                <a class="glyphicon glyphicon-pencil" href="#" title="Edit key and notes"></a> 
-                <a class="glyphicon glyphicon-trash" href="#" title="Delete canonical event"></a>
-                <a class="glyphicon glyphicon-remove-sign" href="#" title="Remove from grid"></a>
-            </label>
-            {% for var in ['key', 'notes'] %}
-            <div class="expanded-event-variable expanded-event-variable canonical" id="expanded-event-canonical-{{ var }}">
-                <b>{{ var|title }}: </b> {{ canonical_event[var]|safe }}<br />
-            </div>
-            {% endfor %}                        
+             {% if canonical_event %}
+                <label>Canonical Event<br/> 
+                    <i>Actions:</i>
+                    <a class="glyphicon glyphicon-pencil edit-canonical" href="#" title="Edit key and notes"></a> 
+                    <a class="glyphicon glyphicon-trash" href="#" title="Delete canonical event"></a>
+                    <a class="glyphicon glyphicon-remove-sign" href="#" title="Remove from grid"></a>
+                </label>
+                {% for var in ['key', 'notes'] %}
+                <div class="expanded-event-variable canonical" id="expanded-event-canonical-{{ var }}">
+                    <b>{{ var|title }}: </b> {{ canonical_event[var]|safe }}<br />
+                </div>
+                {% endfor %}
+            {% else %}
+                <label>Canonical Event</label>
+                <div class="expanded-event-variable canonical">
+                    <i>Add or select a canonical event to start.</i>
+                </div>
+            {% endif %}
         </div>
     </div>
 </div>
 <div class="expanded-event-view">
     {% for var in grid_vars %} 
     <div class="row expanded-event-variable-group">
-        <div class="col-sm-1 expanded-event-variable-name" data-var="{{ var }}">{{ var }} 
+        <div class="col-sm-1 expanded-event-variable-name" data-var="{{ var }}">{{ var }}<br/>
             {% if var in var_adds %}
                 <a class="glyphicon glyphicon-plus add-dummy" title="Add new value for this field" href="#"></a>
             {% endif %}
@@ -97,12 +104,14 @@
         {% endfor %}
         <!-- Canonical Event Fields -->
         <div class="col-sm-2 expanded-event-variable-col canonical-event" id="canonical-event_{{ var }}">
-            {% if canonical_event and canonical_event[var]|length > 0 %}
-            {% for cel_id, value, timestamp, _ in canonical_event[var] %}
-                {% include 'canonical-cell.html' %}
-            {% endfor %}
-            {% else %}
-                <div class="expanded-event-variable canonical text-muted none">(None)</div>
+            {% if canonical_event %}
+                {% if canonical_event[var]|length > 0 %}
+                    {% for cel_id, value, timestamp, _ in canonical_event[var] %}
+                        {% include 'canonical-cell.html' %}
+                    {% endfor %}
+                {% else %}
+                    <div class="expanded-event-variable canonical text-muted none">(None)</div>
+                {% endif %}
             {% endif %}
         </div>
     </div>

@@ -857,25 +857,33 @@ def del_event_flag():
     return make_response("Flag deleted.", 200)
 
 
-@app.route('/modal_edit/<variable>', methods = ['POST'])
+@app.route('/modal_edit/<variable>/<mode>', methods = ['POST'])
 @login_required
-def modal_edit(variable):
+def modal_edit(variable, mode):
     """ Handler for modal display and form submission. """
     if variable == 'canonical':
+        ce_id = request.form['data-id'] 
         key   = request.form['canonical-event-key']
         notes = request.form['canonical-event-notes']
+            
+        if mode == 'add':
+            if key:
+                q = db_session.query(CanonicalEvent).filter(CanonicalEvent.key == key).all()
+                if len(q) > 0: 
+                    return make_response("Key already exists.", 400)
 
-        ## Key already exists
-        qs = db_session.query(CanonicalEvent).filter(CanonicalEvent.key == key).all()
-        if len(qs) > 0: 
-            return make_response("Key already exists.", 400)
-        
-        ## Otherwise, add with no issues
-        db_session.add(CanonicalEvent(coder_id = current_user.id, key = key, notes = notes))
+            ce = CanonicalEvent(coder_id = current_user.id, key = key, notes = notes)
+        elif mode == 'edit':
+            ## update key + notes upon edit
+            ce = db_session.query(CanonicalEvent).filter(CanonicalEvent.id == ce_id).first()
+            ce.key = key
+            ce.notes = notes
+
+        db_session.add(ce)
         db_session.commit()
 
         ## Return new event and put the new ID in the header.
-        return make_response("Canonical event created.", 200)
+        return make_response("Canonical event {}ed.".format(mode), 200)
     elif variable.endswith('-date'):
         ## TODO: Check if current candidate events have a dedicated dummy event?
         ## I'm actually not sure what the logic of this should be.
@@ -899,10 +907,23 @@ def modal_view(variable):
         ## get distinct values
         article_ids = list(set(article_ids))
 
-    return render_template('modal.html', 
-        variable = variable, 
-        article_ids = article_ids)
-
+        return render_template('modal.html', 
+            variable = variable, 
+            article_ids = article_ids)
+    else:
+        ## if we get a key, this is an edit
+        if request.args.get('key'):
+            key = request.args.get('key')
+            ce = db_session.query(CanonicalEvent).\
+                filter(CanonicalEvent.key == key).first()
+            return render_template('modal.html', 
+                variable = variable,
+                canonical_event_id = ce.id,
+                canonical_event_key = key,
+                canonical_event_notes = ce.notes)
+        else: ## otherwise, new entry
+            return render_template('modal.html', variable = variable)
+            
 
 #####
 # Adjudication helper functions

@@ -165,6 +165,36 @@ var toggleFlag = function(e, operation, flag) {
 }
 
 /**
+ * 
+ * @param {str} mode - add or edit 
+ */
+var updateModal = function (mode) {
+  var req = $.ajax({
+    type: "POST",
+    url: $SCRIPT_ROOT + '/modal_edit/canonical/' + mode,
+    data: $('#modal-form').serialize()
+  })
+  .done(function() {
+    $("#modal-flash").text("Added successfully.");
+    $("#modal-flash").removeClass("alert-danger");
+    $("#modal-flash").addClass("alert-success");
+    $("#modal-flash").show();
+    $('#modal-container').modal('hide');
+
+    // update the grid with new canonical event
+    reloadGrid(
+      canonical_event_key = $("#modal-canonical-event-key").val(),
+      cand_events_str = getCandidates()
+    );
+  })
+  .fail(function() {
+    $("#modal-flash").text(req.responseText);
+    $("#modal-flash").addClass("alert-danger");
+    $("#modal-flash").show();
+  });
+}
+
+/**
  * Makes an success flash message.
  * @param {str} msg - Message to show. 
  */
@@ -288,6 +318,28 @@ var initializeGridListeners = function() {
     })
     .fail(function() { return makeError("Could not load modal."); })
   });
+
+  // edit a canonical event metadata
+  $('.edit-canonical').click(function(e) {
+    var canonical_event_key = $(e.target).closest('.canonical-event-metadata').attr('data-key');
+    var req = $.ajax({
+      type: 'GET',
+      url: $SCRIPT_ROOT + '/modal_view/canonical',
+      data: {
+        key: canonical_event_key
+      }
+    })
+    .done(function() {
+      $('#modal-container .modal-content').html(req.responseText);
+      $('#modal-container').modal('show');
+
+      $('#modal-submit').click(function(e) { 
+        e.preventDefault(); 
+        updateModal('edit'); 
+      });      
+    })
+    .fail(function() { return makeError("Could not load modal."); })
+  })
 
   /**
    * Deletions and removals
@@ -420,37 +472,16 @@ $(function () {
 
     // Modal listeners
     $('#new-canonical').click(function () {;
-      $.get($SCRIPT_ROOT + '/modal_view/canonical', function (data) {
-        $('#modal-container .modal-content').html(data);
+      var req = $.ajax({
+        url: $SCRIPT_ROOT + '/modal_view/canonical', 
+        type: "GET"
+      })
+      .done(function() {
+        $('#modal-container .modal-content').html(req.responseText);
         $('#modal-container').modal('show');
-
-        // form submission listener
-        $('#modal-submit').click(function (event) {
-          event.preventDefault();
-          req = $.ajax({
-            type: "POST",
-            url: $SCRIPT_ROOT + '/modal_edit/canonical',
-            data: $('#modal-form').serialize()
-          })
-          .done(function() {
-            $("#modal-flash").text("Added successfully.");
-            $("#modal-flash").removeClass("alert-danger");
-            $("#modal-flash").addClass("alert-success");
-            $("#modal-flash").show();
-
-            $('#modal-container').modal('hide');
-
-            // update the grid with new canonical event
-            reloadGrid(
-              canonical_event_key = $("#modal-canonical-event-key").val(),
-              cand_events_str = getCandidates()
-            );
-          })
-          .fail(function() {
-            $("#modal-flash").text(req.responseText);
-            $("#modal-flash").addClass("alert-danger");
-            $("#modal-flash").show();
-          });
+        $('#modal-submit').click(function(e) {
+          e.preventDefault(); 
+          updateModal('add');
         });
       })
     });

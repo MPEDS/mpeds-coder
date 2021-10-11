@@ -13,13 +13,14 @@
             <input class="form-control form-control-sm" 
                     name="canonical-event-key"
                     id="modal-canonical-event-key"
-                    type="text" 
+                    type="text"
+                    value="{{ canonical_event_key if canonical_event_key != None else '' }}"
                     placeholder = "Canonical Event Key..."/>
+            <input name="data-id" type="hidden" value="{{ canonical_event_id }}" />
            {% else %}
             <select class="form-control form-control-sm" 
               name="article-select">
-                <option value="">Select article</option>
-                <!-- TODO Change to article_ids -->
+              <option value="">Select article</option>
               {% for article_id in article_ids %}
                 <option value="{{ article_id }}">{{ article_id }}</option>
               {% endfor %}
@@ -32,7 +33,7 @@
           {% if variable == 'canonical' %}
             <textarea class="form-control" 
               name="canonical-event-notes" 
-              placeholder = "Notes..."></textarea>
+              placeholder = "Notes...">{{ canonical_event_notes if canonical_event_notes != None else '' }}</textarea>
           {% else %}
             <textarea class="form-control"
               name="variable-text"
