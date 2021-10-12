@@ -11,15 +11,13 @@
         <div class="form-row">
           {% if variable == 'canonical' %}
             <input class="form-control form-control-sm" 
-                    name="canonical-event-key"
-                    id="modal-canonical-event-key"
-                    type="text"
-                    value="{{ canonical_event_key if canonical_event_key != None else '' }}"
-                    placeholder = "Canonical Event Key..."/>
-            <input name="data-id" type="hidden" value="{{ canonical_event_id }}" />
+                   name="canonical-event-key"
+                   id="modal-canonical-event-key"
+                   type="text"
+                   value="{{ canonical_event_key if canonical_event_key != None else '' }}"
+                   placeholder = "Canonical Event Key..."/>
            {% else %}
-            <select class="form-control form-control-sm" 
-              name="article-select">
+            <select class="form-control form-control-sm" name="article-id">
               <option value="">Select article</option>
               {% for article_id in article_ids %}
                 <option value="{{ article_id }}">{{ article_id }}</option>
@@ -34,11 +32,23 @@
             <textarea class="form-control" 
               name="canonical-event-notes" 
               placeholder = "Notes...">{{ canonical_event_notes if canonical_event_notes != None else '' }}</textarea>
+          {% elif variable == 'start-date' or variable == 'end-date' %}
+            <div class="input-group date">
+              <input class="form-control" 
+                     type="text" 
+                     name="value" 
+                     value="" 
+                     placeholder="Click calendar for date..." />
+              <span class="input-group-addon">
+                <span class="glyphicon glyphicon-calendar"></span>
+              </span>
+            </div>
           {% else %}
             <textarea class="form-control"
-              name="variable-text"
+              name="value"
               placeholder = "Enter text for {{ variable }}..."></textarea>
           {% endif %}
+          <input name="canonical-id" type="hidden" value="{{ canonical_event_id }}" />
         </div>
       </div>
     </div>

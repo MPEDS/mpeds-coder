@@ -168,10 +168,10 @@ var toggleFlag = function(e, operation, flag) {
  * 
  * @param {str} mode - add or edit 
  */
-var updateModal = function (mode) {
+var updateModal = function (variable, mode) {
   var req = $.ajax({
     type: "POST",
-    url: $SCRIPT_ROOT + '/modal_edit/canonical/' + mode,
+    url: $SCRIPT_ROOT + '/modal_edit/' + variable + '/' + mode,
     data: $('#modal-form').serialize()
   })
   .done(function() {
@@ -181,9 +181,16 @@ var updateModal = function (mode) {
     $("#modal-flash").show();
     $('#modal-container').modal('hide');
 
-    // update the grid with new canonical event
+    // update the grid with new canonical event if it exists
+    var reload_key = null;
+    if($("#modal-canonical-event-key").val() !== undefined) {
+      reload_key = $("#modal-canonical-event-key").val();
+    } else {
+      // otherwise, reload the current grid
+      reload_key = $('.canonical-event-metadata').attr('data-key');
+    }
     reloadGrid(
-      canonical_event_key = $("#modal-canonical-event-key").val(),
+      canonical_event_key = reload_key,
       cand_events_str = getCandidates()
     );
   })
@@ -304,17 +311,28 @@ var initializeGridListeners = function() {
   // add value to a new dummy event
   $('.add-dummy').click(function(e) {
     var variable = $(e.target).closest('.expanded-event-variable-name').attr('data-var');
+    var canonical_event_key = $('.canonical-event-metadata').attr('data-key');
 
     var req = $.ajax({
       type: 'GET',
       url: $SCRIPT_ROOT + '/modal_view/' + variable,
       data: {
-        candidate_event_ids: getCandidates()
+        candidate_event_ids: getCandidates(),
+        key: canonical_event_key
       }
     })
     .done(function() {
       $('#modal-container .modal-content').html(req.responseText);
       $('#modal-container').modal('show');
+
+      // add date pickers
+      $('#modal-container .date').datetimepicker({ format: 'YYYY-MM-DD' });        
+
+      $('#modal-submit').click(function(e) {
+        e.preventDefault(); 
+        updateModal(variable, 'add');
+      });
+
     })
     .fail(function() { return makeError("Could not load modal."); })
   });
@@ -335,7 +353,7 @@ var initializeGridListeners = function() {
 
       $('#modal-submit').click(function(e) { 
         e.preventDefault(); 
-        updateModal('edit'); 
+        updateModal('canonical', 'edit'); 
       });      
     })
     .fail(function() { return makeError("Could not load modal."); })
@@ -481,7 +499,7 @@ $(function () {
         $('#modal-container').modal('show');
         $('#modal-submit').click(function(e) {
           e.preventDefault(); 
-          updateModal('add');
+          updateModal('canonical', 'add');
         });
       })
     });

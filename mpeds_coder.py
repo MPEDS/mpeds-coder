@@ -862,15 +862,18 @@ def del_event_flag():
 def modal_edit(variable, mode):
     """ Handler for modal display and form submission. """
     if variable == 'canonical':
-        ce_id = request.form['data-id'] 
+        ce_id = request.form['canonical-id'] 
         key   = request.form['canonical-event-key']
         notes = request.form['canonical-event-notes']
             
         if mode == 'add':
+            if not key:
+                return make_response("Please enter text for the key.", 400)
+
             if key:
                 q = db_session.query(CanonicalEvent).filter(CanonicalEvent.key == key).all()
                 if len(q) > 0: 
-                    return make_response("Key already exists.", 400)
+                    return make_response("Key already exists.", 400)                
 
             ce = CanonicalEvent(coder_id = current_user.id, key = key, notes = notes)
         elif mode == 'edit':
@@ -884,13 +887,52 @@ def modal_edit(variable, mode):
 
         ## Return new event and put the new ID in the header.
         return make_response("Canonical event {}ed.".format(mode), 200)
-    elif variable.endswith('-date'):
-        ## TODO: Check if current candidate events have a dedicated dummy event?
-        ## I'm actually not sure what the logic of this should be.
+    else:
+        article_id = request.form['article-id']
+        value = request.form['value']
+        ce_id = request.form['canonical-id']
 
-        ## TODO: Create a new event based off the candidate article 
-        ## if it doesn't exist. Add the text
-        pass
+        if not article_id:
+            return make_response("Please select an article ID.", 400)
+
+        article_id = int(article_id)
+        if mode == 'add':
+            ## Check if selected article has any associated candidate event entries
+            ## Just get the first, since we'll associate that with all dummy events.
+            cec = db_session.query(CodeEventCreator).\
+                filter(
+                    CodeEventCreator.article_id == article_id,
+                    CodeEventCreator.coder_id == current_user.id
+                ).first()
+
+            ## if they do, get the event ID
+            event_id = None
+            if cec:
+                event_id = cec.event_id
+            else:
+                ## otherwise, make a new event with this article ID
+                cand_event = Event(article_id)
+                db_session.add(cand_event)
+                db_session.flush()
+
+                ## refresh to get the event ID
+                db_session.refresh(cand_event)
+                event_id = cand_event.id
+
+            ## if it doesn't exist. Add the value.
+            cec = CodeEventCreator(article_id, event_id, variable, value, current_user.id)
+            db_session.add(cec)
+            db_session.flush()
+
+            ## refresh to get the CEC ID
+            db_session.refresh(cec)
+
+            ## lastly, add the link to the canonical event
+            cel = CanonicalEventLink(current_user.id, ce_id, cec.id)
+            db_session.add(cel)
+            db_session.commit()
+
+            return make_response("{} added.".format(variable), 200)
 
 
 @app.route('/modal_view/<variable>', methods = ['GET'])
@@ -898,6 +940,13 @@ def modal_edit(variable, mode):
 def modal_view(variable):
     """Returns the template for the modal, based on the variable."""
     article_ids = []
+
+    ## get the canonical event to get the ID later
+    ce = None
+    if request.args.get('key'):
+        key = request.args.get('key')
+        ce = db_session.query(CanonicalEvent).\
+            filter(CanonicalEvent.key == key).first()
 
     ## for non-canonical adds, get the article IDs associated with current candidate events
     if variable != 'canonical':
@@ -909,13 +958,11 @@ def modal_view(variable):
 
         return render_template('modal.html', 
             variable = variable, 
+            canonical_event_id = ce.id if ce else '',
             article_ids = article_ids)
     else:
         ## if we get a key, this is an edit
         if request.args.get('key'):
-            key = request.args.get('key')
-            ce = db_session.query(CanonicalEvent).\
-                filter(CanonicalEvent.key == key).first()
             return render_template('modal.html', 
                 variable = variable,
                 canonical_event_id = ce.id,
@@ -1847,7 +1894,6 @@ def addCode(pn):
     if var == 'comments' and pn == '2' and val == '':
         return jsonify(result={"status": 200})
 
-    # try:
     db_session.add(p)
     db_session.add_all(aqs)
     db_session.commit()
