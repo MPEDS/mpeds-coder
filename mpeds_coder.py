@@ -114,6 +114,12 @@ elif os.path.isfile(app.config['WD'] + '/text-selects.csv'):
             key += '-text'
             event_creator_vars.append( (key, var) )
 
+## load adj grid order
+adj_grid_order = []
+if os.path.isfile(app.config['WD'] + '/adj-grid-order.yaml'):
+    adj_grid_order = yaml.load(open(app.config['WD'] + '/adj-grid-order.yaml', 'r'), 
+        Loader = yaml.Loader)
+
 ## load preset variables
 preset_vars = yaml.load(open(app.config['WD'] + '/presets.yaml', 'r'))
 v1 = [(x, str.title(x).replace('-', ' ')) for x in sorted(preset_vars.keys())]
@@ -634,7 +640,7 @@ def adj():
         search_events = search_events,
         filter_fields = filter_fields,
         cand_events   = cand_events,
-        grid_vars     = _make_grid_vars(),
+        grid_vars     = adj_grid_order,
         links         = links,
         flags         = _load_event_flags(cand_event_ids),
         recent_events = recent_events,
@@ -663,7 +669,7 @@ def load_adj_grid():
         cand_events = cand_events,
         links = links,
         flags = _load_event_flags(cand_event_ids),
-        grid_vars = _make_grid_vars())
+        grid_vars = adj_grid_order)
 
 
 @app.route('/add_canonical_link', methods = ['POST'])
@@ -1071,30 +1077,6 @@ def _load_event_flags(events):
             EventFlag.coder_id == current_user.id
         ).all()
     return {x.event_id: x.flag for x in efs}
-
-
-# @app.route('/_load_links')
-# @login_required
-# def _load_links(canonical_event_key):
-#     """Load links for a given canonical event."""
-
-
-@app.route('/_make_grid_vars')
-@login_required
-def _make_grid_vars():
-    """Helper function which returns grid variables."""
-    grid_vars = []
-    for i in event_creator_single_value:
-        if type(i) == list:
-            for j in i:
-                grid_vars.append(j)
-        else:
-            grid_vars.append(i)
-
-    grid_vars.extend([x[0] for x in event_creator_vars])
-    grid_vars.extend(['form', 'issue', 'racial-issue', 'target'])
-
-    return grid_vars
 
 
 class Pagination(object):
