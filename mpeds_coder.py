@@ -960,7 +960,7 @@ def modal_view(variable):
         article_ids = [x.article_id for x in db_session.query(Event).filter(Event.id.in_(candidate_events)).all()]
  
         ## get distinct values
-        article_ids = list(set(article_ids))
+        article_ids = sorted(list(set(article_ids)))
 
         return render_template('modal.html', 
             variable = variable, 
