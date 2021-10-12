@@ -464,6 +464,11 @@ div.canonical {
 	background-color: #CCE5FF;
 }
 
+div.canonical-dummy {
+	margin-left: 5px;
+	background-color: #E2EFDA; 
+}
+
 .data-buttons {
 	float: right;
 }

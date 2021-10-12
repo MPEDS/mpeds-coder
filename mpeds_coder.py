@@ -1018,20 +1018,20 @@ def _load_canonical_event(id = None, key = None):
 
     canonical_event = {}
     ces = None
+    _filter = None
     if id:
         canonical_event['id'] = id
-        ce  = db_session.query(CanonicalEvent).filter(CanonicalEvent.id == id).first()
-        ces = db_session.query(CanonicalEvent, CanonicalEventLink, CodeEventCreator).\
-            join(CanonicalEventLink, CanonicalEvent.id == CanonicalEventLink.canonical_id).\
-            join(CodeEventCreator, CanonicalEventLink.cec_id == CodeEventCreator.id).\
-            filter(CanonicalEvent.id == id).all()
+        _filter = CanonicalEvent.id == id
     else:
         canonical_event['key'] = key
-        ce  = db_session.query(CanonicalEvent).filter(CanonicalEvent.key == key).first()
-        ces = db_session.query(CanonicalEvent, CanonicalEventLink, CodeEventCreator).\
-            join(CanonicalEventLink, CanonicalEvent.id == CanonicalEventLink.canonical_id).\
-            join(CodeEventCreator, CanonicalEventLink.cec_id == CodeEventCreator.id).\
-            filter(CanonicalEvent.key == key).all()
+        _filter = CanonicalEvent.key == key
+
+    ce  = db_session.query(CanonicalEvent).filter(_filter).first()
+    ces = db_session.query(CanonicalEvent, CanonicalEventLink, CodeEventCreator, User).\
+        join(CanonicalEventLink, CanonicalEvent.id == CanonicalEventLink.canonical_id).\
+        join(CodeEventCreator, CanonicalEventLink.cec_id == CodeEventCreator.id).\
+        join(User, CodeEventCreator.coder_id == User.id).\
+        filter(_filter).all()
 
     if not ce:
         return None
@@ -1041,7 +1041,7 @@ def _load_canonical_event(id = None, key = None):
     canonical_event['key'] = ce.key
     canonical_event['notes'] = ce.notes
 
-    for _, cel, cec in ces:
+    for _, cel, cec, user in ces:
         ## create a new list if it doesn't exist
         if not canonical_event.get(cec.variable):
             canonical_event[cec.variable] = []
@@ -1053,7 +1053,10 @@ def _load_canonical_event(id = None, key = None):
         else:
             value = cec.value
 
-        canonical_event[cec.variable].append((cel.id, value, cel.timestamp, cec.event_id))
+        ## if this is a dummy value, username starts with adj
+        is_dummy = 1 if 'adj' in user.username else 0
+
+        canonical_event[cec.variable].append((cel.id, value, cel.timestamp, cec.event_id, is_dummy))
 
     return canonical_event
 
