@@ -1,4 +1,9 @@
 {% set var_adds = ['article-desc', 'desc', 'start-date', 'end-date', 'location'] -%}
+{% if canonical_event is none and (cand_events is none or cand_events.keys()|length == 0) %}
+<p class="info-block bg-info text-info">
+    Get started by selected or adding events.
+</p>
+{% else %}
 <div id="expanded-event-view-metadata" class="sticky-top">
     <div class="row expanded-event-variable-group">
         <div class="col-sm-1 expanded-event-variable-name">metadata</div>
@@ -118,3 +123,4 @@
     </div>
     {% endfor %}
 </div>
+{% endif %}

@@ -17,8 +17,6 @@ import string
 import sys
 import urllib
 import datetime as dt
-from math import ceil, pi
-from random import sample
 from random import choice
 import yaml
 from collections import OrderedDict
@@ -639,7 +637,13 @@ def load_cand_search():
 def load_adj_grid():
     """Loads the grid for the expanded event view."""
     ce_ids = request.args.get('cand_events')
+    if ce_ids == 'null':
+        ce_ids = None
+
     canonical_event_key = request.args.get('canonical_event_key')
+    if canonical_event_key == 'null':
+        canonical_event_key = None
+
     cand_event_ids = [int(x) for x in ce_ids.split(',')] if ce_ids else []
     
     cand_events = _load_candidate_events(cand_event_ids)
@@ -654,7 +658,23 @@ def load_adj_grid():
         flags = event_flags, 
         grid_vars = adj_grid_order)
 
+#####
+## Search functions
+#####
 
+@app.route('/adj_search/<function>')
+@login_required
+def cand_search(function):
+    """Performs a search on the candidate events."""
+    if function not in ['search', 'filter', 'sort']:
+        return make_response("Invalid search function", 400)
+
+    return render_template('adj-{}.html'.format(function))
+
+
+#####
+## Grid functions
+#####
 @app.route('/add_canonical_link', methods = ['POST'])
 @login_required
 def add_canonical_link():
@@ -744,11 +764,8 @@ def add_event_flag():
     db_session.commit()
 
     return make_response("Flag created.", 200)
-    
 
-######
-# Adjudicator Deletions
-######
+
 @app.route('/del_canonical_event', methods = ['POST'])
 @login_required
 def del_canonical_event():
@@ -798,6 +815,7 @@ def del_canonical_link():
     ## commit these deletes first to avoid foreign key error
     db_session.commit()
 
+    ## then delete CECs
     for cec in cecs:
         db_session.delete(cec)
     db_session.commit()

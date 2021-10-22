@@ -104,6 +104,14 @@ var loadGrid = function(canonical_event_key = null, cand_events_str = null) {
 }
 
 /**
+ *  Loads the search results for the given query.
+ *  @returns true if successful, false otherwise.
+ */
+var loadSearch = function() {
+  initializeSearchListeners(); 
+}
+
+/**
  * Removes the block from the canonical record.
  * @returns true if successful, false otherwise.
  */
@@ -530,14 +538,24 @@ $(function () {
 
     // Listener for searches additions
     $('#cand-search').click(function() {
-      
+      var req = $.ajax({
+        url: $SCRIPT_ROOT + '/adj_search/search',
+        type: "GET"
+      })
+      .done($('#adj-search').append(req.responseText))
+      .fail(makeError("Could not add search block."));
     });
 
     $('#cand-filter').click(function() {
-
+      var req = $.ajax({
+        url: $SCRIPT_ROOT + '/adj_search/filter',
+        type: "GET"
+      })
+      .done($('#adj-filter').append(req.responseText))
+      .fail(makeError("Could not add filter block."));
     });
 
-    initializeSearchListeners();
+    loadSearch();
 
     // initialize the grid
     let search_params = new URLSearchParams(window.location.search);

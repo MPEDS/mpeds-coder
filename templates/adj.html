@@ -40,88 +40,24 @@
         </ul>
         <div class="tab-content">
             <div class="tab-pane" id="search_block">
-                <div class="adj-variable-group" id="adj-search">
+                <div class="adj-variable-group">
                     <h5>Search</h5>
-                    <form>
-                      <div class="row form-row">
-                        <div class="col-sm-11">
-                            <input class="form-control"
-                                    name="filter-value" 
-                                    type="text" 
-                                    placeholder = "Value..."/>
-                        </div>
-                        <div class="col-sm-1">
-                            <button type="submit" id="cand-search" class="btn btm-primary">
-                                <span class="glyphicon glyphicon-plus"></span>
-                            </button>
-                        </div>
-                      </div>
+                    <form id="adj-search">
+                        {% include 'adj-search.html' %}
                     </form>
                 </div>
-                <div class="adj-variable-group" id="adj-filter">
+                <hr/>
+                <div class="adj-variable-group">
                     <h5>Filter</h5>
-                    <form>
-                        <div class="row form-row">
-                            <div class="col-sm-4">
-                                <select class="form-control"
-                                        name="filter-field" />
-                                    {% for field in filter_fields %}
-                                    <option>{{ field }}</option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-                            <div class="col-sm-4">
-                                <select class="form-control"
-                                    name="filter-compare">
-                                    <option>equals</option>
-                                    <option>is greater than</option>
-                                    <option>is greater than or equal to</option>
-                                    <option>is less than</option>
-                                    <option>is less than or equal to</option>
-                                    <option>contains</option>
-                                    <option>starts with</option>
-                                    <option>ends with</option>
-                                </select>
-                            </div>
-                            <div class="col-sm-3">
-                                <input class="form-control"
-                                        name="filter-value" 
-                                        type="text" 
-                                        placeholder = "Value..."/>
-                            </div>
-                            <div class="col-sm-1">
-                                <button type="submit" class="btn btm-primary" id="cand-filter">
-                                    <span class="glyphicon glyphicon-plus"></span>
-                                </button>
-                            </div>
-                        </div>
+                    <form id="adj-filter">
+                        {% include 'adj-filter.html' %}
                     </form>
                 </div>
-                <div class="adj-variable-group" id="adj-sorting">
+                <hr/>
+                <div class="adj-variable-group">
                     <h5>Sort</h5>
-                    <form> 
-                        <div class="row form-row">
-                            <div class="col-sm-4">
-                                <select class="form-control"
-                                        name="sort-field" />
-                                    {% for field in filter_fields %}
-                                    <option>{{ field }}</option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-                            <div class="col-sm-4">
-                                <select class="form-control" 
-                                    name="sort-field-asc">
-                                    <option>ascending</option>
-                                    <option>descending</option>
-                                </select>
-                            </div>
-                            <div class="col-sm-1">
-                                <button type="submit" class="btn btm-primary" id="cand-sort">
-                                    <span class="glyphicon glyphicon-plus"></span>
-                                </button>
-                            </div>
-                        </div>
+                    <form id="adj-sort"> 
+                        {% include 'adj-sort.html' %}
                     </form> 
                 </div>
             </div>
@@ -330,13 +266,7 @@
             <a id="new-canonical" data-toggle="modal" 
                 data-target="my_modal" href="#">New Canonical Event</a></h4>
         <div id="adj-grid">
-            {% if canonical_event is none and cand_events.keys()|length == 0 %}
-                <p class="info-block bg-info text-info">
-                    Get started by selected or adding events.
-                </p>
-            {% else %}
-                {% include 'adj-grid.html' %}
-            {% endif %}
+          {% include 'adj-grid.html' %}
         </div>
       </div>
   </div>

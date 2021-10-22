@@ -1,0 +1,22 @@
+<div class="row form-row">
+    <div class="col-sm-4">
+        <select class="form-control"
+                name="sort-field" />
+            {% for field in filter_fields %}
+            <option>{{ field }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="col-sm-4">
+        <select class="form-control" 
+            name="sort-field-asc">
+            <option>ascending</option>
+            <option>descending</option>
+        </select>
+    </div>
+    <div class="col-sm-1">
+        <button class="btn btm-primary" id="cand-sort">
+            <span class="glyphicon glyphicon-plus"></span>
+        </button>
+    </div>
+</div>
