@@ -17,7 +17,9 @@
   </div>
   <div class="row">
     <div class="col-sm-5 adj-pane" id="adj-pane-cand-events">
-        <a href="{{ url_for('adj', cand_events = '6031,6032,21644,21646', canonical_event_key = 'Milo_Chicago_2016') }}">
+        <a href="{{ url_for('adj', 
+            cand_events = '6031,6032,21644,21646', 
+            canonical_event_key = 'Milo_Chicago_2016') }}">
             Example page
         </a><br/>
         <a id="cand-events-hide" href="#">&laquo; Hide Pane</a>
@@ -49,7 +51,9 @@
                                     placeholder = "Value..."/>
                         </div>
                         <div class="col-sm-1">
-                            <button type="submit" class="btn btm-primary"><span class="glyphicon glyphicon-plus"></span></button>
+                            <button type="submit" id="cand-search" class="btn btm-primary">
+                                <span class="glyphicon glyphicon-plus"></span>
+                            </button>
                         </div>
                       </div>
                     </form>
@@ -86,7 +90,9 @@
                                         placeholder = "Value..."/>
                             </div>
                             <div class="col-sm-1">
-                                <button type="submit" class="btn btm-primary"><span class="glyphicon glyphicon-plus"></span></button>
+                                <button type="submit" class="btn btm-primary" id="cand-filter">
+                                    <span class="glyphicon glyphicon-plus"></span>
+                                </button>
                             </div>
                         </div>
                     </form>
@@ -111,13 +117,12 @@
                                 </select>
                             </div>
                             <div class="col-sm-1">
-                                <button type="submit" class="btn btm-primary"><span class="glyphicon glyphicon-plus"></span></button>
+                                <button type="submit" class="btn btm-primary" id="cand-sort">
+                                    <span class="glyphicon glyphicon-plus"></span>
+                                </button>
                             </div>
                         </div>
                     </form> 
-                </div>
-                <div class="adj-variable-group" id="adj-search-button">
-                    <button type="submit" class="btn btm-primary">Search</span></button>
                 </div>
             </div>
             <div class="tab-pane" id="cand_block">
@@ -246,15 +251,14 @@
                             <div class="col-sm-8">
                                 <b>key:</b> {{ canonical_event['key']|safe }}</br>
                                 {% if canonical_event['start_date'] %}
-                                    <b>start_date:</b> {{ canonical_event['start_date'] }}</br>
+                                    <b>start_date:</b> {{ canonical_event['start_date'][0] }}</br>
                                 {% endif %}
 
                                 {% if canonical_event['location'] %}
-                                  <b>location:</b> {{ canonical_event['location'][0] }}
+                                  <b>location:</b> {{ canonical_event['location'][0][1] }}
                                 {% endif %}
                             </div>
                             <div class="col-sm-4">
-                                <b>Status:</b> {{ canonical_event['status'] }}<br/>
                                 <b>Last edited:</b> {{ canonical_event['last_updated'] }}<br/>
                                 <b class="ce-isactive text-muted">Current active event</b>
                                 <b class="ce-makeactive" style="display:none;">
@@ -266,7 +270,7 @@
                             <div class="col-sm-12">
                                 <b>notes: </b> {{ canonical_event['notes']|safe }}<br/>
                                 {% if canonical_event['desc'] %}
-                                    <b>desc:</b> {{ canonical_event['desc']|safe }}</br>
+                                    <b>desc:</b> {{ canonical_event['desc'][0][1]|safe }}</br>
                                 {% endif %}
                             </div>
                         </div>

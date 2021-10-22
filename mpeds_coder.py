@@ -577,14 +577,6 @@ def adj():
     filter = request.form.get('filter')
     sort = request.form.get('sort')
 
-    canonical_event_key = request.args.get('canonical_event_key')
-    ce_ids = request.args.get('cand_events')
-
-    cand_event_ids = []
-
-    if ce_ids:
-        cand_event_ids = [int(x) for x in ce_ids.split(',')]
-
     ## TODO: These are placeholders which will be gathered from queries later
     query1 = 'Chicago'
     query2 = '2016-05-24'
@@ -593,21 +585,6 @@ def adj():
     search_events = db_session.query(EventMetadata).\
         filter(EventMetadata.location.like('%{}%'.format(query1)),
             EventMetadata.start_date == query2).all()
-
-    ## load the candidate events for the grid
-    cand_events = _load_candidate_events(cand_event_ids)
-
-    ## load the canonical event for the grid
-    canonical_event = _load_canonical_event(key = canonical_event_key)
-
-    ## links, keyed by event_id: cel_id
-    links = {}
-    if canonical_event_key and canonical_event and canonical_event.get('link'):
-        links = {x[3]: x[0] for x in canonical_event['link']}
-
-    #####
-    ## Recent events
-    #####
 
     ## Get five recent events
     recent_events = [x[0] for x in db_session.query(EventMetadata, RecentEvent).\
@@ -622,6 +599,7 @@ def adj():
     #####
     ## Data for search
     #####
+    ## TODO: Move this into YAML or base this off of EventMetadata fields
     filter_fields = [
         "---",
         "article_desc",
@@ -636,85 +614,76 @@ def adj():
         "title"
     ]
 
+    ## TODO: Do some checks in the template which don't force us to enter in empty variables
+    ## which will be initialized by load_adj_grid
     return render_template("adj.html", 
         search_events = search_events,
         filter_fields = filter_fields,
-        cand_events   = cand_events,
+        cand_events   = {},
         grid_vars     = adj_grid_order,
-        links         = links,
-        flags         = _load_event_flags(cand_event_ids),
+        links         = [],
+        flags         = [],
         recent_events = recent_events,
 #        recent_canonical_events = recent_canonical_events,
-        canonical_event = canonical_event)
+        canonical_event = None)
+
+
+@app.route('/load_cand_search', methods = ['GET'])
+@login_required
+def load_cand_search():
+    """Loads the candidate event search pane."""
 
 
 @app.route('/load_adj_grid', methods = ['GET'])
 @login_required
 def load_adj_grid():
-    """Loads the grid for the expanded event view and returns the template.""" 
+    """Loads the grid for the expanded event view."""
     ce_ids = request.args.get('cand_events')
     canonical_event_key = request.args.get('canonical_event_key')
     cand_event_ids = [int(x) for x in ce_ids.split(',')] if ce_ids else []
     
     cand_events = _load_candidate_events(cand_event_ids)
     canonical_event = _load_canonical_event(key = canonical_event_key)
-
-    ## links, keyed by event_id: cel_id
-    links = {}
-    if canonical_event_key and canonical_event and canonical_event.get('link'):
-        links = {x[3]: x[0] for x in canonical_event['link']}
+    links = _load_links(canonical_event_key)
+    event_flags = _load_event_flags(cand_event_ids)
 
     return render_template('adj-grid.html',
         canonical_event = canonical_event,
         cand_events = cand_events,
         links = links,
-        flags = _load_event_flags(cand_event_ids),
+        flags = event_flags, 
         grid_vars = adj_grid_order)
 
 
 @app.route('/add_canonical_link', methods = ['POST'])
 @login_required
 def add_canonical_link():
-    """Adds a link from a candidate event to a canonical event 
+    """Adds a link from a article to a canonical event 
     when we don't want to add any data. """
     canonical_event_id = int(request.form['canonical_event_id'])
-    event_id = int(request.form['event_id'])
     article_id = int(request.form['article_id'])
-    coder_name = request.form['coder_name']
 
     ## check if this link exists already
     res = db_session.query(CodeEventCreator, CanonicalEventLink)\
         .filter(
             CodeEventCreator.variable == 'link', 
-            CodeEventCreator.event_id == event_id
+            CodeEventCreator.article_id == article_id
         ).first()
 
     ## if the CEC and CEL are not null, this exists already
     if res and res[0] and res[1]:
         return make_response("Link already exists.", 400)
 
-    ## TODO: update this so we get the coder_id from DOM.
-    ## This is related to the metadata issue.
-    coder = db_session.query(User).filter(User.username == coder_name).first()
-
-    ## for the link, create a new CEC and link it back to the canonical event.
-    ## assign this to the original coder so we do not have issues with events being 
-    ## associated with different coders.
-    db_session.add(CodeEventCreator(article_id, event_id, 'link', 'yes', coder.id))
-    db_session.commit()
-
-    ## get the CEC for the ID
-    cec = db_session.query(CodeEventCreator)\
-        .filter(
-            CodeEventCreator.variable == 'link', 
-            CodeEventCreator.event_id == event_id
-        ).first()
+    ## for the link, create a new CEC and link it back to the canonical event
+    ## we'll treat this as part of the dummy event
+    cec = _check_or_add_dummy_value(article_id, 'link', 'yes')
+    db_session.refresh(cec)
 
     ## add the link
     db_session.add(CanonicalEventLink(current_user.id, canonical_event_id, cec.id))
     db_session.commit()
 
-    return make_response("Link added", 200)    
+    return make_response("Link added.", 200)    
 
 
 @app.route('/add_canonical_record', methods = ['POST'])
@@ -807,12 +776,40 @@ def del_canonical_event():
     return make_response("Canonical event deleted.", 200)
 
 
+@app.route('/del_canonical_link', methods = ['POST'])
+@login_required
+def del_canonical_link():
+    """Removes 'link' from a canonical event. 
+       Remove it from the dummy event as well."""
+    article_id = int(request.form['article_id'])
+
+    ## get all the CECs for this article
+    cecs = db_session.query(CodeEventCreator)\
+        .filter(
+            CodeEventCreator.article_id == article_id,
+            CodeEventCreator.variable == 'link'
+        ).all()
+
+    for cec in cecs:
+        ## get the CELs for this CEC
+        cel = db_session.query(CanonicalEventLink).filter(CanonicalEventLink.cec_id == cec.id).first()
+        db_session.delete(cel)
+
+    ## commit these deletes first to avoid foreign key error
+    db_session.commit()
+
+    for cec in cecs:
+        db_session.delete(cec)
+    db_session.commit()
+
+    return make_response("Link removed.", 200)
+
+
 @app.route('/del_canonical_record', methods = ['POST'])
 @login_required
 def del_canonical_record():
     """ Removes the link between a candidate event piece of data and a canonical event. """
     cel_id = int(request.form['cel_id'])
-    is_link = request.form['is_link'] if 'is_link' in request.form else None
 
     ## grab it from the database
     cel = db_session.query(CanonicalEventLink)\
@@ -825,23 +822,8 @@ def del_canonical_record():
     ## delete and commit
     db_session.delete(cel)
     db_session.commit()
-
-    ## for the link, get the CEC too and delete it.
-    if is_link:
-        event_id = request.form['event_id']
-        link_cec = db_session.query(CodeEventCreator)\
-            .filter(
-                CodeEventCreator.event_id == event_id,
-                CodeEventCreator.variable == 'link'
-            ).first()
-
-        db_session.delete(link_cec)
-        db_session.commit()
  
-    if is_link:
-        return make_response("Link removed.", 200)
-    else:
-        return make_response("Delete successful.", 200)
+    return make_response("Delete successful.", 200)
 
 
 @app.route('/del_event_flag', methods = ['POST'])
@@ -903,35 +885,9 @@ def modal_edit(variable, mode):
 
         article_id = int(article_id)
         if mode == 'add':
-            ## Check if selected article has any associated candidate event entries
-            ## Just get the first, since we'll associate that with all dummy events.
-            cec = db_session.query(CodeEventCreator).\
-                filter(
-                    CodeEventCreator.article_id == article_id,
-                    CodeEventCreator.coder_id == current_user.id
-                ).first()
-
-            ## if they do, get the event ID
-            event_id = None
-            if cec:
-                event_id = cec.event_id
-            else:
-                ## otherwise, make a new event with this article ID
-                cand_event = Event(article_id)
-                db_session.add(cand_event)
-                db_session.flush()
-
-                ## refresh to get the event ID
-                db_session.refresh(cand_event)
-                event_id = cand_event.id
-
-            ## if it doesn't exist. Add the value.
-            cec = CodeEventCreator(article_id, event_id, variable, value, current_user.id)
-            db_session.add(cec)
-            db_session.flush()
-
-            ## refresh to get the CEC ID
-            db_session.refresh(cec)
+            ## check to see if this has a dummy value
+            ## if it does, link it. otherwise, this adds it
+            cec = _check_or_add_dummy_value(article_id, variable, value)
 
             ## lastly, add the link to the canonical event
             cel = CanonicalEventLink(current_user.id, ce_id, cec.id)
@@ -981,6 +937,42 @@ def modal_view(variable):
 #####
 # Adjudication helper functions
 #####
+@app.route('/_check_or_add_dummy')
+@login_required
+def _check_or_add_dummy_value(article_id, variable, value):
+    """Check if selected article has any associated candidate event entries
+        Just get the first, since we'll associate that with all dummy events."""
+    cec = db_session.query(CodeEventCreator).\
+        filter(
+            CodeEventCreator.article_id == article_id,
+            CodeEventCreator.coder_id == current_user.id
+        ).first()
+
+    ## if they do, get the event ID
+    event_id = None
+    if cec:
+        event_id = cec.event_id
+    else:
+        ## otherwise, make a new event with this article ID
+        cand_event = Event(article_id)
+        db_session.add(cand_event)
+        db_session.flush()
+
+        ## refresh to get the event ID
+        db_session.refresh(cand_event)
+        event_id = cand_event.id
+
+    ## if it doesn't exist. Add the value.
+    cec = CodeEventCreator(article_id, event_id, variable, value, current_user.id)
+    db_session.add(cec)
+    db_session.flush()
+
+    ## refresh to get the CEC ID
+    db_session.refresh(cec)
+
+    return cec
+
+
 @app.route('/_load_candidate_events')
 @login_required
 def _load_candidate_events(cand_event_ids):
@@ -1079,131 +1071,146 @@ def _load_event_flags(events):
     return {x.event_id: x.flag for x in efs}
 
 
-class Pagination(object):
-    """
-    Extracted from flask-sqlalchemy
-    Internal helper class returned by :meth:`BaseQuery.paginate`.  You
-    can also construct it from any other SQLAlchemy query object if you are
-    working with other libraries.  Additionally it is possible to pass `None`
-    as query object in which case the :meth:`prev` and :meth:`next` will
-    no longer work.
-    """
+@app.route('/_load_links')
+@login_required
+def _load_links(canonical_event_key):
+    """Loads the links to the canonical event that do not have a record in the CEC table."""
 
-    def __init__(self, query, page, per_page, total, items):
-        #: the unlimited query object that was used to create this
-        #: pagination object.
-        self.query = query
-        #: the current page number (1 indexed)
-        self.page = page
-        #: the number of items to be displayed on a page.
-        self.per_page = per_page
-        #: the total number of items matching the query
-        self.total = total
-        #: the items for the current page
-        self.items = items
+    cecs = db_session.query(CodeEventCreator).\
+        join(CanonicalEventLink, CodeEventCreator.id == CanonicalEventLink.cec_id).\
+        join(CanonicalEvent, CanonicalEventLink.canonical_id == CanonicalEvent.id).\
+        filter(CanonicalEvent.key == canonical_event_key, CodeEventCreator.variable == 'link').all()
 
-    @property
-    def pages(self):
-        """The total number of pages"""
-        if self.per_page == 0:
-            pages = 0
-        else:
-            pages = int(ceil(self.total / float(self.per_page)))
-        return pages
+    links = list(set([cec.article_id for cec in cecs]))
+        
+    return links
 
-    def prev(self, error_out=False):
-        """Returns a :class:`Pagination` object for the previous page."""
-        assert self.query is not None, 'a query object is required ' \
-                                       'for this method to work'
-        return paginate(self.query, self.page - 1, self.per_page, error_out)
 
-    @property
-    def prev_num(self):
-        """Number of the previous page."""
-        return self.page - 1
+# class Pagination(object):
+#     """
+#     Extracted from flask-sqlalchemy
+#     Internal helper class returned by :meth:`BaseQuery.paginate`.  You
+#     can also construct it from any other SQLAlchemy query object if you are
+#     working with other libraries.  Additionally it is possible to pass `None`
+#     as query object in which case the :meth:`prev` and :meth:`next` will
+#     no longer work.
+#     """
 
-    @property
-    def has_prev(self):
-        """True if a previous page exists"""
-        return self.page > 1
+#     def __init__(self, query, page, per_page, total, items):
+#         #: the unlimited query object that was used to create this
+#         #: pagination object.
+#         self.query = query
+#         #: the current page number (1 indexed)
+#         self.page = page
+#         #: the number of items to be displayed on a page.
+#         self.per_page = per_page
+#         #: the total number of items matching the query
+#         self.total = total
+#         #: the items for the current page
+#         self.items = items
 
-    def next(self, error_out=False):
-        """Returns a :class:`Pagination` object for the next page."""
-        assert self.query is not None, 'a query object is required ' \
-                                       'for this method to work'
-        return paginate(self.query, self.page + 1, self.per_page, error_out)
+#     @property
+#     def pages(self):
+#         """The total number of pages"""
+#         if self.per_page == 0:
+#             pages = 0
+#         else:
+#             pages = int(ceil(self.total / float(self.per_page)))
+#         return pages
 
-    @property
-    def has_next(self):
-        """True if a next page exists."""
-        return self.page < self.pages
+#     def prev(self, error_out=False):
+#         """Returns a :class:`Pagination` object for the previous page."""
+#         assert self.query is not None, 'a query object is required ' \
+#                                        'for this method to work'
+#         return paginate(self.query, self.page - 1, self.per_page, error_out)
 
-    @property
-    def next_num(self):
-        """Number of the next page"""
-        return self.page + 1
+#     @property
+#     def prev_num(self):
+#         """Number of the previous page."""
+#         return self.page - 1
 
-    def iter_pages(self, left_edge=2, left_current=2,
-                   right_current=5, right_edge=2):
-        """Iterates over the page numbers in the pagination.  The four
-        parameters control the thresholds how many numbers should be produced
-        from the sides.  Skipped page numbers are represented as `None`.
-        This is how you could render such a pagination in the templates:
-        .. sourcecode:: html+jinja
-            {% macro render_pagination(pagination, endpoint) %}
-              <div class=pagination>
-              {%- for page in pagination.iter_pages() %}
-                {% if page %}
-                  {% if page != pagination.page %}
-                    <a href="{{ url_for(endpoint, page=page) }}">{{ page }}</a>
-                  {% else %}
-                    <strong>{{ page }}</strong>
-                  {% endif %}
-                {% else %}
-                  <span class=ellipsis>…</span>
-                {% endif %}
-              {%- endfor %}
-              </div>
-            {% endmacro %}
-        """
-        last = 0
-        for num in range(1, self.pages + 1):
-            if num <= left_edge or \
-               (num > self.page - left_current - 1 and \
-                num < self.page + right_current) or \
-               num > self.pages - right_edge:
-                if last + 1 != num:
-                    yield None
-                yield num
-                last = num
+#     @property
+#     def has_prev(self):
+#         """True if a previous page exists"""
+#         return self.page > 1
 
-def paginate(query, page, per_page=20, error_out=True):
-    """
-    Modified from the flask-sqlalchemy to support paging for
-    the original version of the sqlalchemy that not use BaseQuery.
-    """
-    if page < 1 and error_out:
-        abort(404)
+#     def next(self, error_out=False):
+#         """Returns a :class:`Pagination` object for the next page."""
+#         assert self.query is not None, 'a query object is required ' \
+#                                        'for this method to work'
+#         return paginate(self.query, self.page + 1, self.per_page, error_out)
 
-    items = query.limit(per_page).offset((page - 1) * per_page).all()
-    if not items and page != 1 and error_out:
-        abort(404)
+#     @property
+#     def has_next(self):
+#         """True if a next page exists."""
+#         return self.page < self.pages
 
-    # No need to count if we're on the first page and there are fewer
-    # items than we expected.
-    if page == 1 and len(items) < per_page:
-        total = len(items)
-    else:
-        total = query.order_by(None).count()
+#     @property
+#     def next_num(self):
+#         """Number of the next page"""
+#         return self.page + 1
 
-    return Pagination(query, page, per_page, total, items)
+#     def iter_pages(self, left_edge=2, left_current=2,
+#                    right_current=5, right_edge=2):
+#         """Iterates over the page numbers in the pagination.  The four
+#         parameters control the thresholds how many numbers should be produced
+#         from the sides.  Skipped page numbers are represented as `None`.
+#         This is how you could render such a pagination in the templates:
+#         .. sourcecode:: html+jinja
+#             {% macro render_pagination(pagination, endpoint) %}
+#               <div class=pagination>
+#               {%- for page in pagination.iter_pages() %}
+#                 {% if page %}
+#                   {% if page != pagination.page %}
+#                     <a href="{{ url_for(endpoint, page=page) }}">{{ page }}</a>
+#                   {% else %}
+#                     <strong>{{ page }}</strong>
+#                   {% endif %}
+#                 {% else %}
+#                   <span class=ellipsis>…</span>
+#                 {% endif %}
+#               {%- endfor %}
+#               </div>
+#             {% endmacro %}
+#         """
+#         last = 0
+#         for num in range(1, self.pages + 1):
+#             if num <= left_edge or \
+#                (num > self.page - left_current - 1 and \
+#                 num < self.page + right_current) or \
+#                num > self.pages - right_edge:
+#                 if last + 1 != num:
+#                     yield None
+#                 yield num
+#                 last = num
 
-def url_for_other_page(page):
-    args = request.view_args.copy()
-    args['page'] = page
-    return url_for(request.endpoint, **args)
+# def paginate(query, page, per_page=20, error_out=True):
+#     """
+#     Modified from the flask-sqlalchemy to support paging for
+#     the original version of the sqlalchemy that not use BaseQuery.
+#     """
+#     if page < 1 and error_out:
+#         abort(404)
 
-app.jinja_env.globals['url_for_other_page'] = url_for_other_page
+#     items = query.limit(per_page).offset((page - 1) * per_page).all()
+#     if not items and page != 1 and error_out:
+#         abort(404)
+
+#     # No need to count if we're on the first page and there are fewer
+#     # items than we expected.
+#     if page == 1 and len(items) < per_page:
+#         total = len(items)
+#     else:
+#         total = query.order_by(None).count()
+
+#     return Pagination(query, page, per_page, total, items)
+
+# def url_for_other_page(page):
+#     args = request.view_args.copy()
+#     args['page'] = page
+#     return url_for(request.endpoint, **args)
+
+# app.jinja_env.globals['url_for_other_page'] = url_for_other_page
 
 @app.route('/code2queue/<sort>/<sort_dir>')
 @app.route('/code2queue/<sort>/<sort_dir>/<int:page>')
