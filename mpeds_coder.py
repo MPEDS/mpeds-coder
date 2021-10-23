@@ -45,7 +45,6 @@ from flask_login import LoginManager, login_user, logout_user, current_user, log
 import assign_lib
 
 ## db
-from sqlalchemy.exc import OperationalError
 from sqlalchemy import func, desc, distinct, or_, text
 from sqlalchemy.sql import select
 
@@ -571,9 +570,7 @@ def eventCreator(aid):
 @app.route('/adj', methods = ['GET'])
 @login_required
 def adj():
-    """ Rendering for adjudication page."""
-    filter = request.form.get('filter')
-    sort = request.form.get('sort')
+    """Initial rendering for adjudication page."""
 
     ## TODO: These are placeholders which will be gathered from queries later
     query1 = 'Chicago'
@@ -594,23 +591,9 @@ def adj():
     #     join(CodeEventCreator, CanonicalEventLink.cec_id == CodeEventCreator.id).\
     #     filter(CanonicalEvent.key == canonical_event_key).all()    
 
-    #####
-    ## Data for search
-    #####
-    ## TODO: Move this into YAML or base this off of EventMetadata fields
-    filter_fields = [
-        "---",
-        "article_desc",
-        "article_id",
-        "desc",
-        "event_id",
-        "location",
-        "start_date",
-        "end_date",
-        "publication",
-        "pub_date",
-        "title"
-    ]
+    ## TODO: Base this off EventMetadata for now. Eventually, we want to get rid of this.
+    filter_fields = EventMetadata.__table__.columns.keys()
+    filter_fields.remove('id')
 
     ## TODO: Do some checks in the template which don't force us to enter in empty variables
     ## which will be initialized by load_adj_grid
@@ -630,6 +613,7 @@ def adj():
 @login_required
 def load_cand_search():
     """Loads the candidate event search pane."""
+    pass
 
 
 @app.route('/load_adj_grid', methods = ['GET'])
@@ -662,14 +646,50 @@ def load_adj_grid():
 ## Search functions
 #####
 
-@app.route('/adj_search/<function>')
+@app.route('/do_search', methods = ['GET'])
 @login_required
-def cand_search(function):
-    """Performs a search on the candidate events."""
-    if function not in ['search', 'filter', 'sort']:
+def do_search():
+    """Takes the URL params and searches the candidate events for events
+    which meet the search criteria."""
+    search_params = request.args.to_dict()
+
+    filter_field = search_params.get('filter_field')
+    filter_value = search_params.get('filter_value')
+    filter_compare = search_params.get('filter_compare')
+
+    ## TODO: Do the filtering. Find a way to translate the filter compare
+    ## to a SQLAlchemy expression.
+    pass
+
+@app.route('/adj_search/<function>', methods = ['POST'])
+@login_required
+def adj_search(function):
+    """Adds a search/filter/sort form row to the search pane.
+       Will only do this if the prior search/filter/sort form rows are full."""
+
+    if function == 'search':
+        search_str = request.form['adj-search-input']
+        if search_str is None or search_str == '':
+            return make_response('No search string provided', 400)
+    elif function == 'filter':
+        filter_field = request.form['adj-filter-field']
+        filter_compare = request.form['adj-filter-compare']
+        filter_value = request.form['adj-filter-value']
+
+        if filter_field is None or filter_compare is None or filter_value is None:
+            return make_response('No filter provided', 400)
+    elif function == 'sort':
+        sort_field = request.form['adj-sort-field']
+        sort_order = request.form['adj-sort-order']
+
+        if sort_field is None or sort_order is None:
+            return make_response('No sort field provided', 400)
+    else:
         return make_response("Invalid search function", 400)
 
-    return render_template('adj-{}.html'.format(function))
+    is_addition = True if request.form['is_addition'] == 'true' else False
+
+    return render_template('adj-{}.html'.format(function), is_addition = is_addition)
 
 
 #####

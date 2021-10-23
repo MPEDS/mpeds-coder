@@ -1,22 +1,23 @@
 <div class="row form-row">
     <div class="col-sm-4">
         <select class="form-control"
-                name="sort-field" />
+                name="adj-sort-field"
+                id="adj-sort-field">
+            <option value="">---</option>
             {% for field in filter_fields %}
-            <option>{{ field }}</option>
+              <option>{{ field }}</option>
             {% endfor %}
         </select>
     </div>
     <div class="col-sm-4">
         <select class="form-control" 
-            name="sort-field-asc">
+            name="adj-sort-order"
+            id="adj-sort-order">
             <option>ascending</option>
             <option>descending</option>
         </select>
     </div>
     <div class="col-sm-1">
-        <button class="btn btm-primary" id="cand-sort">
-            <span class="glyphicon glyphicon-plus"></span>
-        </button>
+        <a id="adj-sort-button" class="btn btm-primary glyphicon glyphicon-{{ 'minus' if is_addition else 'plus' }}"></a>
     </div>
 </div>

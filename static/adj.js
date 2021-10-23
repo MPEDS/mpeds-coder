@@ -537,22 +537,41 @@ $(function () {
     });
 
     // Listener for searches additions
-    $('#cand-search').click(function() {
+    $('#adj-search-button').click(function() {
       var req = $.ajax({
         url: $SCRIPT_ROOT + '/adj_search/search',
-        type: "GET"
+        type: "POST",
+        data: {
+          is_addition: true,
+          search_str: $('#adj-search-input').val()
+        }
       })
-      .done($('#adj-search').append(req.responseText))
-      .fail(makeError("Could not add search block."));
+      .done(function() {$('#adj-search-form').append(req.responseText); })
+      .fail(function() { return makeError(req.responseText); });
     });
 
-    $('#cand-filter').click(function() {
+    $('#adj-filter-button').click(function() {
       var req = $.ajax({
         url: $SCRIPT_ROOT + '/adj_search/filter',
-        type: "GET"
+        type: "POST",
+        data: {
+          is_addition: true
+        }
       })
-      .done($('#adj-filter').append(req.responseText))
-      .fail(makeError("Could not add filter block."));
+      .done(function() {$('#adj-filter-form').append(req.responseText); })
+      .fail(function() { return makeError(req.responseText); });
+    });
+
+    $('#adj-sort-button').click(function() {
+      var req = $.ajax({
+        url: $SCRIPT_ROOT + '/adj_search/sort',
+        type: "POST",
+        data: {
+          is_addition: true
+        }        
+      })
+      .done(function() {$('#adj-sort-form').append(req.responseText); })
+      .fail(function() { return makeError(req.responseText); });
     });
 
     loadSearch();

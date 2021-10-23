@@ -1,13 +1,12 @@
 <div class="row form-row">
     <div class="col-sm-11">
         <input class="form-control"
-                name="filter-value" 
+                name="search_value" 
+                id="adj-search-input"
                 type="text" 
                 placeholder = "Value..."/>
     </div>
     <div class="col-sm-1">
-        <button id="cand-search" class="btn btm-primary">
-            <span class="glyphicon glyphicon-plus"></span>
-        </button>
+        <a id="adj-search-button" class="btn btm-primary glyphicon glyphicon-{{ 'minus' if is_addition else 'plus' }}"></a>
     </div>
 </div> 
