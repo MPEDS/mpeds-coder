@@ -60,76 +60,20 @@
                         {% include 'adj-sort.html' %}
                     </form> 
                 </div>
+                <hr/>
+                <button id="adj-search-button" class="btn btn-primary">Search</button>
             </div>
             <div class="tab-pane" id="cand_block">
                 <ul class="nav nav-pills nav-justified" id="adj-subtabselecter">
                     <li class="subtablinks active nav-item" id="cand-search_button">
-                        <a href="#">Search</a>
+                        <a href="#" id="cand-search-text">Search</a>
                     </li>
                     <li class="subtablinks nav-item" id="cand-recent_button">
                         <a href="#">Recent</a>
                     </li>
                 </ul>
                 <div class="subtab-pane" id="cand-search_block">
-                    <div class="cand-event-group">                
-                        {% for e in search_events %}
-                        <div class="event-desc" id="cand-event_{{ e.event_id }}">
-                            <div class="row">
-                                <div class="col-sm-6">
-                                    <b>start_date:</b> {{e.start_date}}</br>
-                                    <b>location:</b> {{e.location | safe }}<br/>
-                                    <b>title:</b> {{e.title | safe }}<br/>
-                                </div>
-                                <div class="col-sm-3">
-                                    <b>event_id:</b> {{ e.event_id }}<br/>
-                                    <b>article_id:</b> 
-                                        <a href="{{ url_for('eventCreator', aid = e.article_id) }}"
-                                           target="_blank"
-                                           title="{{ e.publication }} ({{ e.pub_date }}) --- {{ e.article_desc|safe }}">{{e.article_id}}</a><br/>
-                                    <b>coder:</b> {{ e.coder_id }} <br/>
-                                </div>
-                                <div class="col-sm-3">
-                                    {% if e.event_id in cand_events.keys() %}
-                                        <b class="text-muted">In the expanded view</b> <br/>
-                                    {% else %}
-                                        <b><a href="#">Add to Expand <span class="glyphicon glyphicon-plus"></span></a></b><br/>
-                                    {% endif %}
-                                    {% if e.event_id in flags %}
-                                        {% if flags[e.event_id] == 'for-review' %}
-                                            <b class="text-danger">Flagged</b>
-                                        {% elif flags[e.event_id] == 'completed' %}
-                                            <b class="text-success">Completed</b>
-                                        {% endif %}
-                                    {% endif %}
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-sm-12">
-                                    <b>desc:</b> {{ e.desc | safe }}<br/>
-                                </div>
-                            </div>
-                        </div>
-                        {% endfor %}
-                    </div>
-                    <nav aria-label="cand-event-pagination">
-                        <ul class="pagination">
-                        <li class="page-item">
-                            <a class="page-link" href="#" aria-label="Previous">
-                            <span aria-hidden="true">&laquo;</span>
-                            <span class="sr-only">Previous</span>
-                            </a>
-                        </li>
-                        <li class="page-item"><a class="page-link" href="#">1</a></li>
-                        <li class="page-item"><a class="page-link" href="#">2</a></li>
-                        <li class="page-item"><a class="page-link" href="#">3</a></li>
-                        <li class="page-item">
-                            <a class="page-link" href="#" aria-label="Next">
-                            <span aria-hidden="true">&raquo;</span>
-                            <span class="sr-only">Next</span>
-                            </a>
-                        </li>
-                        </ul>
-                    </nav>
+                    {% include 'adj-search-block.html' %}
                 </div>
                 <div class="subtab-pane" id="cand-recent_block" style="display:none;">
                     <div class="cand-event-group">                

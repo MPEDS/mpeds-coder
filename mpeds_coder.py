@@ -45,7 +45,7 @@ from flask_login import LoginManager, login_user, logout_user, current_user, log
 import assign_lib
 
 ## db
-from sqlalchemy import func, desc, distinct, or_, text
+from sqlalchemy import func, desc, distinct, and_, or_, text
 from sqlalchemy.sql import select
 
 ## app-specific
@@ -573,13 +573,19 @@ def adj():
     """Initial rendering for adjudication page."""
 
     ## TODO: These are placeholders which will be gathered from queries later
-    query1 = 'Chicago'
-    query2 = '2016-05-24'
+    filter_field1 = 'start_date'
+    filter_compare1 = '__eq__'
+    filter_value1 = '2016-05-24'
 
-    ## perform the query on the web
-    search_events = db_session.query(EventMetadata).\
-        filter(EventMetadata.location.like('%{}%'.format(query1)),
-            EventMetadata.start_date == query2).all()
+    filter_field2 = 'location'
+    filter_compare2 = 'like'
+    filter_value2 = 'Chicago'
+
+    filter_expr1 = getattr(getattr(EventMetadata, filter_field1), filter_compare1)(filter_value1)
+    filter_expr2 = getattr(getattr(EventMetadata, filter_field2), filter_compare2)('%{}%'.format(filter_value2))
+
+    ## perform the query and get the results
+    search_events = db_session.query(EventMetadata).filter(filter_expr1, filter_expr2).all()
 
     ## Get five recent events
     recent_events = [x[0] for x in db_session.query(EventMetadata, RecentEvent).\
@@ -653,13 +659,99 @@ def do_search():
     which meet the search criteria."""
     search_params = request.args.to_dict()
 
-    filter_field = search_params.get('filter_field')
-    filter_value = search_params.get('filter_value')
-    filter_compare = search_params.get('filter_compare')
+    filter_field = search_params.get('adj-filter-field')
+    filter_value = search_params.get('adj-filter-value')
+    filter_compare = search_params.get('adj-filter-compare')
 
-    ## TODO: Do the filtering. Find a way to translate the filter compare
-    ## to a SQLAlchemy expression.
-    pass
+    search_str = search_params.get('adj-search-input')
+
+    sort_field = search_params.get('adj-sort-field')
+    sort_order = search_params.get('adj-sort-order')
+
+    ## TODO: Need to account for multiple different filters and sorting terms.
+
+    filter_expr = None
+    if filter_field and filter_value and filter_compare:
+        ## Translate the filter compare to a SQLAlchemy expression.
+        if filter_compare == 'eq':
+            filter_expr = getattr(getattr(EventMetadata, filter_field), '__eq__')(filter_value)
+        elif filter_compare == 'ne':
+            filter_expr = getattr(getattr(EventMetadata, filter_field), '__ne__')(filter_value)
+        elif filter_compare == 'lt':
+            filter_expr = getattr(getattr(EventMetadata, filter_field), '__lt__')(filter_value)
+        elif filter_compare == 'le':
+            filter_expr = getattr(getattr(EventMetadata, filter_field), '__le__')(filter_value)
+        elif filter_compare == 'gt':
+            filter_expr = getattr(getattr(EventMetadata, filter_field), '__gt__')(filter_value)
+        elif filter_compare == 'ge':
+            filter_expr = getattr(getattr(EventMetadata, filter_field), '__ge__')(filter_value)
+        elif filter_compare == 'like':
+            filter_expr = getattr(getattr(EventMetadata, filter_field), 'like')('%{}%'.format(filter_value))
+        elif filter_compare == 'startswith':
+            filter_expr = getattr(getattr(EventMetadata, filter_field), 'like')('{}%'.format(filter_value))
+        elif filter_compare == 'endswith':
+            filter_expr = getattr(getattr(EventMetadata, filter_field), 'like')('%{}'.format(filter_value))
+        else:
+            raise Exception('Invalid filter compare: {}'.format(filter_compare))
+ 
+    search_expr = None
+    if search_str:
+        ## Get all fields that are searchable.
+        search_fields = EventMetadata.__table__.columns.keys()
+        search_fields.remove('id')
+
+        ## Build the search expression. For now, it can only do an AND or OR search.
+        operator = and_
+        if ' AND ' in search_str:
+            search_terms = search_str.split(' AND ')
+            operator = and_
+        elif ' OR ' in search_str:
+            search_terms = search_str.split(' OR ')
+            operator = or_
+        else:
+            search_terms = [search_str]
+
+        ## Build the search by creating an expression for each search term and search field.
+        search_expr = []
+        for term in search_terms:
+            term_expr = []
+            for field in search_fields:
+                term_expr.append(getattr(getattr(EventMetadata, field), 'like')('%{}%'.format(term)))
+            search_expr.append(or_(*term_expr))
+        search_expr = operator(*search_expr) 
+
+    ## Sort by the specified field.
+    sort_expr = None
+    if sort_field and sort_order:
+        sort_expr = getattr(getattr(EventMetadata, sort_field), sort_order)()
+
+        print(sort_expr)
+
+    a_filter_expr = None
+    if filter_expr is not None and search_expr is not None:
+        a_filter_expr = and_(filter_expr, search_expr)
+    elif filter_expr is not None:
+        a_filter_expr = filter_expr
+    elif search_expr is not None:
+        a_filter_expr = search_expr
+    else:
+        return make_response("Please enter a search term or a filter.", 400)
+
+    search_events = db_session.query(EventMetadata).\
+        filter(a_filter_expr).\
+        order_by(sort_expr).all()
+
+    ## TODO: Eventually need to load candidate events
+    response = make_response(
+        render_template('adj-search-block.html', 
+            search_events = search_events,
+            cand_events = {})
+        )
+
+    ## make and return results. add in the number of results to update the button.
+    response.headers['Search-Results'] = len(search_events)
+    return response
+
 
 @app.route('/adj_search/<function>', methods = ['POST'])
 @login_required

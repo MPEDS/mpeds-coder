@@ -536,20 +536,7 @@ $(function () {
       })
     });
 
-    // Listener for searches additions
-    $('#adj-search-button').click(function() {
-      var req = $.ajax({
-        url: $SCRIPT_ROOT + '/adj_search/search',
-        type: "POST",
-        data: {
-          is_addition: true,
-          search_str: $('#adj-search-input').val()
-        }
-      })
-      .done(function() {$('#adj-search-form').append(req.responseText); })
-      .fail(function() { return makeError(req.responseText); });
-    });
-
+    // Listener for filters and sorting
     $('#adj-filter-button').click(function() {
       var req = $.ajax({
         url: $SCRIPT_ROOT + '/adj_search/filter',
@@ -571,6 +558,37 @@ $(function () {
         }        
       })
       .done(function() {$('#adj-sort-form').append(req.responseText); })
+      .fail(function() { return makeError(req.responseText); });
+    });
+
+    // Listener for search button.
+    $('#adj-search-button').click(function() {
+      var req = $.ajax({
+        url: $SCRIPT_ROOT + '/do_search',
+        type: "GET",
+        data: 
+          $('#adj-search-form, #adj-filter-form, #adj-sort-form').serialize(),
+        beforeSend: function () {
+          $('.flash').removeClass('alert-danger');
+          $('.flash').addClass('alert-info');
+          $('.flash').text("Loading...");
+          $('.flash').show();
+        }
+      })
+      .done(function() {
+        $('#cand-search_block').html(req.responseText); 
+
+        // TODO: Update the URL search params.
+
+        // Update the search button text.
+        n_results = req.getResponseHeader('Search-Results');
+        $('#cand-search-text').text("Search (" + n_results + " results)");
+
+        // get rid of loading flash 
+        $('.flash').hide();
+        $('.flash').removeClass('alert-info');
+        return true;
+      })
       .fail(function() { return makeError(req.responseText); });
     });
 
