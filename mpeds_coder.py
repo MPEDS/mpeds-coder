@@ -652,21 +652,19 @@ def load_adj_grid():
 ## Search functions
 #####
 
-@app.route('/do_search', methods = ['GET'])
+@app.route('/do_search', methods = ['POST'])
 @login_required
 def do_search():
     """Takes the URL params and searches the candidate events for events
     which meet the search criteria."""
-    search_params = request.args.to_dict()
+    filter_field = request.form['adj-filter-field']
+    filter_value = request.form['adj-filter-value']
+    filter_compare = request.form['adj-filter-compare']
 
-    filter_field = search_params.get('adj-filter-field')
-    filter_value = search_params.get('adj-filter-value')
-    filter_compare = search_params.get('adj-filter-compare')
+    search_str = request.form['adj-search-input']
 
-    search_str = search_params.get('adj-search-input')
-
-    sort_field = search_params.get('adj-sort-field')
-    sort_order = search_params.get('adj-sort-order')
+    sort_field = request.form['adj-sort-field']
+    sort_order = request.form['adj-sort-order']
 
     ## TODO: Need to account for multiple different filters and sorting terms.
 
@@ -686,11 +684,11 @@ def do_search():
         elif filter_compare == 'ge':
             filter_expr = getattr(getattr(EventMetadata, filter_field), '__ge__')(filter_value)
         elif filter_compare == 'like':
-            filter_expr = getattr(getattr(EventMetadata, filter_field), 'like')('%{}%'.format(filter_value))
+            filter_expr = getattr(getattr(EventMetadata, filter_field), 'like')(u'%{}%'.format(filter_value))
         elif filter_compare == 'startswith':
-            filter_expr = getattr(getattr(EventMetadata, filter_field), 'like')('{}%'.format(filter_value))
+            filter_expr = getattr(getattr(EventMetadata, filter_field), 'like')(u'{}%'.format(filter_value))
         elif filter_compare == 'endswith':
-            filter_expr = getattr(getattr(EventMetadata, filter_field), 'like')('%{}'.format(filter_value))
+            filter_expr = getattr(getattr(EventMetadata, filter_field), 'like')(u'%{}'.format(filter_value))
         else:
             raise Exception('Invalid filter compare: {}'.format(filter_compare))
  
@@ -716,7 +714,7 @@ def do_search():
         for term in search_terms:
             term_expr = []
             for field in search_fields:
-                term_expr.append(getattr(getattr(EventMetadata, field), 'like')('%{}%'.format(term)))
+                term_expr.append(getattr(getattr(EventMetadata, field), 'like')(u'%{}%'.format(term)))
             search_expr.append(or_(*term_expr))
         search_expr = operator(*search_expr) 
 
@@ -725,15 +723,17 @@ def do_search():
     if sort_field and sort_order:
         sort_expr = getattr(getattr(EventMetadata, sort_field), sort_order)()
 
-        print(sort_expr)
+    ## Filter out null start dates to account for disqualifying information.
+    date_filter = EventMetadata.start_date != None
 
+    ## Combine filters.
     a_filter_expr = None
     if filter_expr is not None and search_expr is not None:
-        a_filter_expr = and_(filter_expr, search_expr)
+        a_filter_expr = and_(filter_expr, search_expr, date_filter)
     elif filter_expr is not None:
-        a_filter_expr = filter_expr
+        a_filter_expr = and_(filter_expr, date_filter)
     elif search_expr is not None:
-        a_filter_expr = search_expr
+        a_filter_expr = and_(search_expr, date_filter)
     else:
         return make_response("Please enter a search term or a filter.", 400)
 
@@ -741,15 +741,20 @@ def do_search():
         filter(a_filter_expr).\
         order_by(sort_expr).all()
 
-    ## TODO: Eventually need to load candidate events
+    ## TODO: Eventually need to load candidate events.
+    ## Will probably end up doing this in JavaScript with the button initializers.
     response = make_response(
         render_template('adj-search-block.html', 
             search_events = search_events,
             cand_events = {})
         )
 
+    ## TODO: eventually can add multiple values for the same key by coercing to dict.
+    url_params = {k: v for k, v in request.form.iteritems()}
+
     ## make and return results. add in the number of results to update the button.
     response.headers['Search-Results'] = len(search_events)
+    response.headers['Query'] = json.dumps(url_params)
     return response
 
 

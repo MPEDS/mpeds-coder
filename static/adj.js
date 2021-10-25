@@ -565,7 +565,7 @@ $(function () {
     $('#adj-search-button').click(function() {
       var req = $.ajax({
         url: $SCRIPT_ROOT + '/do_search',
-        type: "GET",
+        type: "POST",
         data: 
           $('#adj-search-form, #adj-filter-form, #adj-sort-form').serialize(),
         beforeSend: function () {
@@ -576,13 +576,22 @@ $(function () {
         }
       })
       .done(function() {
+        // Update content block.
         $('#cand-search_block').html(req.responseText); 
-
-        // TODO: Update the URL search params.
 
         // Update the search button text.
         n_results = req.getResponseHeader('Search-Results');
         $('#cand-search-text').text("Search (" + n_results + " results)");
+
+        // Update the URL search params.
+        let curr_search_params = new URLSearchParams(window.location.search);
+        var search_params = jQuery.parseJSON(req.getResponseHeader('Query'));
+        for (var key in search_params) {
+          curr_search_params.set(key, search_params[key]);
+        }
+
+        var new_url = 'adj?' + curr_search_params.toString();
+        window.history.pushState({path: new_url}, '', new_url);
 
         // get rid of loading flash 
         $('.flash').hide();
