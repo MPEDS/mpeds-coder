@@ -6,7 +6,7 @@
  * @returns false
  */
 var changeTab = function(e, level = "") {
-    var eid = $(e.target).parent().attr("id").split("_")[0];
+    var label = $(e.target).parent().attr("id").split("_")[0];
 
     // TODO: Add error checking
 
@@ -21,8 +21,15 @@ var changeTab = function(e, level = "") {
     });
 
     // Show the current tab, and add an "active" class to the button that opened the tab
-    $('#' + eid + "_button").addClass("active");
-    $('#' + eid + "_block").show();
+    $('#' + label + "_button").addClass("active");
+    $('#' + label + "_block").show();
+
+    // if this has a *, remove
+    var button_text = $('#' + label + '_button-link').text();
+    if (button_text.indexOf("*") > -1) {
+      button_text = button_text.replace("*", "");
+      $('#' + label + '_button-link').html(button_text);
+    }
 
     return false;
 }
@@ -583,6 +590,9 @@ $(function () {
         n_results = req.getResponseHeader('Search-Results');
         $('#cand-search-text').text("Search (" + n_results + " results)");
 
+        // Update the candidate button text.
+        $('#cand_button-link').text("Candidate Events*");
+
         // Update the URL search params.
         let curr_search_params = new URLSearchParams(window.location.search);
         var search_params = jQuery.parseJSON(req.getResponseHeader('Query'));
@@ -592,6 +602,8 @@ $(function () {
 
         var new_url = 'adj?' + curr_search_params.toString();
         window.history.pushState({path: new_url}, '', new_url);
+
+        initializeSearchListeners();
 
         // get rid of loading flash 
         $('.flash').hide();
