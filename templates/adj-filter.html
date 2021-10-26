@@ -1,8 +1,8 @@
 <div class="row form-row">
     <div class="col-sm-4">
         <select class="form-control"
-                name="adj-filter-field" 
-                id="adj-filter-field">
+                name="adj_filter_field" 
+                id="adj_filter_field">
             <option value="">---</option>
             {% for field in filter_fields %}
               <option>{{ field }}</option>
@@ -11,27 +11,27 @@
     </div>
     <div class="col-sm-4">
         <select class="form-control"
-            name="adj-filter-compare"
-            id="adj-filter-compare">
+            name="adj_filter_compare"
+            id="adj_filter_compare">
             <option value="">---</option>
             <option value="eq">equals</option>
             <option value="gt">is greater than</option>
             <option value="gte">is greater than or equal to</option>
             <option value="lt">is less than</option>
             <option value="lte">is less than or equal to</option>
-            <option value="like">contains</option>
+            <option value="contains">contains</option>
             <option value="starts">starts with</option>
             <option value="ends">ends with</option>
         </select>
     </div>
     <div class="col-sm-3">
         <input class="form-control"
-                name="adj-filter-value"
-                id="adj-filter-value" 
+                name="adj_filter_value"
+                id="adj_filter_value" 
                 type="text" 
                 placeholder = "Value..."/>
     </div>
     <div class="col-sm-1">
-        <a id="adj-filter-button" class="btn btm-primary glyphicon glyphicon-{{ 'minus' if is_addition else 'plus' }}"></a>
+        <a id="adj_filter_button" class="btn btm-primary glyphicon glyphicon-{{ 'minus' if is_addition else 'plus' }}"></a>
     </div>
 </div>

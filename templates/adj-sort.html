@@ -1,8 +1,8 @@
 <div class="row form-row">
     <div class="col-sm-4">
         <select class="form-control"
-                name="adj-sort-field"
-                id="adj-sort-field">
+                name="adj_sort_field"
+                id="adj_sort_field">
             <option value="">---</option>
             {% for field in filter_fields %}
               <option>{{ field }}</option>
@@ -11,13 +11,14 @@
     </div>
     <div class="col-sm-4">
         <select class="form-control" 
-            name="adj-sort-order"
-            id="adj-sort-order">
+            name="adj_sort_order"
+            id="adj_sort_order">
+            <option value="">---</option>
             <option value="asc">ascending</option>
             <option value="desc">descending</option>
         </select>
     </div>
     <div class="col-sm-1">
-        <a id="adj-sort-button" class="btn btm-primary glyphicon glyphicon-{{ 'minus' if is_addition else 'plus' }}"></a>
+        <a id="adj_sort_button" class="btn btm-primary glyphicon glyphicon-{{ 'minus' if is_addition else 'plus' }}"></a>
     </div>
 </div>

@@ -19,7 +19,11 @@
     <div class="col-sm-5 adj-pane" id="adj-pane-cand-events">
         <a href="{{ url_for('adj', 
             cand_events = '6031,6032,21644,21646', 
-            canonical_event_key = 'Milo_Chicago_2016') }}">
+            canonical_event_key = 'Milo_Chicago_2016',
+            adj_search_input = 'Milo',
+            adj_filter_field = 'location',
+            adj_filter_compare = 'contains',
+            adj_filter_value = 'Chicago') }}">
             Example page
         </a><br/>
         <a id="cand-events-hide" href="#">&laquo; Hide Pane</a>
@@ -42,26 +46,26 @@
             <div class="tab-pane" id="search_block">
                 <div class="adj-variable-group">
                     <h5>Search</h5>
-                    <form id="adj-search-form">
+                    <form id="adj_search_form">
                         {% include 'adj-search.html' %}
                     </form>
                 </div>
                 <hr/>
                 <div class="adj-variable-group">
                     <h5>Filter</h5>
-                    <form id="adj-filter-form">
+                    <form id="adj_filter_form">
                         {% include 'adj-filter.html' %}
                     </form>
                 </div>
                 <hr/>
                 <div class="adj-variable-group">
                     <h5>Sort</h5>
-                    <form id="adj-sort-form"> 
+                    <form id="adj_sort_form"> 
                         {% include 'adj-sort.html' %}
                     </form> 
                 </div>
                 <hr/>
-                <button id="adj-search-button" class="btn btn-primary">Search</button>
+                <button id="adj_search_button" class="btn btn-primary">Search</button>
             </div>
             <div class="tab-pane" id="cand_block">
                 <ul class="nav nav-pills nav-justified" id="adj-subtabselecter">

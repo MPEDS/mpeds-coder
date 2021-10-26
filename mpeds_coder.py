@@ -571,21 +571,8 @@ def eventCreator(aid):
 @login_required
 def adj():
     """Initial rendering for adjudication page."""
-
-    ## TODO: These are placeholders which will be gathered from queries later
-    filter_field1 = 'start_date'
-    filter_compare1 = '__eq__'
-    filter_value1 = '2016-05-24'
-
-    filter_field2 = 'location'
-    filter_compare2 = 'like'
-    filter_value2 = 'Chicago'
-
-    filter_expr1 = getattr(getattr(EventMetadata, filter_field1), filter_compare1)(filter_value1)
-    filter_expr2 = getattr(getattr(EventMetadata, filter_field2), filter_compare2)('%{}%'.format(filter_value2))
-
-    ## perform the query and get the results
-    search_events = db_session.query(EventMetadata).filter(filter_expr1, filter_expr2).all()
+    if current_user.authlevel < 2: 
+        return redirect(url_for('index'))
 
     ## Get five recent events
     recent_events = [x[0] for x in db_session.query(EventMetadata, RecentEvent).\
@@ -604,7 +591,7 @@ def adj():
     ## TODO: Do some checks in the template which don't force us to enter in empty variables
     ## which will be initialized by load_adj_grid
     return render_template("adj.html", 
-        search_events = search_events,
+        search_events = [],
         filter_fields = filter_fields,
         cand_events   = {},
         grid_vars     = adj_grid_order,
@@ -657,14 +644,14 @@ def load_adj_grid():
 def do_search():
     """Takes the URL params and searches the candidate events for events
     which meet the search criteria."""
-    filter_field = request.form['adj-filter-field']
-    filter_value = request.form['adj-filter-value']
-    filter_compare = request.form['adj-filter-compare']
+    filter_field = request.form['adj_filter_field']
+    filter_value = request.form['adj_filter_value']
+    filter_compare = request.form['adj_filter_compare']
 
-    search_str = request.form['adj-search-input']
+    search_str = request.form['adj_search_input']
 
-    sort_field = request.form['adj-sort-field']
-    sort_order = request.form['adj-sort-order']
+    sort_field = request.form['adj_sort_field']
+    sort_order = request.form['adj_sort_order']
 
     ## TODO: Need to account for multiple different filters and sorting terms.
 
@@ -683,7 +670,7 @@ def do_search():
             filter_expr = getattr(getattr(EventMetadata, filter_field), '__gt__')(filter_value)
         elif filter_compare == 'ge':
             filter_expr = getattr(getattr(EventMetadata, filter_field), '__ge__')(filter_value)
-        elif filter_compare == 'like':
+        elif filter_compare == 'contains':
             filter_expr = getattr(getattr(EventMetadata, filter_field), 'like')(u'%{}%'.format(filter_value))
         elif filter_compare == 'startswith':
             filter_expr = getattr(getattr(EventMetadata, filter_field), 'like')(u'{}%'.format(filter_value))

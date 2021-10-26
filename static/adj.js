@@ -110,13 +110,6 @@ var loadGrid = function(canonical_event_key = null, cand_events_str = null) {
   .fail(function() { return makeError(req.responseText); });
 }
 
-/**
- *  Loads the search results for the given query.
- *  @returns true if successful, false otherwise.
- */
-var loadSearch = function() {
-  initializeSearchListeners(); 
-}
 
 /**
  * Removes the block from the canonical record.
@@ -143,12 +136,64 @@ var removeCanonical = function () {
   .fail(function() { return makeError(req.responseText); });
 }
 
+
+/**
+ * Loads the search results for the given query from the existing forms.
+ * @returns true if successful, false otherwise.
+ */
+ var loadSearch = function(rewrite_url = false) {
+  var req = $.ajax({
+    url: $SCRIPT_ROOT + '/do_search',
+    type: "POST",
+    data: 
+      $('#adj_search_form, #adj_filter_form, #adj_sort_form').serialize(),
+    beforeSend: function () {
+      $('.flash').removeClass('alert-danger');
+      $('.flash').addClass('alert-info');
+      $('.flash').text("Loading...");
+      $('.flash').show();
+    }
+  })
+  .done(function() {
+    // Update content block.
+    $('#cand-search_block').html(req.responseText); 
+
+    // Update the search button text.
+    n_results = req.getResponseHeader('Search-Results');
+    $('#cand-search-text').text("Search (" + n_results + " results)");
+
+    // Update the candidate button text.
+    $('#cand_button-link').text("Candidate Events*");
+
+    if (rewrite_url == true) {
+      // Update the URL search params.
+      let curr_search_params = new URLSearchParams(window.location.search);
+      var search_params = jQuery.parseJSON(req.getResponseHeader('Query'));
+      for (var key in search_params) {
+        curr_search_params.set(key, search_params[key]);
+      }
+
+      var new_url = 'adj?' + curr_search_params.toString();
+      window.history.pushState({path: new_url}, '', new_url);
+    }
+
+    initializeSearchListeners();
+
+    // get rid of loading flash 
+    $('.flash').hide();
+    $('.flash').removeClass('alert-info');
+    return true;
+  })
+  .fail(function() { return makeError(req.responseText); });
+}
+
+
 /**
  * Toggles flags for candidate events.
  * @param {Event} e - click event
  * @param {str} operation - add or deletion operation. takes values 'add' or 'del'
  * @param {str} flag - the flag to add to this event
- * @returns true if success, false otherwise 
+ * @returns true if successful, false otherwise.
  */
 var toggleFlag = function(e, operation, flag) {
   if (operation != 'add' & operation != 'del') {
@@ -178,6 +223,7 @@ var toggleFlag = function(e, operation, flag) {
   })
   .fail(function() { return makeError(req.responseText); });
 }
+
 
 /**
  * 
@@ -544,7 +590,7 @@ $(function () {
     });
 
     // Listener for filters and sorting
-    $('#adj-filter-button').click(function() {
+    $('#adj_filter_button').click(function() {
       var req = $.ajax({
         url: $SCRIPT_ROOT + '/adj_search/filter',
         type: "POST",
@@ -552,11 +598,11 @@ $(function () {
           is_addition: true
         }
       })
-      .done(function() {$('#adj-filter-form').append(req.responseText); })
+      .done(function() {$('#adj_filter_form').append(req.responseText); })
       .fail(function() { return makeError(req.responseText); });
     });
 
-    $('#adj-sort-button').click(function() {
+    $('#adj_sort_button').click(function() {
       var req = $.ajax({
         url: $SCRIPT_ROOT + '/adj_search/sort',
         type: "POST",
@@ -564,59 +610,28 @@ $(function () {
           is_addition: true
         }        
       })
-      .done(function() {$('#adj-sort-form').append(req.responseText); })
+      .done(function() {$('#adj_sort_form').append(req.responseText); })
       .fail(function() { return makeError(req.responseText); });
     });
 
     // Listener for search button.
-    $('#adj-search-button').click(function() {
-      var req = $.ajax({
-        url: $SCRIPT_ROOT + '/do_search',
-        type: "POST",
-        data: 
-          $('#adj-search-form, #adj-filter-form, #adj-sort-form').serialize(),
-        beforeSend: function () {
-          $('.flash').removeClass('alert-danger');
-          $('.flash').addClass('alert-info');
-          $('.flash').text("Loading...");
-          $('.flash').show();
-        }
-      })
-      .done(function() {
-        // Update content block.
-        $('#cand-search_block').html(req.responseText); 
+    $('#adj_search_button').click(loadSearch);
 
-        // Update the search button text.
-        n_results = req.getResponseHeader('Search-Results');
-        $('#cand-search-text').text("Search (" + n_results + " results)");
-
-        // Update the candidate button text.
-        $('#cand_button-link').text("Candidate Events*");
-
-        // Update the URL search params.
-        let curr_search_params = new URLSearchParams(window.location.search);
-        var search_params = jQuery.parseJSON(req.getResponseHeader('Query'));
-        for (var key in search_params) {
-          curr_search_params.set(key, search_params[key]);
-        }
-
-        var new_url = 'adj?' + curr_search_params.toString();
-        window.history.pushState({path: new_url}, '', new_url);
-
-        initializeSearchListeners();
-
-        // get rid of loading flash 
-        $('.flash').hide();
-        $('.flash').removeClass('alert-info');
-        return true;
-      })
-      .fail(function() { return makeError(req.responseText); });
-    });
-
-    loadSearch();
-
-    // initialize the grid
+    // initialize the grid and search 
     let search_params = new URLSearchParams(window.location.search);
+    var search_ids = [
+      'adj_search_input',
+      'adj_filter_compare',
+      'adj_filter_value',
+      'adj_filter_field',
+      'adj_sort_field',
+      'adj_sort_order'
+    ]
+    for(var i = 0; i < search_ids.length; i++) {
+      $('#' + search_ids[i]).val(search_params.get(search_ids[i]));
+    }
+    loadSearch();
+ 
     loadGrid(
       search_params.get('canonical_event_key'),      
       search_params.get('cand_events')
