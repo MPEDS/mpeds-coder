@@ -590,6 +590,27 @@ $(function () {
     // Listener for search button.
     $('#adj_search_button').click(loadSearch);
 
+    // Listener for clear button.
+    $('.clear-values').each(function() {
+      $(this).click(function() {
+        // Clear the search form and clear URL parameters
+        let search_params = new URLSearchParams(window.location.search);
+
+        $(this).closest('.form-row').find('input').each(function() {
+          $(this).val('');
+          search_params.set($(this).attr('name'), '');
+        });
+        $(this).closest('.form-row').find('select').each(function() {
+          $(this).val('');
+          search_params.set($(this).attr('name'), '');
+        });
+
+        // Update the URL with cleared values
+        var new_url = 'adj?' + search_params.toString();
+        window.history.pushState({path: new_url}, '', new_url);    
+      });
+    });
+
     // initialize the grid and search 
     let search_params = new URLSearchParams(window.location.search);
     var repeated_fields = [
