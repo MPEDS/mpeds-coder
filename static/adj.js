@@ -141,7 +141,7 @@ var removeCanonical = function () {
  * Loads the search results for the given query from the existing forms.
  * @returns true if successful, false otherwise.
  */
- var loadSearch = function(rewrite_url = false) {
+ var loadSearch = function() {
   var req = $.ajax({
     url: $SCRIPT_ROOT + '/do_search',
     type: "POST",
@@ -165,17 +165,15 @@ var removeCanonical = function () {
     // Update the candidate button text.
     $('#cand_button-link').text("Candidate Events*");
 
-    if (rewrite_url == true) {
-      // Update the URL search params.
-      let curr_search_params = new URLSearchParams(window.location.search);
-      var search_params = jQuery.parseJSON(req.getResponseHeader('Query'));
-      for (var key in search_params) {
-        curr_search_params.set(key, search_params[key]);
-      }
-
-      var new_url = 'adj?' + curr_search_params.toString();
-      window.history.pushState({path: new_url}, '', new_url);
+    // Update the URL search params.
+    let curr_search_params = new URLSearchParams(window.location.search);
+    var search_params = jQuery.parseJSON(req.getResponseHeader('Query'));
+    for (var key in search_params) {
+      curr_search_params.set(key, search_params[key]);
     }
+
+    var new_url = 'adj?' + curr_search_params.toString();
+    window.history.pushState({path: new_url}, '', new_url);
 
     initializeSearchListeners();
 
@@ -589,44 +587,29 @@ $(function () {
       })
     });
 
-    // Listener for filters and sorting
-    $('#adj_filter_button').click(function() {
-      var req = $.ajax({
-        url: $SCRIPT_ROOT + '/adj_search/filter',
-        type: "POST",
-        data: {
-          is_addition: true
-        }
-      })
-      .done(function() {$('#adj_filter_form').append(req.responseText); })
-      .fail(function() { return makeError(req.responseText); });
-    });
-
-    $('#adj_sort_button').click(function() {
-      var req = $.ajax({
-        url: $SCRIPT_ROOT + '/adj_search/sort',
-        type: "POST",
-        data: {
-          is_addition: true
-        }        
-      })
-      .done(function() {$('#adj_sort_form').append(req.responseText); })
-      .fail(function() { return makeError(req.responseText); });
-    });
-
     // Listener for search button.
     $('#adj_search_button').click(loadSearch);
 
     // initialize the grid and search 
     let search_params = new URLSearchParams(window.location.search);
-    var search_ids = [
-      'adj_search_input',
+    var repeated_fields = [
       'adj_filter_compare',
       'adj_filter_value',
       'adj_filter_field',
       'adj_sort_field',
       'adj_sort_order'
-    ]
+    ];
+    var search_ids = ['adj_search_input'];
+
+    // create indexed array of search parameters
+    for(var i = 0; i < 2; i++) {
+      for (var j = 0; j < repeated_fields.length; j++) {
+        var field = repeated_fields[j] + '_' + i;
+        search_ids.push(field);
+      }
+    }
+
+    // initialize the search parameters in the URLs
     for(var i = 0; i < search_ids.length; i++) {
       $('#' + search_ids[i]).val(search_params.get(search_ids[i]));
     }

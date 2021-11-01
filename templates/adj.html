@@ -17,16 +17,21 @@
   </div>
   <div class="row">
     <div class="col-sm-5 adj-pane" id="adj-pane-cand-events">
+        <a id="cand-events-hide" href="#">&laquo; Hide</a><br/>
         <a href="{{ url_for('adj', 
             cand_events = '6031,6032,21644,21646', 
             canonical_event_key = 'Milo_Chicago_2016',
             adj_search_input = 'Milo',
-            adj_filter_field = 'location',
-            adj_filter_compare = 'contains',
-            adj_filter_value = 'Chicago') }}">
+            adj_filter_field_0 = 'start_date',
+            adj_filter_compare_0 = 'ge',
+            adj_filter_value_0 = '2016-05-01',
+            adj_filter_field_1 = 'start_date',
+            adj_filter_compare_1 = 'lt',
+            adj_filter_value_1 = '2016-07-01',
+            adj_sort_field_0 = 'start_date',
+            adj_sort_order_0 = 'asc') }}">
             Example page
-        </a><br/>
-        <a id="cand-events-hide" href="#">&laquo; Hide Pane</a>
+        </a>
         <h4>Event Selection</h4>
         <ul class="nav nav-tabs" id="adj-tabselecter">
             <li class="tablinks active" id="search_button">
@@ -209,7 +214,7 @@
         </div>
     </div>
     <div class="col-sm-7 adj-pane" id="adj-pane-expanded-view">
-        <a id="cand-events-show" style="display:none;" href="#">Show Events &raquo;</a>
+        <a id="cand-events-show" style="display:none;" href="#">Show Search &raquo;</a>
         <h4>Expanded Event View | 
             <a id="new-canonical" data-toggle="modal" 
                 data-target="my_modal" href="#">New Canonical Event</a></h4>

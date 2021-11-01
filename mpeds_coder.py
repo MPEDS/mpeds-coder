@@ -644,41 +644,55 @@ def load_adj_grid():
 def do_search():
     """Takes the URL params and searches the candidate events for events
     which meet the search criteria."""
-    filter_field = request.form['adj_filter_field']
-    filter_value = request.form['adj_filter_value']
-    filter_compare = request.form['adj_filter_compare']
-
     search_str = request.form['adj_search_input']
 
-    sort_field = request.form['adj_sort_field']
-    sort_order = request.form['adj_sort_order']
+    ## get multiple filters and sorting
+    filters = []
+    sorts = []
 
-    ## TODO: Need to account for multiple different filters and sorting terms.
+    ## cycle through all the filter and sort fields
+    for i in range(3):
+        filter_field = request.form['adj_filter_field_{}'.format(i)]
+        filter_value = request.form['adj_filter_value_{}'.format(i)]
+        filter_compare = request.form['adj_filter_compare_{}'.format(i)]
 
-    filter_expr = None
-    if filter_field and filter_value and filter_compare:
-        ## Translate the filter compare to a SQLAlchemy expression.
-        if filter_compare == 'eq':
-            filter_expr = getattr(getattr(EventMetadata, filter_field), '__eq__')(filter_value)
-        elif filter_compare == 'ne':
-            filter_expr = getattr(getattr(EventMetadata, filter_field), '__ne__')(filter_value)
-        elif filter_compare == 'lt':
-            filter_expr = getattr(getattr(EventMetadata, filter_field), '__lt__')(filter_value)
-        elif filter_compare == 'le':
-            filter_expr = getattr(getattr(EventMetadata, filter_field), '__le__')(filter_value)
-        elif filter_compare == 'gt':
-            filter_expr = getattr(getattr(EventMetadata, filter_field), '__gt__')(filter_value)
-        elif filter_compare == 'ge':
-            filter_expr = getattr(getattr(EventMetadata, filter_field), '__ge__')(filter_value)
-        elif filter_compare == 'contains':
-            filter_expr = getattr(getattr(EventMetadata, filter_field), 'like')(u'%{}%'.format(filter_value))
-        elif filter_compare == 'startswith':
-            filter_expr = getattr(getattr(EventMetadata, filter_field), 'like')(u'{}%'.format(filter_value))
-        elif filter_compare == 'endswith':
-            filter_expr = getattr(getattr(EventMetadata, filter_field), 'like')(u'%{}'.format(filter_value))
-        else:
-            raise Exception('Invalid filter compare: {}'.format(filter_compare))
+        if filter_field and filter_value and filter_compare:
+            ## Translate the filter compare to a SQLAlchemy expression.
+            if filter_compare == 'eq':
+                _filter = getattr(getattr(EventMetadata, filter_field), '__eq__')(filter_value)
+            elif filter_compare == 'ne':
+                _filter = getattr(getattr(EventMetadata, filter_field), '__ne__')(filter_value)
+            elif filter_compare == 'lt':
+                _filter = getattr(getattr(EventMetadata, filter_field), '__lt__')(filter_value)
+            elif filter_compare == 'le':
+                _filter = getattr(getattr(EventMetadata, filter_field), '__le__')(filter_value)
+            elif filter_compare == 'gt':
+                _filter = getattr(getattr(EventMetadata, filter_field), '__gt__')(filter_value)
+            elif filter_compare == 'ge':
+                _filter = getattr(getattr(EventMetadata, filter_field), '__ge__')(filter_value)
+            elif filter_compare == 'contains':
+                _filter = getattr(getattr(EventMetadata, filter_field), 'like')(u'%{}%'.format(filter_value))
+            elif filter_compare == 'startswith':
+                _filter = getattr(getattr(EventMetadata, filter_field), 'like')(u'{}%'.format(filter_value))
+            elif filter_compare == 'endswith':
+                _filter = getattr(getattr(EventMetadata, filter_field), 'like')(u'%{}'.format(filter_value))
+            else:
+                raise Exception('Invalid filter compare: {}'.format(filter_compare))
  
+            filters.append(_filter)
+
+        sort_field = request.form['adj_sort_field_{}'.format(i)]
+        sort_order = request.form['adj_sort_order_{}'.format(i)]
+
+        ## Sort by the specified field.
+        if sort_field and sort_order:
+            _sort = getattr(getattr(EventMetadata, sort_field), sort_order)()
+            sorts.append(_sort)
+
+    ## AND all the filters together
+    sort_expr = and_(*sorts)
+    filter_expr = and_(*filters)
+
     search_expr = None
     if search_str:
         ## Get all fields that are searchable.
@@ -705,11 +719,6 @@ def do_search():
             search_expr.append(or_(*term_expr))
         search_expr = operator(*search_expr) 
 
-    ## Sort by the specified field.
-    sort_expr = None
-    if sort_field and sort_order:
-        sort_expr = getattr(getattr(EventMetadata, sort_field), sort_order)()
-
     ## Filter out null start dates to account for disqualifying information.
     date_filter = EventMetadata.start_date != None
 
@@ -728,7 +737,7 @@ def do_search():
         filter(a_filter_expr).\
         order_by(sort_expr).all()
 
-    ## TODO: Eventually need to load candidate events.
+    ## TODO: Eventually need to load current candidate events.
     ## Will probably end up doing this in JavaScript with the button initializers.
     response = make_response(
         render_template('adj-search-block.html', 
