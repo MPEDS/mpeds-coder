@@ -1,10 +1,10 @@
 <div class="cand-event-group">                
-    {% for e in search_events %}
-    <div class="event-desc" id="cand-event_{{ e.event_id }}">
+    {% for e in events %}
+    <div class="event-desc" id="cand-event_{{ e.event_id }}" data-event="{{ e.event_id }}">
         <div class="row">
             <div class="col-sm-6">
-                <b>start_date:</b> {{e.start_date}}</br>
-                <b>location:</b> {{e.location | safe }}<br/>
+                <b>start_date:</b> {{ e.start_date }}</br>
+                <b>location:</b> {{ e.location | safe }}<br/>
                 <b>title:</b> {{e.title | safe }}<br/>
             </div>
             <div class="col-sm-3">
@@ -16,18 +16,21 @@
                 <b>coder:</b> {{ e.coder_id }} <br/>
             </div>
             <div class="col-sm-3">
-                {% if e.event_id in cand_events.keys() %}
-                    <b class="text-muted">In the expanded view</b> <br/>
-                {% else %}
-                    <b><a href="#">Add to Expand <span class="glyphicon glyphicon-plus"></span></a></b><br/>
-                {% endif %}
+                <p class="flags">
                 {% if e.event_id in flags %}
                     {% if flags[e.event_id] == 'for-review' %}
-                        <b class="text-danger">Flagged</b>
+                        Flag: <b class="text-danger">for-review</b>
                     {% elif flags[e.event_id] == 'completed' %}
-                        <b class="text-success">Completed</b>
+                        Flag: <b class="text-success">completed</b>
                     {% endif %}
+                {% else %}
+                    No flags
                 {% endif %}
+                </p>
+                <a href="#" class="cande-makeactive">
+                    <b>Add to grid <span class="glyphicon glyphicon-export"></span></b>
+                </a>
+                <b class="cande-isactive text-muted" style="display:none;">In the expanded view</b>
             </div>
         </div>
         <div class="row">
@@ -38,7 +41,7 @@
     </div>
     {% endfor %}
 </div>
-<nav aria-label="cand-event-pagination">
+<!-- <nav aria-label="cand-event-pagination">
     <ul class="pagination">
         <li class="page-item">
             <a class="page-link" href="#" aria-label="Previous">
@@ -56,4 +59,4 @@
             </a>
         </li>
     </ul>
-</nav>
+</nav> -->

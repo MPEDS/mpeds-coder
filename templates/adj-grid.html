@@ -16,7 +16,7 @@
             data-coder="{{ cand_events[event_id]['metadata']['coder_id'] }}">
             <label>Event {{ event_id }}<br/> 
             <i>Actions:</i> 
-                <a class="glyphicon glyphicon-plus-sign add-all-val" title="Add all values" ></a> 
+                <!-- <a class="glyphicon glyphicon-plus-sign add-all-val" title="Add all values" ></a>  -->
                 {% set article_id = cand_events[event_id]['metadata']['article_id'] -%}
                 {% if article_id in links %}
                     <a class="glyphicon glyphicon-link text-danger remove-link" 

@@ -587,6 +587,7 @@ def adj():
     ## TODO: Base this off EventMetadata for now. Eventually, we want to get rid of this.
     filter_fields = EventMetadata.__table__.columns.keys()
     filter_fields.remove('id')
+    filter_fields.append('flag')
 
     ## TODO: Do some checks in the template which don't force us to enter in empty variables
     ## which will be initialized by load_adj_grid
@@ -657,25 +658,27 @@ def do_search():
         filter_compare = request.form['adj_filter_compare_{}'.format(i)]
 
         if filter_field and filter_value and filter_compare:
+            _model = EventMetadata if filter_field != 'flag' else EventFlag
+
             ## Translate the filter compare to a SQLAlchemy expression.
             if filter_compare == 'eq':
-                _filter = getattr(getattr(EventMetadata, filter_field), '__eq__')(filter_value)
+                _filter = getattr(getattr(_model, filter_field), '__eq__')(filter_value)
             elif filter_compare == 'ne':
-                _filter = getattr(getattr(EventMetadata, filter_field), '__ne__')(filter_value)
+                _filter = getattr(getattr(_model, filter_field), '__ne__')(filter_value)
             elif filter_compare == 'lt':
-                _filter = getattr(getattr(EventMetadata, filter_field), '__lt__')(filter_value)
+                _filter = getattr(getattr(_model, filter_field), '__lt__')(filter_value)
             elif filter_compare == 'le':
-                _filter = getattr(getattr(EventMetadata, filter_field), '__le__')(filter_value)
+                _filter = getattr(getattr(_model, filter_field), '__le__')(filter_value)
             elif filter_compare == 'gt':
-                _filter = getattr(getattr(EventMetadata, filter_field), '__gt__')(filter_value)
+                _filter = getattr(getattr(_model, filter_field), '__gt__')(filter_value)
             elif filter_compare == 'ge':
-                _filter = getattr(getattr(EventMetadata, filter_field), '__ge__')(filter_value)
+                _filter = getattr(getattr(_model, filter_field), '__ge__')(filter_value)
             elif filter_compare == 'contains':
-                _filter = getattr(getattr(EventMetadata, filter_field), 'like')(u'%{}%'.format(filter_value))
+                _filter = getattr(getattr(_model, filter_field), 'like')(u'%{}%'.format(filter_value))
             elif filter_compare == 'startswith':
-                _filter = getattr(getattr(EventMetadata, filter_field), 'like')(u'{}%'.format(filter_value))
+                _filter = getattr(getattr(_model, filter_field), 'like')(u'{}%'.format(filter_value))
             elif filter_compare == 'endswith':
-                _filter = getattr(getattr(EventMetadata, filter_field), 'like')(u'%{}'.format(filter_value))
+                _filter = getattr(getattr(_model, filter_field), 'like')(u'%{}'.format(filter_value))
             else:
                 raise Exception('Invalid filter compare: {}'.format(filter_compare))
  
@@ -686,7 +689,9 @@ def do_search():
 
         ## Sort by the specified field.
         if sort_field and sort_order:
-            _sort = getattr(getattr(EventMetadata, sort_field), sort_order)()
+            _model = EventMetadata if sort_field != 'flag' else EventFlag
+
+            _sort = getattr(getattr(_model, sort_field), sort_order)()
             sorts.append(_sort)
 
     ## AND all the filters together
@@ -733,19 +738,24 @@ def do_search():
     else:
         return make_response("Please enter a search term or a filter.", 400)
 
+    ## Perform the search on a left join to get all the candidate events.
     search_events = db_session.query(EventMetadata).\
+        join(EventFlag, EventMetadata.event_id == EventFlag.event_id, isouter = True).\
         filter(a_filter_expr).\
         order_by(sort_expr).all()
+
+    ## get all flags for these events
+    flags = _load_event_flags([x.event_id for x in search_events])
 
     ## TODO: Eventually need to load current candidate events.
     ## Will probably end up doing this in JavaScript with the button initializers.
     response = make_response(
         render_template('adj-search-block.html', 
-            search_events = search_events,
+            events = search_events,
+            flags = flags,
             cand_events = {})
         )
 
-    ## TODO: eventually can add multiple values for the same key by coercing to dict.
     url_params = {k: v for k, v in request.form.iteritems()}
 
     ## make and return results. add in the number of results to update the button.

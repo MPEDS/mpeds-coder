@@ -82,40 +82,12 @@
                     </li>
                 </ul>
                 <div class="subtab-pane" id="cand-search_block">
+                    {% set events = search_events %}
                     {% include 'adj-search-block.html' %}
                 </div>
                 <div class="subtab-pane" id="cand-recent_block" style="display:none;">
-                    <div class="cand-event-group">                
-                        {% for e in recent_events %}
-                        <div class="event-desc" id="recent-cand-event_{{ e.event_id }}">
-                            <div class="row">
-                                <div class="col-sm-6">
-                                    <b>start_date:</b> {{e.start_date}}</br>
-                                    <b>location:</b> {{e.location | safe }}<br/>
-                                    <b>title:</b> {{e.title | safe }}<br/>
-                                </div>
-                                <div class="col-sm-3">
-                                    <b>event_id:</b> {{ e.event_id }}<br/>
-                                    <b>article_id:</b> 
-                                        <a href="{{ url_for('eventCreator', aid = e.article_id) }}" 
-                                            target="_blank"
-                                            title="{{ e.publication }} ({{ e.pub_date }}) --- {{ e.article_desc|safe }}">{{e.article_id}}</a><br/>
-                                    <b>coder:</b> {{ e.coder_id }} <br/>
-                                </div>
-                                <div class="col-sm-3">
-                                    <!-- TODO: Logic which chooses the correct one to display upon load. -->
-                                    <b class="cande-isactive text-muted">In the expanded view</b><br/>
-                                    <b class="cande-makeactive" style="display:none;"></b><a href="#">Add to grid <span class="glyphicon glyphicon-export"></span></a></b>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-sm-12">
-                                    <b>desc:</b> {{ e.desc | safe }}<br/>
-                                </div>
-                            </div>
-                        </div>
-                        {% endfor %}
-                    </div>
+                    {% set events = recent_events %}
+                    {% include 'adj-search-block.html' %}
                 </div>
             </div>
             <div class="tab-pane" id="canon_block">

@@ -1,4 +1,6 @@
 
+var MAX_CAND_EVENTS = 4;
+
 /**
  * 
  * @param {*} e - Event
@@ -293,6 +295,35 @@ var makeError = function(msg) {
  */
 var initializeSearchListeners = function() {
   // listeners for current search results
+  $('.cande-makeactive').click(function(e) {
+    var event_desc = $(e.target).closest('.event-desc');
+    var event_id = event_desc.attr('data-event');
+    let search_params = new URLSearchParams(window.location.search);
+    var cand_events = search_params.get('cand_events').split(',');
+
+    // remove last event from the list if full
+    if (cand_events.length == MAX_CAND_EVENTS) {
+      cand_events.pop();
+    }
+
+    // add this event to the list
+    cand_events.push(event_id);
+
+    loadGrid(
+      canonical_event_key = search_params.get('canonical_event_key'),
+      cand_events_str = cand_events.join(',')
+    );
+
+    // hide link to add to grid, show cande-isactive
+    $(e.target).hide();
+    event_desc.find('.cande-isactive').show();
+
+    console.log(event_desc.find('.cande-isactive'));
+
+    return true;
+  });
+
+  // listener for canonical event.
   $('b.ce-makeactive').each(function () {
     $(this).click(function () {
       // get key and id from event-desc
@@ -634,8 +665,8 @@ $(function () {
     for(var i = 0; i < search_ids.length; i++) {
       $('#' + search_ids[i]).val(search_params.get(search_ids[i]));
     }
+
     loadSearch();
- 
     loadGrid(
       search_params.get('canonical_event_key'),      
       search_params.get('cand_events')
