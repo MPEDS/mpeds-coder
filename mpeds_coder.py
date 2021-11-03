@@ -1206,8 +1206,7 @@ def _load_event_flags(events):
     """Loads the event flags for candidate events."""
     efs = db_session.query(EventFlag).\
         filter(
-            EventFlag.event_id.in_(events),
-            EventFlag.coder_id == current_user.id
+            EventFlag.event_id.in_(events)
         ).all()
     return {x.event_id: x.flag for x in efs}
 
