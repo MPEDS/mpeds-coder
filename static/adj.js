@@ -304,8 +304,11 @@ var initializeSearchListeners = function() {
     // remove last event from the list if full
     if (cand_events.length == MAX_CAND_EVENTS) {
       cand_events.pop();
+    } else if (cand_events.length == 1 & cand_events[0] == 'null') {
+      // remove the null keyword
+      cand_events = [];
     }
-
+    
     // add this event to the list
     cand_events.push(event_id);
 
@@ -317,8 +320,6 @@ var initializeSearchListeners = function() {
     // hide link to add to grid, show cande-isactive
     $(e.target).hide();
     event_desc.find('.cande-isactive').show();
-
-    console.log(event_desc.find('.cande-isactive'));
 
     return true;
   });
