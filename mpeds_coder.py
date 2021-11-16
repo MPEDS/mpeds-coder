@@ -602,13 +602,6 @@ def adj():
         canonical_event = None)
 
 
-@app.route('/load_cand_search', methods = ['GET'])
-@login_required
-def load_cand_search():
-    """Loads the candidate event search pane."""
-    pass
-
-
 @app.route('/load_adj_grid', methods = ['GET'])
 @login_required
 def load_adj_grid():
@@ -1011,6 +1004,7 @@ def modal_edit(variable, mode):
     if variable == 'canonical':
         ce_id = request.form['canonical-id'] 
         key   = request.form['canonical-event-key']
+        desc  = request.form['canonical-event-desc']
         notes = request.form['canonical-event-notes']
             
         if mode == 'add':
@@ -1022,11 +1016,12 @@ def modal_edit(variable, mode):
                 if len(q) > 0: 
                     return make_response("Key already exists.", 400)                
 
-            ce = CanonicalEvent(coder_id = current_user.id, key = key, notes = notes)
+            ce = CanonicalEvent(coder_id = current_user.id, key = key, description = desc, notes = notes)
         elif mode == 'edit':
             ## update key + notes upon edit
             ce = db_session.query(CanonicalEvent).filter(CanonicalEvent.id == ce_id).first()
             ce.key = key
+            ce.description = desc
             ce.notes = notes
 
         db_session.add(ce)
@@ -1056,22 +1051,23 @@ def modal_edit(variable, mode):
             return make_response("{} added.".format(variable), 200)
 
 
-@app.route('/modal_view/<variable>', methods = ['GET'])
+@app.route('/modal_view', methods = ['POST'])
 @login_required
-def modal_view(variable):
+def modal_view():
     """Returns the template for the modal, based on the variable."""
     article_ids = []
+    variable = request.form['variable']
 
     ## get the canonical event to get the ID later
     ce = None
-    if request.args.get('key'):
-        key = request.args.get('key')
+    key = request.form.get('key')
+    if key:
         ce = db_session.query(CanonicalEvent).\
             filter(CanonicalEvent.key == key).first()
 
     ## for non-canonical adds, get the article IDs associated with current candidate events
     if variable != 'canonical':
-        candidate_events = request.args.get('candidate_event_ids').split(',')
+        candidate_events = request.form['candidate_event_ids'].split(',')
         article_ids = [x.article_id for x in db_session.query(Event).filter(Event.id.in_(candidate_events)).all()]
  
         ## get distinct values
@@ -1079,18 +1075,10 @@ def modal_view(variable):
 
         return render_template('modal.html', 
             variable = variable, 
-            canonical_event_id = ce.id if ce else '',
+            ce = ce,
             article_ids = article_ids)
     else:
-        ## if we get a key, this is an edit
-        if request.args.get('key'):
-            return render_template('modal.html', 
-                variable = variable,
-                canonical_event_id = ce.id,
-                canonical_event_key = key,
-                canonical_event_notes = ce.notes)
-        else: ## otherwise, new entry
-            return render_template('modal.html', variable = variable)
+        return render_template('modal.html', variable = variable, ce = ce)
             
 
 #####
@@ -1196,6 +1184,7 @@ def _load_canonical_event(id = None, key = None):
     ## load CE data
     canonical_event['id'] = ce.id
     canonical_event['key'] = ce.key
+    canonical_event['description'] = ce.description
     canonical_event['notes'] = ce.notes
 
     for _, cel, cec, user in ces:

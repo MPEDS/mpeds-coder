@@ -61,7 +61,7 @@
              {% if canonical_event %}
                 <label>Canonical Event<br/> 
                     <i>Actions:</i>
-                    <a class="glyphicon glyphicon-pencil edit-canonical" href="#" title="Edit key and notes"></a> 
+                    <a class="glyphicon glyphicon-pencil edit-canonical" href="#" title="Edit canonical metadata"></a> 
                     <a class="glyphicon glyphicon-trash" href="#" title="Delete canonical event"></a>
                     <a class="glyphicon glyphicon-remove-sign" href="#" title="Remove from grid"></a>
                 </label>
@@ -94,10 +94,9 @@
             {% for value, cec_id, timestamp in cand_events[event_id][var] %}
                 <div class="expanded-event-variable" data-var="{{ var }}">
                     <div class="sticky-top data-buttons">
-                        {% if var in ['article-desc', 'desc'] %}
-                            {% if var == 'desc' %}
-                                <a class="glyphicon glyphicon-duplicate" href="#" title="Copy to clipboard"></a>
-                            {% endif %}
+                        {% if var == 'article-desc' %} <!-- no-op -->
+                        {% elif var == 'desc' %}
+                            <a class="glyphicon glyphicon-duplicate copy-text" href="#" title="Copy to clipboard"></a>
                         {% else %}
                             <a class="glyphicon glyphicon-plus add-val" 
                             title="Add to canonical event" 
@@ -121,8 +120,13 @@
                     {% for cel_id, value, timestamp, _, is_dummy in canonical_event[var] %}
                         {% include 'canonical-cell.html' %}
                     {% endfor %}
+                {% elif var == 'article-desc' %}
+                    <div class="expanded-event-variable text-muted canonical none">N/A</div>
+                {% elif var == 'desc' %}
+                    {% set value = canonical_event['description'] %}
+                    {% include 'canonical-cell.html' %}
                 {% else %}
-                    <div class="expanded-event-variable canonical text-muted none">(None)</div>
+                        <div class="expanded-event-variable text-muted canonical none">(None)</div>
                 {% endif %}
             {% endif %}
         </div>

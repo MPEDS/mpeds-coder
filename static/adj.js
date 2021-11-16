@@ -52,6 +52,7 @@ var getCandidates = function(to_exclude = '') {
   return candidate_event_ids.join()
 }
 
+
 /**
  * Loads the grid for adding and removing candidate and canonical events.
  * @param {str} canonical_event_key - Desired canonical event record.
@@ -446,10 +447,11 @@ var initializeGridListeners = function() {
     var canonical_event_key = $('.canonical-event-metadata').attr('data-key');
 
     var req = $.ajax({
-      type: 'GET',
-      url: $SCRIPT_ROOT + '/modal_view/' + variable,
+      type: 'POST',
+      url: $SCRIPT_ROOT + '/modal_view',
       data: {
         candidate_event_ids: getCandidates(),
+        variable: variable,
         key: canonical_event_key
       }
     })
@@ -473,9 +475,10 @@ var initializeGridListeners = function() {
   $('.edit-canonical').click(function(e) {
     var canonical_event_key = $(e.target).closest('.canonical-event-metadata').attr('data-key');
     var req = $.ajax({
-      type: 'GET',
-      url: $SCRIPT_ROOT + '/modal_view/canonical',
+      type: 'POST',
+      url: $SCRIPT_ROOT + '/modal_view',
       data: {
+        variable: 'canonical',
         key: canonical_event_key
       }
     })
@@ -490,6 +493,14 @@ var initializeGridListeners = function() {
     })
     .fail(function() { return makeError("Could not load modal."); })
   })
+
+  // Copy current text to clipboard
+  $('.copy-text').click(function(e) {
+    var text = $(e.target).closest('.expanded-event-variable').find('.expanded-event-value').text();
+
+    // TODO: I don't think this is possible in Firefox. May have to turn this into a modal or something.
+    // return makeSuccess("Copied to clipboard.");
+  });
 
   /**
    * Deletions and removals
@@ -627,8 +638,11 @@ $(function () {
     // Listener to create a new canonical event
     $('#new-canonical').click(function () {;
       var req = $.ajax({
-        url: $SCRIPT_ROOT + '/modal_view/canonical', 
-        type: "GET"
+        url: $SCRIPT_ROOT + '/modal_view', 
+        type: "POST",
+        data: {
+          variable: 'canonical'
+        }
       })
       .done(function() {
         $('#modal-container .modal-content').html(req.responseText);
