@@ -446,6 +446,11 @@ var initializeGridListeners = function() {
     var variable = $(e.target).closest('.expanded-event-variable-name').attr('data-var');
     var canonical_event_key = $('.canonical-event-metadata').attr('data-key');
 
+    if(canonical_event_key == '') {
+      makeError("Please select a canonical event first.");
+      return false;
+    }
+
     var req = $.ajax({
       type: 'POST',
       url: $SCRIPT_ROOT + '/modal_view',
