@@ -3,9 +3,13 @@
     data-var="{{ var }}"
     data-key="{{ cel_id }}">
     <div class="sticky-top data-buttons">
-        <a class="glyphicon glyphicon-remove remove-canonical" title="Remove"></a> 
-        <a class="glyphicon glyphicon-info-sign" 
-           title="Added on {{ timestamp }}"></a>
+        {% if var == 'desc' %}
+        <a class="glyphicon glyphicon-pencil" title="Edit notes"></a> 
+        {% else %}
+            <a class="glyphicon glyphicon-remove remove-canonical" title="Remove"></a> 
+            <a class="glyphicon glyphicon-info-sign" 
+               title="Added on {{ timestamp }}"></a>
+        {% endif %}
     </div>
     {{ value | safe }}
 </div>

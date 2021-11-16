@@ -1,6 +1,7 @@
 from sqlalchemy import Column, Date, DateTime, Integer, String, Unicode, ForeignKey, UniqueConstraint, Text, UnicodeText
 from sqlalchemy.orm import relationship, backref
 from flask_login import UserMixin
+from sqlalchemy.sql.expression import desc
 from database import Base
 import datetime as dt
 from pytz import timezone
@@ -34,16 +35,17 @@ class CanonicalEvent(Base):
     id           = Column(Integer, primary_key=True)
     coder_id     = Column(Integer, ForeignKey('user.id'), nullable = False)
     key          = Column(Text, nullable = False)
+    description  = Column(UnicodeText, nullable = False)
     notes        = Column(UnicodeText)
     last_updated = Column(DateTime)
 
     UniqueConstraint('key', name = 'unique1')
 
-    def __init__(self, coder_id, key, notes = None, status = 'In Progress'):
+    def __init__(self, coder_id, key, description, notes = None):
         self.coder_id     = coder_id
         self.key          = key
+        self.description  = description,
         self.notes        = notes
-        self.status       = status
         self.last_updated = dt.datetime.now(tz = central).replace(tzinfo = None)
 
     def __repr__(self):

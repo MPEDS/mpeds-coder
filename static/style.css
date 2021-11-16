@@ -376,11 +376,11 @@ footer {
 /* 
 	Adjudication variables 
 */
-.adj-variable-group, .cand-event-group {
+.adj-variable-group, .event-group {
 	padding: 6px 0;
 }
 
-.cand-event-group {
+.event-group {
 	max-height: 640px;
 	overflow-y: scroll;
 }
@@ -416,7 +416,7 @@ span.adj-variable:hover {
 	background-color: #CCC;
 }
 
-div.cand-event-group div.event-desc {
+div.event-group div.event-desc {
 	height: 150px;
 	width: auto;
 	overflow-y: scroll;

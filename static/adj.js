@@ -1,6 +1,4 @@
 
-var MAX_CAND_EVENTS = 4;
-
 /**
  * 
  * @param {*} e - Event
@@ -35,17 +33,6 @@ var changeTab = function(e, level = "") {
 
     return false;
 }
-
-/**
- * Wrapper to change subtabs 
- * @param {*} e - Event
- * @returns false
- * */ 
-var changeSubTab = function(e) {
-  changeTab(e, "sub");
-  return false;
-}
-
 
 /**
  * Gets the current candidate events in the grid
@@ -177,6 +164,7 @@ var removeCanonical = function () {
     var new_url = 'adj?' + curr_search_params.toString();
     window.history.pushState({path: new_url}, '', new_url);
 
+    markGridEvents();
     initializeSearchListeners();
 
     // get rid of loading flash 
@@ -289,17 +277,42 @@ var makeError = function(msg) {
 }
 
 /**
+ * Marks the given candidate events as in the grid.
+ *  */
+var markGridEvents = function() {
+  let search_params = new URLSearchParams(window.location.search);
+  var cand_events = search_params.get('cand_events').split(',');
+
+  // Mark all events as not in the grid.
+  $('.event-desc').each(function() {
+    $(this).find('.cande-isactive').hide();    
+    $(this).find('.cande-makeactive').show();
+  });
+
+  // Mark events which are in the grid as active.
+  for (var i = 0; i < cand_events.length; i++) {
+    let event_desc = $('.event-desc[data-event="' + cand_events[i] + '"]');
+    event_desc.find('.cande-isactive').show();
+    event_desc.find('.cande-makeactive').hide();
+  }
+}
+
+/**
  * Initialize listeners for search pane.
  * Will need to perform this on every reload of the search pane.
  * 
  */
 var initializeSearchListeners = function() {
+  var MAX_CAND_EVENTS = 4;
+
   // listeners for current search results
   $('.cande-makeactive').click(function(e) {
+    e.preventDefault();
+
     var event_desc = $(e.target).closest('.event-desc');
     var event_id = event_desc.attr('data-event');
     let search_params = new URLSearchParams(window.location.search);
-    var cand_events = search_params.get('cand_events').split(',');
+    var cand_events = search_params.get('cand_events').split(',');  
 
     // remove last event from the list if full
     if (cand_events.length == MAX_CAND_EVENTS) {
@@ -316,10 +329,12 @@ var initializeSearchListeners = function() {
       canonical_event_key = search_params.get('canonical_event_key'),
       cand_events_str = cand_events.join(',')
     );
+    
+    // update all grid events
+    markGridEvents();
 
-    // hide link to add to grid, show cande-isactive
-    $(e.target).hide();
-    event_desc.find('.cande-isactive').show();
+    // $(e.target).hide();
+    // event_desc.find('.cande-isactive').show();
 
     return true;
   });
@@ -499,6 +514,8 @@ var initializeGridListeners = function() {
           canonical_event_key = canonical_event_key, 
           cand_event_str = getCandidates(to_exclude)
       );
+
+      markGridEvents();
   });
 
   // Remove the link to this canonical event
@@ -573,8 +590,12 @@ $(function () {
     });
 
     // Add listener to subtab links 
-    $(".subtablinks").each(function(){
-      $(this).click(changeSubTab);
+    $(".cand-subtablinks").each(function(){
+      $(this).click(function(e) { changeTab(e, 'cand-sub'); });
+    });
+
+    $(".canonical-subtablinks").each(function(){
+      $(this).click(function(e) { changeTab(e, 'canonical-sub'); });
     });
 
     // hide search panel
@@ -641,6 +662,38 @@ $(function () {
         var new_url = 'adj?' + search_params.toString();
         window.history.pushState({path: new_url}, '', new_url);    
       });
+    });
+
+    // Listener for canonical event search
+    $('#canonical-search-button').click(function(e) {
+      e.preventDefault();
+      // Get the canonical event key from the search box
+      var canonical_search_term = $('#canonical-search-term').val();
+
+      // Get the candidates from the database
+      var req = $.ajax({
+        url: $SCRIPT_ROOT + '/search_canonical',
+        type: "POST",
+        data: {
+          canonical_search_term: canonical_search_term
+        },
+        beforeSend: function () {
+          $('.flash').removeClass('alert-danger');
+          $('.flash').addClass('alert-info');
+          $('.flash').text("Loading...");
+          $('.flash').show();
+          }
+      })
+      .done(function() {
+        // Update the canonical events in the search list
+        $('#canonical-search-block').html(req.responseText);
+
+        // get rid of loading flash 
+        $('.flash').hide();
+        $('.flash').removeClass('alert-info');
+        return true;
+      })
+      .fail(function() { return makeError(req.responseText); });      
     });
 
     // initialize the grid and search 

@@ -574,23 +574,22 @@ def adj():
     if current_user.authlevel < 2: 
         return redirect(url_for('index'))
 
-    ## Get five recent events
+    ## Get most recent candidate events.
     recent_events = [x[0] for x in db_session.query(EventMetadata, RecentEvent).\
         join(EventMetadata, EventMetadata.event_id == RecentEvent.event_id).\
         order_by(desc(RecentEvent.last_accessed)).limit(5).all()]
 
-    # search_canonical_events = db_session.query(CanonicalEvent, CanonicalEventLink, CodeEventCreator).\
-    #     join(CanonicalEventLink, CanonicalEvent.id == CanonicalEventLink.canonical_id).\
-    #     join(CodeEventCreator, CanonicalEventLink.cec_id == CodeEventCreator.id).\
-    #     filter(CanonicalEvent.key == canonical_event_key).all()    
+    ## Get most recent canonical events.
+    ## TODO: Add in user by name.
+    recent_canonical_events = db_session.query(CanonicalEvent).\
+        join(RecentCanonicalEvent, CanonicalEvent.id == RecentCanonicalEvent.canonical_id).\
+        order_by(desc(RecentCanonicalEvent.last_accessed)).limit(5).all()
 
     ## TODO: Base this off EventMetadata for now. Eventually, we want to get rid of this.
     filter_fields = EventMetadata.__table__.columns.keys()
     filter_fields.remove('id')
     filter_fields.append('flag')
 
-    ## TODO: Do some checks in the template which don't force us to enter in empty variables
-    ## which will be initialized by load_adj_grid
     return render_template("adj.html", 
         search_events = [],
         filter_fields = filter_fields,
@@ -599,7 +598,7 @@ def adj():
         links         = [],
         flags         = [],
         recent_events = recent_events,
-#        recent_canonical_events = recent_canonical_events,
+        recent_canonical_events = recent_canonical_events,
         canonical_event = None)
 
 
@@ -747,13 +746,10 @@ def do_search():
     ## get all flags for these events
     flags = _load_event_flags([x.event_id for x in search_events])
 
-    ## TODO: Eventually need to load current candidate events.
-    ## Will probably end up doing this in JavaScript with the button initializers.
     response = make_response(
         render_template('adj-search-block.html', 
             events = search_events,
-            flags = flags,
-            cand_events = {})
+            flags = flags)
         )
 
     url_params = {k: v for k, v in request.form.iteritems()}
@@ -762,6 +758,28 @@ def do_search():
     response.headers['Search-Results'] = len(search_events)
     response.headers['Query'] = json.dumps(url_params)
     return response
+
+
+@app.route('/search_canonical', methods = ['POST'])
+@login_required
+def search_canonical():
+    """Loads a set of canonical events which meet search criteria."""
+    canonical_search_term = request.form['canonical_search_term']
+
+    if canonical_search_term == '':
+        return make_response("Please enter a search term.", 400)
+
+    ## Construct search in all available fields
+    filter_expr = or_(
+        CanonicalEvent.key.like(u'%{}%'.format(canonical_search_term)),
+        CanonicalEvent.description.like(u'%{}%'.format(canonical_search_term)),
+        CanonicalEvent.notes.like(u'%{}%'.format(canonical_search_term))
+    )
+
+    ## search for the canonical event in key and notes
+    rs = db_session.query(CanonicalEvent).filter(filter_expr).all()
+
+    return render_template('adj-canonical-search-block.html', events = rs)
 
 
 @app.route('/adj_search/<function>', methods = ['POST'])

@@ -19,8 +19,7 @@
     <div class="col-sm-5 adj-pane" id="adj-pane-cand-events">
         <a id="cand-events-hide" href="#">&laquo; Hide</a><br/>
         <a href="{{ url_for('adj', 
-            cand_events = '6031,6032,21644,21646', 
-            canonical_event_key = 'Milo_Chicago_2016',
+            cand_events = ' 2544,2545,2572,2708', 
             adj_search_input = 'Milo',
             adj_filter_field_0 = 'start_date',
             adj_filter_compare_0 = 'ge',
@@ -40,7 +39,7 @@
             <li class="tablinks" id="cand_button">
                 <a href="#" id="cand_button-link">Candidate Events</a>
             </li>
-            <li class="tablinks" id="canon_button">
+            <li class="tablinks" id="canonical_button">
                 <a href="#">Canonical Events</a>
             </li>
             <li class="tablinks" id="relationships_button">
@@ -52,7 +51,15 @@
                 <div class="adj-variable-group">
                     <h5>Search</h5>
                     <form id="adj_search_form">
-                        {% include 'adj-search.html' %}
+                        <div class="row form-row">
+                            <div class="col-sm-11">
+                                <input class="form-control"
+                                        name="adj_search_input" 
+                                        id="adj_search_input"
+                                        type="text" 
+                                        placeholder = "Example: Mizzou OR Missouri, Quebec AND students"/>
+                            </div>
+                        </div>
                     </form>
                 </div>
                 <hr/>
@@ -73,70 +80,52 @@
                 <button id="adj_search_button" class="btn btn-primary">Search</button>
             </div>
             <div class="tab-pane" id="cand_block">
-                <ul class="nav nav-pills nav-justified" id="adj-subtabselecter">
-                    <li class="subtablinks active nav-item" id="cand-search_button">
+                <ul class="nav nav-pills nav-justified">
+                    <li class="cand-subtablinks active nav-item" id="cand-search_button">
                         <a href="#" id="cand-search-text">Search</a>
                     </li>
-                    <li class="subtablinks nav-item" id="cand-recent_button">
+                    <li class="cand-subtablinks nav-item" id="cand-recent_button">
                         <a href="#">Recent</a>
                     </li>
                 </ul>
-                <div class="subtab-pane" id="cand-search_block">
+                <div class="cand-subtab-pane" id="cand-search_block">
                     {% set events = search_events %}
                     {% include 'adj-search-block.html' %}
                 </div>
-                <div class="subtab-pane" id="cand-recent_block" style="display:none;">
+                <div class="cand-subtab-pane" id="cand-recent_block" style="display:none;">
                     {% set events = recent_events %}
                     {% include 'adj-search-block.html' %}
                 </div>
             </div>
-            <div class="tab-pane" id="canon_block">
-                <div class="cand-event-group">
+            <div class="tab-pane" id="canonical_block">
+                <ul class="nav nav-pills nav-justified">
+                    <li class="canonical-subtablinks active nav-item" id="canonical-search_button">
+                        <a href="#"">Search</a>
+                    </li>
+                    <li class="canonical-subtablinks nav-item" id="canonical-recent_button">
+                        <a href="#">Recent</a>
+                    </li>
+                </ul>
+                <div class="canonical-subtab-pane" id="canonical-search_block">
                     <h5>Search</h5>
-                    <form> 
-                        <div class="form-row">
-                            <div class="form-group">
-                                <input class="form-control form-control-sm" 
-                                       name="search-key" 
-                                       type="text" 
-                                       placeholder = "Key..."/>
-                            </div>    
+                    <div class="row">
+                        <div class="form-group col-sm-9">
+                            <input class="form-control form-control-sm" 
+                                    name="canonical-search-term" 
+                                    id="canonical-search-term"
+                                    type="text" 
+                                    placeholder="Search term (key or keyword in notes/description)"/>
                         </div>
-                    </form>
-                    <!-- TODO: Change this to be associated with the search key -->
-                    {% if canonical_event is not none %}
-                    <div class="event-desc" 
-                        id="search-canonical-event_{{ canonical_event['id'] }}"
-                        data-key="{{ canonical_event['key']|safe }}">
-                        <div class="row">
-                            <div class="col-sm-8">
-                                <b>key:</b> {{ canonical_event['key']|safe }}</br>
-                                {% if canonical_event['start_date'] %}
-                                    <b>start_date:</b> {{ canonical_event['start_date'][0] }}</br>
-                                {% endif %}
-
-                                {% if canonical_event['location'] %}
-                                  <b>location:</b> {{ canonical_event['location'][0][1] }}
-                                {% endif %}
-                            </div>
-                            <div class="col-sm-4">
-                                <b>Last edited:</b> {{ canonical_event['last_updated'] }}<br/>
-                                <b class="ce-isactive text-muted">Current active event</b>
-                                <b class="ce-makeactive" style="display:none;">
-                                    <a href="#">Make active event <span class="glyphicon glyphicon-export"></span></a>
-                                </b>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-sm-12">
-                                <b>notes: </b> {{ canonical_event['notes']|safe }}<br/>
-                                {% if canonical_event['desc'] %}
-                                    <b>desc:</b> {{ canonical_event['desc'][0][1]|safe }}</br>
-                                {% endif %}
-                            </div>
+                        <div class="col-sm-3">
+                            <button id="canonical-search-button" class="btn btn-primary btn-sm">Search</button>
                         </div>
                     </div>
-                    {% endif %}
+                    {% set events = [] %}
+                    {% include 'adj-canonical-search-block.html' %}
+                </div>
+                <div class="canonical-subtab-pane" id="canonical-recent_block" style="display:none;">
+                    {% set events = recent_canonical_events %}
+                    {% include 'adj-canonical-search-block.html' %}
                 </div>
             </div>
             <div class="tab-pane" id="relationships_block">
