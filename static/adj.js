@@ -492,7 +492,22 @@ var initializeGridListeners = function() {
       });      
     })
     .fail(function() { return makeError("Could not load modal."); })
-  })
+  });
+
+  // Toggle metadata visibility.
+  $('#hide-metadata').click(function(e) {
+    $('.expanded-event-variable-metadata').hide();
+    $('.canonical-event-metadata .expanded-event-variable').hide();
+    $('#show-metadata').show();
+    $('#hide-metadata').hide();
+  });
+
+  $('#show-metadata').click(function(e) {
+    $('.expanded-event-variable-metadata').show();
+    $('.canonical-event-metadata .expanded-event-variable').show();
+    $('#show-metadata').hide();
+    $('#hide-metadata').show();
+  });
 
   // Copy current text to clipboard
   $('.copy-text').click(function(e) {

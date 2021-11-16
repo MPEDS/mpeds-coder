@@ -6,7 +6,15 @@
 {% else %}
 <div id="expanded-event-view-metadata" class="sticky-top">
     <div class="row expanded-event-variable-group">
-        <div class="col-sm-1 expanded-event-variable-name">metadata</div>
+        <div class="col-sm-1 expanded-event-variable-name">
+            metadata
+          <a href="#" id="hide-metadata" title="Hide metadata">
+              <span class="glyphicon glyphicon-chevron-up"></span>
+          </a>
+          <a href="#" id="show-metadata" style="display:none;" title="Show metadata">
+              <span class="glyphicon glyphicon-chevron-down"></span>
+          </a>
+        </div>
         {% for event_id in cand_events.keys()|sort %}
         <!-- Candidate Event Metadata -->
         <div class="col-sm-2 expanded-event-variable-col candidate-event" 
