@@ -1076,7 +1076,8 @@ def modal_view():
         return render_template('modal.html', 
             variable = variable, 
             ce = ce,
-            article_ids = article_ids)
+            article_ids = article_ids,
+            preset_vars = preset_vars)
     else:
         return render_template('modal.html', variable = variable, ce = ce)
             

@@ -57,12 +57,26 @@
               </span>
             </div>
           </div>
-        {% else %}
+        {% elif variable in ['form', 'issue', 'racial-issue', 'target'] %}
+        <div class="form-row">
+          <div class="input-group">
+            <label for="select-value">{{ variable | title }}</label>
+            <select class="form-control form-control-sm" id="select-value" name="value">
+              <option value="">---</option>
+              {% for var in preset_vars[variable]|sort %}
+                <option value="{{ var }}">{{ var }}</option>              
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+        {% else %} 
+        <div class="form-row">
           <label for="variable-value">Value</label>
           <textarea class="form-control"
             name="value"
             id="variable-value"
             placeholder = "Enter text for {{ variable }}..."></textarea>
+        </div>
         {% endif %}
       {% endif %}
       <input name="canonical-id" type="hidden" value="{{ ce.id }}" />
