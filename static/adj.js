@@ -506,6 +506,17 @@ var initializeGridListeners = function() {
     .fail(function() { return makeError("Could not load modal."); })
   });
 
+  // Select all text in the current candidate event box.
+  $('.select-text').click(function(e) {
+    e.preventDefault();
+
+    var text = $(e.target).closest('.expanded-event-variable');
+    let range = document.createRange();
+    range.selectNodeContents(text[0]);
+    window.getSelection().addRange(range);
+    range.removeAllRanges();
+  });
+
   // edit a canonical event metadata
   $('.edit-canonical').click(function(e) {
     var canonical_event_key = $(e.target).closest('.canonical-event-metadata').attr('data-key');
