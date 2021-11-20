@@ -310,8 +310,6 @@ var markGridEvents = function(cand_events = null) {
  * @param {str} event_desc - optional element to mark as active.
  */
 var markCanonicalGridEvent = function(event_desc = null) {
-  console.log("Marking canonical events as not active.");
-
   // Mark all canonical event search results as not in the grid.
   $('.event-desc.canonical-search').each(function() {
     $(this).find('.canonical-isactive').hide();
@@ -514,7 +512,6 @@ var initializeGridListeners = function() {
     let range = document.createRange();
     range.selectNodeContents(text[0]);
     window.getSelection().addRange(range);
-    range.removeAllRanges();
   });
 
   // edit a canonical event metadata

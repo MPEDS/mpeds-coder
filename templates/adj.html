@@ -176,9 +176,11 @@
     </div>
     <div class="col-sm-7 adj-pane" id="adj-pane-expanded-view">
         <a id="cand-events-show" style="display:none;" href="#">Show Search &raquo;</a>
-        <h4>Expanded Event View | 
-            <a id="new-canonical" data-toggle="modal" 
-                data-target="my_modal" href="#">New Canonical Event</a></h4>
+        <a id="new-canonical" 
+            data-toggle="modal" 
+            data-target="my_modal" 
+            title="Add new canonical event"
+            href="#"><span class="glyphicon glyphicon-plus-sign"></span></a>
         <div id="adj-grid">
           {% include 'adj-grid.html' %}
         </div>

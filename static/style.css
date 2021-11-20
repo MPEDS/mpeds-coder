@@ -471,6 +471,14 @@ div.canonical {
 	background-color: #CCE5FF;
 }
 
+a#new-canonical {
+	font-size: 2em;
+	position: absolute; 
+	z-index: 5; 
+	top: 0;
+	right: 0;
+}
+
 div.canonical-dummy {
 	margin-left: 5px;
 	background-color: #E2EFDA; 
