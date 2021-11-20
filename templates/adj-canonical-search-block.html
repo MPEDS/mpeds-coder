@@ -1,6 +1,8 @@
 <div class="event-group" id="canonical-search-block">
     {% for e in events %}
-    <div class="event-desc" id="canonical-event_{{ e.id }}" data-event="{{ e.id }}">
+    <div class="event-desc canonical-search" id="canonical-event_{{ e.id }}" 
+        data-event="{{ e.id }}"
+        data-key="{{ e.key }}">
         <div class="row">
             <div class="col-sm-9">
                 <b>key:</b> {{ e.key }}</br>

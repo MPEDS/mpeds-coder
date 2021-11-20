@@ -1,6 +1,6 @@
 <div class="event-group">
     {% for e in events %}
-    <div class="event-desc" id="cand-event_{{ e.event_id }}" data-event="{{ e.event_id }}">
+    <div class="event-desc candidate-search" id="cand-event_{{ e.event_id }}" data-event="{{ e.event_id }}">
         <div class="row">
             <div class="col-sm-6">
                 <b>start_date:</b> {{ e.start_date }}</br>
@@ -27,10 +27,10 @@
                     No flags
                 {% endif %}
                 </p>
-                <a href="#" class="cande-makeactive">
+                <a href="#" class="cand-makeactive">
                     <b>Add to grid <span class="glyphicon glyphicon-export"></span></b>
                 </a>
-                <b class="cande-isactive text-muted" style="display:none;">In the grid</b>
+                <b class="cand-isactive text-muted" style="display:none;">In the grid</b>
             </div>
         </div>
         <div class="row">

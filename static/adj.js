@@ -95,9 +95,12 @@ var loadGrid = function(canonical_event_key = null, cand_events_str = null) {
     // get rid of loading flash 
     $('.flash').hide();
     $('.flash').removeClass('alert-info');
+
     return true;
   })
   .fail(function() { return makeError(req.responseText); });
+
+  return true;
 }
 
 
@@ -279,24 +282,48 @@ var makeError = function(msg) {
 
 /**
  * Marks the given candidate events as in the grid.
+ * @param {str} cand_events - optional array of candidate event ids.
  *  */
-var markGridEvents = function() {
-  let search_params = new URLSearchParams(window.location.search);
-  var cand_events = search_params.get('cand_events').split(',');
+var markGridEvents = function(cand_events = null) {
+  // If we don't get cand_events, get them from the URL.
+  if(cand_events == null) {
+    var search_params = new URLSearchParams(window.location.search);
+    cand_events = search_params.get('cand_events').split(',');
+  }
 
   // Mark all events as not in the grid.
-  $('.event-desc').each(function() {
-    $(this).find('.cande-isactive').hide();    
-    $(this).find('.cande-makeactive').show();
+  $('.event-desc.candidate-search').each(function() {
+    $(this).find('.cand-isactive').hide();
+    $(this).find('.cand-makeactive').show();
   });
 
   // Mark events which are in the grid as active.
   for (var i = 0; i < cand_events.length; i++) {
     let event_desc = $('.event-desc[data-event="' + cand_events[i] + '"]');
-    event_desc.find('.cande-isactive').show();
-    event_desc.find('.cande-makeactive').hide();
+    event_desc.find('.cand-isactive').show();
+    event_desc.find('.cand-makeactive').hide();
   }
 }
+
+/**
+ * Marks the given canonical event as in the grid.
+ * @param {str} event_desc - optional element to mark as active.
+ */
+var markCanonicalGridEvent = function(event_desc = null) {
+  console.log("Marking canonical events as not active.");
+
+  // Mark all canonical event search results as not in the grid.
+  $('.event-desc.canonical-search').each(function() {
+    $(this).find('.canonical-isactive').hide();
+    $(this).find('.canonical-makeactive').show();
+  });
+
+  // Mark the current canonical event as active.
+  if (event_desc != null) {
+    event_desc.find('.canonical-isactive').show();
+    event_desc.find('.canonical-makeactive').hide();
+  }
+};
 
 /**
  * Initialize listeners for search pane.
@@ -307,12 +334,13 @@ var initializeSearchListeners = function() {
   var MAX_CAND_EVENTS = 4;
 
   // listeners for current search results
-  $('.cande-makeactive').click(function(e) {
+  $('.cand-makeactive').click(function(e) {
     e.preventDefault();
+
+    var search_params = new URLSearchParams(window.location.search);
 
     var event_desc = $(e.target).closest('.event-desc');
     var event_id = event_desc.attr('data-event');
-    let search_params = new URLSearchParams(window.location.search);
     var cand_events = search_params.get('cand_events').split(',');  
 
     // remove last event from the list if full
@@ -326,40 +354,42 @@ var initializeSearchListeners = function() {
     // add this event to the list
     cand_events.push(event_id);
 
-    loadGrid(
+    let success = loadGrid(
       canonical_event_key = search_params.get('canonical_event_key'),
       cand_events_str = cand_events.join(',')
     );
-    
-    // update all grid events
-    markGridEvents();
 
-    // $(e.target).hide();
-    // event_desc.find('.cande-isactive').show();
+    if (success) {
+      markGridEvents(cand_events);
+    }
 
     return true;
   });
+}
 
-  // listener for canonical event.
-  $('b.ce-makeactive').each(function () {
-    $(this).click(function () {
-      // get key and id from event-desc
-      var search_canonical_event = $(this).closest('.event-desc');
-      var canonical_event_id  = search_canonical_event.attr('id').split('_')[1];
-      var canonical_event_key = search_canonical_event.attr('data-key');
-      
-      var success = loadGrid(
-        canonical_event_key = canonical_event_key, 
-        cand_events_str = getCandidates()
-      );
+/**
+ * Initialize canonical search listeners.
+ */
+var initializeCanonicalSearchListeners = function() {
+  // Listener for canonical event search.
+  $('.canonical-makeactive').click(function (e) {
+    e.preventDefault();
 
-      if (success) {
-        // toggle search buttons
-        $('#search-canonical-event_' + canonical_event_id + ' b.ce-isactive').show();
-        $('#search-canonical-event_' + canonical_event_id + ' b.ce-makeactive').hide();
-      }
-    });
-  });  
+    // get event desc
+    var event_desc = $(e.target).closest('.event-desc');
+
+    // get key and id from event-desc
+    var canonical_event_key = event_desc.attr('data-key');
+    
+    var success = loadGrid(
+      canonical_event_key = canonical_event_key, 
+      cand_events_str = getCandidates()
+    );
+
+    if (success) {
+      markCanonicalGridEvent(event_desc);
+    }
+  });
 }
 
 /**
@@ -599,13 +629,11 @@ var initializeGridListeners = function() {
 
   // Remove canonical event from grid
   $('div.canonical-event-metadata a.glyphicon-remove-sign').click(function () {
-    var canonical_event_id = $('div.canonical-event-metadata').attr('id').split('_')[1];
     var success = loadGrid('', getCandidates());
 
     // Change the buttons in the search section
     if (success) {
-      $('#search-canonical-event_' + canonical_event_id + ' b.ce-isactive').hide();
-      $('#search-canonical-event_' + canonical_event_id + ' b.ce-makeactive').show();
+      markCanonicalGridEvent();
     }
   });
 }
@@ -722,6 +750,9 @@ $(function () {
         // Update the canonical events in the search list
         $('#canonical-search-block').html(req.responseText);
 
+        // Initialize the listeners for the new canonical search results
+        initializeCanonicalSearchListeners();
+
         // get rid of loading flash 
         $('.flash').hide();
         $('.flash').removeClass('alert-info');
@@ -758,5 +789,5 @@ $(function () {
     loadGrid(
       search_params.get('canonical_event_key'),      
       search_params.get('cand_events')
-    )
+    );
 });

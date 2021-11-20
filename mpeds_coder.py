@@ -736,6 +736,9 @@ def do_search():
         filter(a_filter_expr).\
         order_by(sort_expr).all()
 
+    if len(search_events) > 1000:
+        return make_response("Too many results. Please refine your search.", 400)
+
     ## get all flags for these events
     flags = _load_event_flags([x.event_id for x in search_events])
 
