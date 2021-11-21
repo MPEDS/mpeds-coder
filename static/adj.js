@@ -671,11 +671,8 @@ $(function () {
       $("#cand-events-hide").hide();
       $("#cand-events-show").show();
 
-      $("#adj-pane-expanded-view").removeClass("col-md-6");
+      $("#adj-pane-expanded-view").removeClass("col-md-7");
       $("#adj-pane-expanded-view").addClass("col-md-12");
-    
-      $("#adj-pane-event-constructor").removeClass("col-md-6");
-      $("#adj-pane-event-constructor").addClass("col-md-12");
     });
 
     // show search pane
@@ -685,10 +682,7 @@ $(function () {
       $("#adj-pane-cand-events").show();
 
       $("#adj-pane-expanded-view").removeClass("col-md-12");
-      $("#adj-pane-expanded-view").addClass("col-md-6");
-
-      $("#adj-pane-event-constructor").removeClass("col-md-12");
-      $("#adj-pane-event-constructor").addClass("col-md-6");
+      $("#adj-pane-expanded-view").addClass("col-md-7");
     });
 
     // Listener to create a new canonical event
