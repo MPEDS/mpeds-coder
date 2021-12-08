@@ -372,11 +372,11 @@ var initializeSearchListeners = function() {
     // remove last event from the list if full
     if (cand_events.length == MAX_CAND_EVENTS) {
       cand_events.pop();
-    } else if (cand_events.length == 1 & cand_events[0] == 'null') {
+    } else if (cand_events.length == 1 & (cand_events[0] == 'null' | cand_events[0] == '')) {
       // remove the null keyword
       cand_events = [];
     }
-    
+
     // add this event to the list
     cand_events.push(event_id);
 
