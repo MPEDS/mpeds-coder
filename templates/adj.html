@@ -52,32 +52,31 @@
                     <h5>Search</h5>
                     <form id="adj_search_form">
                         <div class="row form-row">
-                            <div class="col-sm-11">
+                            <div class="col-sm-9">
                                 <input class="form-control"
                                         name="adj_search_input" 
                                         id="adj_search_input"
                                         type="text" 
                                         placeholder = "Example: Mizzou OR Missouri, Quebec AND students"/>
                             </div>
+                            <div class="col-sm-3">
+                                <button id="adj_search_button" class="btn btn-primary">Search</button>
+                            </div>
                         </div>
                     </form>
                 </div>
-                <hr/>
                 <div class="adj-variable-group">
                     <h5>Filter</h5>
                     <form id="adj_filter_form">
                         {% include 'adj-filter.html' %}
                     </form>
                 </div>
-                <hr/>
                 <div class="adj-variable-group">
                     <h5>Sort</h5>
                     <form id="adj_sort_form"> 
                         {% include 'adj-sort.html' %}
                     </form> 
                 </div>
-                <hr/>
-                <button id="adj_search_button" class="btn btn-primary">Search</button>
             </div>
             <div class="tab-pane" id="cand_block">
                 <ul class="nav nav-pills nav-justified">

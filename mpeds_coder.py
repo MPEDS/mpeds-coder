@@ -824,12 +824,15 @@ def add_canonical_link():
 
     ## check if this link exists already
     res = db_session.query(CodeEventCreator, CanonicalEventLink)\
+        .join(CanonicalEventLink, CodeEventCreator.id == CanonicalEventLink.cec_id)\
         .filter(
             CodeEventCreator.variable == 'link', 
-            CodeEventCreator.article_id == article_id
+            CodeEventCreator.article_id == article_id,
+            CanonicalEventLink.canonical_id == canonical_event_id
         ).first()
 
-    ## if the CEC and CEL are not null, this exists already
+    ## if the CEC and CEL are not null, 
+    ## and CEL matches canonical event, then link this.
     if res and res[0] and res[1]:
         return make_response("Link already exists.", 400)
 
@@ -949,7 +952,8 @@ def del_canonical_link():
     for cec in cecs:
         ## get the CELs for this CEC
         cel = db_session.query(CanonicalEventLink).filter(CanonicalEventLink.cec_id == cec.id).first()
-        db_session.delete(cel)
+        if cel:
+            db_session.delete(cel)
 
     ## commit these deletes first to avoid foreign key error
     db_session.commit()

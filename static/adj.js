@@ -732,7 +732,10 @@ $(function () {
     });
 
     // Listener for search button.
-    $('#adj_search_button').click(loadSearch);
+    $('#adj_search_button').click(function(e) { 
+      e.preventDefault();
+      loadSearch(); 
+    });
 
     // Listener for clear button.
     $('.clear-values').each(function() {
