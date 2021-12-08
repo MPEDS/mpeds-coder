@@ -236,12 +236,13 @@ var updateModal = function (variable, mode) {
 
     // update the grid with new canonical event if it exists
     var reload_key = null;
-    if($("#modal-canonical-event-key").val() !== undefined) {
-      reload_key = $("#modal-canonical-event-key").val();
+    if($("#canonical-event-key").val() !== undefined) {
+      reload_key = $("#canonical-event-key").val();
     } else {
       // otherwise, reload the current grid
       reload_key = $('.canonical-event-metadata').attr('data-key');
     }
+
     loadGrid(
       canonical_event_key = reload_key,
       cand_events_str = getCandidates()
