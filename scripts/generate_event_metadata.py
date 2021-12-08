@@ -29,18 +29,26 @@ disqualifying_variables = yaml.load(
 disqualifying_variables = [x[0] for x in disqualifying_variables['Disqualifying information']]
 
 query = """SELECT 
-    event_id, 
-    u.username coder_id, 
-    variable, 
-    value, 
+    cec.event_id, 
+    u.username AS coder_id, 
+    cec.variable, 
+    cec.value, 
     cec.text, 
-    am.id article_id,
+    am.id AS article_id,
     am.pub_date, 
     am.publication, 
-    am.title
+    am.title,
+    cec2.form AS form
 FROM coder_event_creator cec
 LEFT JOIN article_metadata am ON (cec.article_id = am.id)  
-LEFT JOIN user u ON (cec.coder_id = u.id)"""
+LEFT JOIN user u ON (cec.coder_id = u.id)
+LEFT JOIN (SELECT 
+            event_id, GROUP_CONCAT(value SEPARATOR ';') AS form 
+            FROM coder_event_creator 
+            WHERE variable = 'form'
+            GROUP BY 1
+        ) cec2 ON (cec.event_id = cec2.event_id)
+"""
 
 ## get the query
 df_long = pd.read_sql(query, con = mysql_engine)
@@ -60,9 +68,9 @@ df_long['value'] = df_long.apply(lambda x: x['text'] if x['text'] is not None el
 
 ## pivot
 columns = ['article-desc', 'desc', 'location', 'start-date'] 
-indexes = ['event_id', 'coder_id', 'article_id', 'publication', 'pub_date', 'title']
+indexes = ['event_id', 'coder_id', 'article_id', 'publication', 'pub_date', 'title', 'form']
 df_wide = df_long[df_long['variable'].isin(columns)].\
-    pivot(index = indexes, columns = 'variable', values  = 'value')
+    pivot(index = indexes, columns = 'variable', values = 'value')
 
 ## rename a few things to be MySQL and SQLAlchemy friendly
 df_wide = df_wide.rename(columns = {'article-desc': 'article_desc', 'start-date': 'start_date'})
@@ -90,5 +98,6 @@ df_wide.to_sql(name = 'event_metadata',
                 'start_date': sqlalchemy.types.Date(),
                 'publication': sqlalchemy.types.Text(),
                 'pub_date': sqlalchemy.types.Date(),
-                'title': sqlalchemy.types.Text()
+                'title': sqlalchemy.types.Text(),
+                'form': sqlalchemy.types.Text()
             })

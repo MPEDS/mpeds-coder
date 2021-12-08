@@ -466,6 +466,10 @@ div.expanded-event-variable {
 	overflow-y: scroll;	
 }
 
+div.maximize {
+	max-height: none !important;
+}
+
 div.canonical {
 	margin-left: 5px;
 	background-color: #CCE5FF;

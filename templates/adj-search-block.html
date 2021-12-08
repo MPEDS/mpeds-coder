@@ -1,36 +1,42 @@
 <div class="event-group">
     {% for e in events %}
-    <div class="event-desc candidate-search" id="cand-event_{{ e.event_id }}" data-event="{{ e.event_id }}">
+    {% if flags[e.event_id] == 'for-review' %}
+        {%- set event_class = 'bg-danger' %}
+    {% elif flags[e.event_id] == 'completed' %}
+        {%- set event_class = 'bg-success' %}
+    {% else %}
+        {%- set event_class = '' %}
+    {% endif %} 
+    <div class="event-desc candidate-search {{ event_class }}" id="cand-event_{{ e.event_id }}" data-event="{{ e.event_id }}">
         <div class="row">
             <div class="col-sm-6">
-                <b>start_date:</b> {{ e.start_date }}</br>
-                <b>location:</b> {{ e.location | safe }}<br/>
-                <b>title:</b> {{e.title | safe }}<br/>
+                <b>st_d:</b> {{ e.start_date }}</br>
+                <b>loc:</b> {{ e.location | safe }}<br/>
+                <b>titl:</b> {{ e.title[0:30] }}{{ '...' if e.title > 30 else '' }} <br/>
+                <b>form:</b> {{ e.form | safe }}<br />
             </div>
             <div class="col-sm-3">
-                <b>event_id:</b> {{ e.event_id }}<br/>
-                <b>article_id:</b> 
+                <b>eid:</b> {{ e.event_id }}<br/>
+                <b>aid:</b> 
                     <a href="{{ url_for('eventCreator', aid = e.article_id) }}"
                        target="_blank"
                        title="{{ e.publication }} ({{ e.pub_date }}) --- {{ e.article_desc|safe }}">{{e.article_id}}</a><br/>
-                <b>coder:</b> {{ e.coder_id }} <br/>
+                <b>cod:</b> {{ e.coder_id }} <br/>
             </div>
             <div class="col-sm-3">
                 <p class="flags">
                 {% if e.event_id in flags %}
                     {% if flags[e.event_id] == 'for-review' %}
-                        Flag: <b class="text-danger">for-review</b>
+                        <b class="text-danger">for-review</b>
                     {% elif flags[e.event_id] == 'completed' %}
-                        Flag: <b class="text-success">completed</b>
+                        <b class="text-success">completed</b>
                     {% endif %}
-                {% else %}
-                    No flags
                 {% endif %}
                 </p>
                 <a href="#" class="cand-makeactive">
                     <b>Add to grid <span class="glyphicon glyphicon-export"></span></b>
                 </a>
-                <b class="cand-isactive text-muted" style="display:none;">In the grid</b>
+                <span class="cand-isactive text-muted" style="display:none;">In the grid</span>
             </div>
         </div>
         <div class="row">

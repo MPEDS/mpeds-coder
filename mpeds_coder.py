@@ -644,7 +644,7 @@ def do_search():
     sorts = []
 
     ## cycle through all the filter and sort fields
-    for i in range(3):
+    for i in range(4):
         filter_field = request.form['adj_filter_field_{}'.format(i)]
         filter_value = request.form['adj_filter_value_{}'.format(i)]
         filter_compare = request.form['adj_filter_compare_{}'.format(i)]
@@ -735,6 +735,8 @@ def do_search():
         join(EventFlag, EventMetadata.event_id == EventFlag.event_id, isouter = True).\
         filter(a_filter_expr).\
         order_by(sort_expr).all()
+
+    ## print(a_filter_expr)
 
     if len(search_events) > 1000:
         return make_response("Too many results. Please refine your search.", 400)

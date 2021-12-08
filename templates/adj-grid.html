@@ -49,15 +49,15 @@
             </label>
             <div class="expanded-event-variable expanded-event-variable-metadata" 
                 id="expanded-event-metadata_{{ event_id }}">
-                <b>title:</b> {{ cand_events[event_id]['metadata']['title'] | safe }}<br/>
-                <b>publication:</b> {{ cand_events[event_id]['metadata']['publication'] | safe }}<br/>
-                <b>pub_date:</b> {{ cand_events[event_id]['metadata']['pub_date'] }}<br/>
-                <b>article_id:</b>
+                <b>ttl:</b> {{ cand_events[event_id]['metadata']['title'] | safe }}<br/>
+                <b>pub:</b> {{ cand_events[event_id]['metadata']['publication'] | safe }}<br/>
+                <b>p_d:</b> {{ cand_events[event_id]['metadata']['pub_date'] }}<br/>
+                <b>aid:</b>
                     <a href="{{ url_for('eventCreator', aid = cand_events[event_id]['metadata']['article_id']) }}"
                        target="_blank">
                         {{ cand_events[event_id]['metadata']['article_id'] }}
                     </a><br/>
-                <b>coder:</b> {{ cand_events[event_id]['metadata']['coder_id'] }} <br/>
+                <b>cod:</b> {{ cand_events[event_id]['metadata']['coder_id'] }} <br/>
             </div>
         </div>
         {% endfor %}
@@ -92,6 +92,13 @@
         <div class="col-sm-1 expanded-event-variable-name" data-var="{{ var }}">{{ var }}<br/>
             {% if var in var_adds %}
                 <a class="glyphicon glyphicon-plus add-dummy" title="Add new value for this field" href="#"></a>
+            {% elif var in ['article-desc', 'desc'] %}
+                <a href="#" id="collapse-{{ var }}" title="Minimize {{ var }}" style="display:none;">
+                    <span class="glyphicon glyphicon-resize-small"></span>
+                </a>
+                <a href="#" id="expand-{{ var }}" title="Expand {{ var }}">
+                    <span class="glyphicon glyphicon-resize-full"></span>
+                </a>
             {% endif %}
         </div>
         <!-- Candidate Event Fields -->

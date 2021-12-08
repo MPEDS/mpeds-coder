@@ -324,6 +324,34 @@ var markCanonicalGridEvent = function(event_desc = null) {
 };
 
 /**
+ * 
+ * @param {*} e - event
+ * @param {*} variable - variable to be expanded
+ */
+var expandDesc = function(e, variable) {
+  $('.expanded-event-variable[data-var=' + variable + ']').each(function() {
+    $(this).addClass('maximize');
+  });
+
+  $('#expand-' + variable).hide();
+  $('#collapse-' + variable).show();
+}
+
+/**
+ * 
+ * @param {*} e - event 
+ * @param {*} variable - variable to be collapse
+ */
+var collapseDesc = function(e, variable) {
+  $('.expanded-event-variable[data-var=' + variable + ']').each(function() {
+    $(this).removeClass('maximize');
+  });
+
+  $('#expand-' + variable).show();
+  $('#collapse-' + variable).hide();
+}
+
+/**
  * Initialize listeners for search pane.
  * Will need to perform this on every reload of the search pane.
  * 
@@ -552,13 +580,11 @@ var initializeGridListeners = function() {
     $('#hide-metadata').show();
   });
 
-  // Copy current text to clipboard
-  $('.copy-text').click(function(e) {
-    var text = $(e.target).closest('.expanded-event-variable').find('.expanded-event-value').text();
-
-    // TODO: I don't think this is possible in Firefox. May have to turn this into a modal or something.
-    // return makeSuccess("Copied to clipboard.");
-  });
+  // Toggle the expansion of the article-desc and the desc.
+  $('#expand-article-desc').click(function(e) { expandDesc(e, 'article-desc') }); 
+  $('#expand-desc').click(function(e) { expandDesc(e, 'desc') }); 
+  $('#collapse-article-desc').click(function(e) { collapseDesc(e, 'article-desc') });
+  $('#collapse-desc').click(function(e) { collapseDesc(e, 'desc') });
 
   /**
    * Deletions and removals
@@ -775,7 +801,7 @@ $(function () {
     var search_ids = ['adj_search_input'];
 
     // create indexed array of search parameters
-    for(var i = 0; i < 2; i++) {
+    for(var i = 0; i < 3; i++) {
       for (var j = 0; j < repeated_fields.length; j++) {
         var field = repeated_fields[j] + '_' + i;
         search_ids.push(field);
