@@ -233,12 +233,8 @@ div.event-item {
     border-radius: 5px;
 }
 
-.event-desc:hover {
+.event-desc.completed {
     background-color: #E2E3E5;
-}
-
-.event-desc.selected {
-    background-color: #CCE5FF;
 }
 
 div.icons {
@@ -503,4 +499,10 @@ div.action-buttons {
 
 div.action-buttons a {
 	padding-right: 4px;
+}
+
+p.event-groupers a {
+	padding: 2px;
+	margin-right: 4px;
+	border: 1px solid #AAA;
 }

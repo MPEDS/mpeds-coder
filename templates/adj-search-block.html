@@ -3,7 +3,7 @@
     {% if flags[e.event_id] == 'for-review' %}
         {%- set event_class = 'bg-danger' %}
     {% elif flags[e.event_id] == 'completed' %}
-        {%- set event_class = 'bg-success' %}
+        {%- set event_class = 'completed' %}
     {% else %}
         {%- set event_class = '' %}
     {% endif %} 
@@ -24,19 +24,26 @@
                 <b>cod:</b> {{ e.coder_id }} <br/>
             </div>
             <div class="col-sm-3">
-                <p class="flags">
                 {% if e.event_id in flags %}
+                <p class="flags">
                     {% if flags[e.event_id] == 'for-review' %}
                         <b class="text-danger">for-review</b>
                     {% elif flags[e.event_id] == 'completed' %}
-                        <b class="text-success">completed</b>
+                        <b class="text-muted">completed</b>
                     {% endif %}
-                {% endif %}
                 </p>
+                {% endif %}
                 <a href="#" class="cand-makeactive">
                     <b>Add to grid <span class="glyphicon glyphicon-export"></span></b>
                 </a>
                 <span class="cand-isactive text-muted" style="display:none;">In the grid</span>
+                {% if e.event_id not in flags %}
+                <p class="event-groupers">
+                    {% for class in ['info', 'warning', 'success'] %}
+                        <a class="bg-{{ class }} glyphicon glyphicon-unchecked" title="Add to group"></a>
+                    {% endfor %}
+                </p>
+                {% endif %}
             </div>
         </div>
         <div class="row">
