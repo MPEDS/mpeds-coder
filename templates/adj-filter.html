@@ -1,0 +1,40 @@
+{% for i in range(4) %}
+<div class="row form-row">
+    <div class="col-sm-4">
+        <select class="form-control"
+                name="adj_filter_field_{{ i }}" 
+                id="adj_filter_field_{{ i }}">
+            <option value="">---</option>
+            {% for field in filter_fields %}
+              <option>{{ field }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="col-sm-4">
+        <select class="form-control"
+            name="adj_filter_compare_{{ i }}"
+            id="adj_filter_compare_{{ i }}">
+            <option value="">---</option>
+            <option value="eq">equals</option>
+            <option value="ne">not equal to</option>
+            <option value="gt">is greater than</option>
+            <option value="ge">is greater than or equal to</option>
+            <option value="lt">is less than</option>
+            <option value="le">is less than or equal to</option>
+            <option value="contains">contains</option>
+            <option value="starts">starts with</option>
+            <option value="ends">ends with</option>
+        </select>
+    </div>
+    <div class="col-sm-3">
+        <input class="form-control"
+                name="adj_filter_value_{{ i }}"
+                id="adj_filter_value_{{ i }}" 
+                type="text" 
+                placeholder = "Value..."/>
+    </div>
+    <div class="col-sm-1">
+        <a id="adj_filter_clear_button_{{ i }}" class="btn clear-values glyphicon glyphicon-remove" title="Clear values"></a>
+    </div>
+</div>
+{% endfor %}

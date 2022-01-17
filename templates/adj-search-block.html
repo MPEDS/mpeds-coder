@@ -1,0 +1,75 @@
+<div class="event-group">
+    {% for e in events %}
+    {% if flags[e.event_id] == 'for-review' %}
+        {%- set event_class = 'bg-danger' %}
+    {% elif flags[e.event_id] == 'completed' %}
+        {%- set event_class = 'completed' %}
+    {% else %}
+        {%- set event_class = '' %}
+    {% endif %} 
+    <div class="event-desc candidate-search {{ event_class }}" id="cand-event_{{ e.event_id }}" data-event="{{ e.event_id }}">
+        <div class="row">
+            <div class="col-sm-6">
+                <b>st_d:</b> {{ e.start_date }}</br>
+                <b>loc:</b> {{ e.location | safe }}<br/>
+                <b>ttl:</b> {{ e.title[0:30] }}{{ '...' if e.title > 30 else '' }} <br/>
+                <b>form:</b> {{ e.form | safe }}<br />
+            </div>
+            <div class="col-sm-3">
+                <b>eid:</b> {{ e.event_id }}<br/>
+                <b>aid:</b> 
+                    <a href="{{ url_for('eventCreator', aid = e.article_id) }}"
+                       target="_blank"
+                       title="{{ e.publication }} ({{ e.pub_date }}) --- {{ e.article_desc|safe }}">{{e.article_id}}</a><br/>
+                <b>cod:</b> {{ e.coder_id }} <br/>
+            </div>
+            <div class="col-sm-3">
+                {% if e.event_id in flags %}
+                <p class="flags">
+                    {% if flags[e.event_id] == 'for-review' %}
+                        <b class="text-danger">for-review</b>
+                    {% elif flags[e.event_id] == 'completed' %}
+                        <b class="text-muted">completed</b>
+                    {% endif %}
+                </p>
+                {% endif %}
+                <a href="#" class="cand-makeactive">
+                    <b>Add to grid <span class="glyphicon glyphicon-export"></span></b>
+                </a>
+                <span class="cand-isactive text-muted" style="display:none;">In the grid</span>
+                {% if e.event_id not in flags %}
+                <p class="event-groupers">
+                    {% for class in ['info', 'warning', 'success'] %}
+                        <a class="bg-{{ class }} glyphicon glyphicon-unchecked" title="Add to group"></a>
+                    {% endfor %}
+                </p>
+                {% endif %}
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-12">
+                <b>desc:</b> {{ e.desc | safe }}<br/>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+<!-- <nav aria-label="cand-event-pagination">
+    <ul class="pagination">
+        <li class="page-item">
+            <a class="page-link" href="#" aria-label="Previous">
+            <span aria-hidden="true">&laquo;</span>
+            <span class="sr-only">Previous</span>
+            </a>
+        </li>
+        <li class="page-item"><a class="page-link" href="#">1</a></li>
+        <li class="page-item"><a class="page-link" href="#">2</a></li>
+        <li class="page-item"><a class="page-link" href="#">3</a></li>
+        <li class="page-item">
+            <a class="page-link" href="#" aria-label="Next">
+            <span aria-hidden="true">&raquo;</span>
+            <span class="sr-only">Next</span>
+            </a>
+        </li>
+    </ul>
+</nav> -->

@@ -1,9 +1,9 @@
-from sqlalchemy import Boolean, Column, Date, DateTime, Integer, String, Unicode, ForeignKey, UniqueConstraint, Text, UnicodeText
+from sqlalchemy import Column, Date, DateTime, Integer, String, Unicode, ForeignKey, UniqueConstraint, Text, UnicodeText
 from sqlalchemy.orm import relationship, backref
 from flask_login import UserMixin
+from sqlalchemy.sql.expression import desc
 from database import Base
 import datetime as dt
-import pytz
 from pytz import timezone
 
 central = timezone('US/Central')
@@ -28,6 +28,186 @@ class CoderArticleAnnotation(Base):
 
     def __repr__(self):
         return '<CoderArticleAnnotation %r>' % (self.id)
+
+
+class CanonicalEvent(Base):
+    __tablename__ = 'canonical_event'
+    id           = Column(Integer, primary_key=True)
+    coder_id     = Column(Integer, ForeignKey('user.id'), nullable = False)
+    key          = Column(Text, nullable = False)
+    description  = Column(UnicodeText, nullable = False)
+    notes        = Column(UnicodeText)
+    last_updated = Column(DateTime)
+
+    UniqueConstraint('key', name = 'unique1')
+
+    def __init__(self, coder_id, key, description, notes = None):
+        self.coder_id     = coder_id
+        self.key          = key
+        self.description  = description,
+        self.notes        = notes
+        self.last_updated = dt.datetime.now(tz = central).replace(tzinfo = None)
+
+    def __repr__(self):
+        return '<CanonicalEvent %r>' % (self.id)
+
+
+class CanonicalEventLink(Base):
+    __tablename__ = 'canonical_event_link'
+    id           = Column(Integer, primary_key=True)
+    coder_id     = Column(Integer, ForeignKey('user.id'), nullable = False)
+    canonical_id = Column(Integer, ForeignKey('canonical_event.id'), nullable = False)
+    cec_id       = Column(Integer, ForeignKey('coder_event_creator.id'), nullable = False)
+    timestamp    = Column(DateTime)
+
+    UniqueConstraint('canonical_id', 'cec_id', name = 'unique1')
+
+    def __init__(self, coder_id, canonical_id, cec_id):
+        self.coder_id     = coder_id
+        self.canonical_id = canonical_id
+        self.cec_id       = cec_id
+        self.timestamp    = dt.datetime.now(tz = central).replace(tzinfo = None)
+
+    def __repr__(self):
+        return '<CanonicalEventLink %r>' % (self.id)
+
+
+class CanonicalEventRelationship(Base):
+    __tablename__ = 'canonical_event_relationship'
+    id                = Column(Integer, primary_key=True)
+    coder_id          = Column(Integer, ForeignKey('user.id'))
+    canonical_id1     = Column(Integer, ForeignKey('canonical_event.id'))
+    canonical_id2     = Column(Integer, ForeignKey('canonical_event.id'))
+    relationship_type = Column(Text)
+    timestamp         = Column(DateTime)
+
+    UniqueConstraint('canonical_id1', 'canonical_id2', 'relationship_type', name = 'unique1')
+
+    def __init__(self, coder_id, canonical_id1, canonical_id2, relationship_type):
+        self.coder_id          = coder_id
+        self.canonical_id1     = canonical_id1
+        self.canonical_id2     = canonical_id2
+        self.relationship_type = relationship_type
+        self.timestamp         = dt.datetime.now(tz = central).replace(tzinfo = None)
+
+    def __repr__(self):
+        return '<CanonicalEventRelationship %r -> %r (%r)>' % \
+            (self.canonical_id1, self.canonical_id2, self.relationship_type)
+
+
+class EventFlag(Base):
+    __tablename__ = 'event_flag'
+    id        = Column(Integer, primary_key=True)
+    coder_id  = Column(Integer, ForeignKey('user.id'))
+    event_id  = Column(Integer, ForeignKey('event.id'))
+    flag      = Column(Text)
+    timestamp = Column(DateTime)
+
+    UniqueConstraint('event_id', name = 'unique1')
+
+    def __init__(self, coder_id, event_id, flag):
+        self.coder_id  = coder_id
+        self.event_id  = event_id
+        self.flag      = flag
+        self.timestamp = dt.datetime.now(tz = central).replace(tzinfo = None)
+
+    def __repr__(self):
+        return '<EventFlag %r (%r)>' % (self.event_id, self.flag)
+
+
+class EventMetadata(Base):
+    __tablename__ = 'event_metadata'
+    id           = Column(Integer, primary_key=True)
+    coder_id     = Column(Integer, ForeignKey('user.id'))
+    event_id     = Column(Integer, ForeignKey('event.id'))
+    article_id   = Column(Integer, ForeignKey('article_metadata.id'))
+    article_desc = Column(UnicodeText, nullable = True)
+    desc         = Column(UnicodeText, nullable = True)
+    location     = Column(Text, nullable = True)
+    start_date   = Column(Date, nullable = True)
+    publication  = Column(Text)
+    pub_date     = Column(Date)
+    title        = Column(Text)
+    form         = Column(Text)
+
+    UniqueConstraint('event_id', name = 'unique1')
+
+    def __init__(self, coder_id, event_id, article_id, article_desc, desc, 
+        location, start_date, publication, pub_date, title, form):
+        self.coder_id     = coder_id
+        self.event_id     = event_id
+        self.article_id   = article_id
+        self.article_desc = article_desc
+        self.desc         = desc
+        self.location     = location
+        self.start_date   = start_date
+        self.publication  = publication
+        self.pub_date     = pub_date
+        self.title        = title
+        self.form         = form
+        
+    def __repr__(self):
+        return '<EventMetadata %r>' % (self.event_id)
+
+
+class RecentCanonicalEvent(Base):
+    __tablename__ = 'recent_canonical_event'
+    id            = Column(Integer, primary_key=True)
+    coder_id      = Column(Integer, ForeignKey('user.id'))
+    canonical_id  = Column(Integer, ForeignKey('canonical_event.id'))
+    last_accessed = Column(DateTime)
+
+    UniqueConstraint('coder_id', 'canonical_id', name = 'unique1')
+
+    def __init__(self, coder_id, canonical_id):
+        self.coder_id      = coder_id
+        self.canonical_id  = canonical_id
+        self.last_accessed = dt.datetime.now(tz = central).replace(tzinfo = None)
+
+    def __repr__(self):
+        return '<RecentCanonicalEvent %r (%r)>' % (self.canonical_id, self.last_accessed)
+
+
+class RecentEvent(Base):
+    __tablename__ = 'recent_event'
+    id            = Column(Integer, primary_key=True)
+    coder_id      = Column(Integer, ForeignKey('user.id'))
+    event_id      = Column(Integer, ForeignKey('event.id'))
+    last_accessed = Column(DateTime)
+
+    UniqueConstraint('coder_id', 'event_id', name = 'unique1')
+
+    def __init__(self, coder_id, event_id):
+        self.coder_id      = coder_id
+        self.event_id      = event_id
+        self.last_accessed = dt.datetime.now(tz = central).replace(tzinfo = None)
+
+    def __repr__(self):
+        return '<RecentEvent %r (%r)>' % (self.event_id, self.last_accessed)
+
+
+class RecentSearch(Base):
+    __tablename__ = 'recent_search'
+    id            = Column(Integer, primary_key=True)
+    coder_id      = Column(Integer, ForeignKey('user.id'))
+    field         = Column(Text)
+    comparison    = Column(Text)
+    value         = Column(Text)
+    last_accessed = Column(DateTime)
+
+    UniqueConstraint('coder_id', 'field', 'comparison', 'value', name = 'unique1')
+
+    def __init__(self, coder_id, field, comparison, value):
+        self.coder_id      = coder_id
+        self.field         = field
+        self.comparison    = comparison
+        self.value         = value
+        self.last_accessed = dt.datetime.now(tz = central).replace(tzinfo = None)
+
+    def __repr__(self):
+        return '<RecentSearch %r-%r-%r (%r)>' % \
+            (self.field, self.comparison, self.value, self.last_accessed)
+
 
 class CodeFirstPass(Base):
     __tablename__ = 'coder_first_pass'
@@ -116,7 +296,7 @@ class ArticleQueue(Base):
     id         = Column(Integer, primary_key=True)
     article_id = Column(Integer, ForeignKey('article_metadata.id'), nullable = False)
     coder_id   = Column(Integer, ForeignKey('user.id'), nullable = False)
-    coded_dt  = Column(DateTime)
+    coded_dt   = Column(DateTime)
 
     UniqueConstraint('article_id', 'coder_id', name = 'unique1')
 
@@ -219,11 +399,11 @@ class User(Base, UserMixin):
         self.password  = password
         self.authlevel = authlevel
 
-    def get_id(self):
-        try:
-            return unicode(self.id)  # python 2
-        except NameError:
-            return str(self.id)  # python 3
+    # def get_id(self):
+    #     try:
+    #         return unicode(self.id)  # python 2
+    #     except NameError:
+    #         return str(self.id)  # python 3
 
     def __repr__(self):
         return '<Coder %r>' % (self.username)

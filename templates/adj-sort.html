@@ -1,0 +1,26 @@
+{% for i in range(4) %}
+<div class="row form-row">
+    <div class="col-sm-4">
+        <select class="form-control"
+                name="adj_sort_field_{{ i }}"
+                id="adj_sort_field_{{ i }}">
+            <option value="">---</option>
+            {% for field in filter_fields %}
+              <option>{{ field }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="col-sm-4">
+        <select class="form-control" 
+            name="adj_sort_order_{{ i }}"
+            id="adj_sort_order_{{ i }}">
+            <option value="">---</option>
+            <option value="asc">ascending</option>
+            <option value="desc">descending</option>
+        </select>
+    </div>
+    <div class="col-sm-1">
+        <a id="adj_sort_clear_button_{{ i }}" class="btn clear-values glyphicon glyphicon-remove" title="Clear values"></a>
+    </div>
+</div>
+{% endfor %}

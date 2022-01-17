@@ -1,0 +1,13 @@
+<div class="expanded-event-variable {{ 'canonical-dummy' if is_dummy else 'canonical' }}" 
+    id="canonical-{{ var }}_{{ cel_id }}"
+    data-var="{{ var }}"
+    data-key="{{ cel_id }}">
+    <div class="sticky-top data-buttons">
+        {% if var != 'desc' %}
+            <a class="glyphicon glyphicon-remove remove-canonical" title="Remove"></a> 
+            <a class="glyphicon glyphicon-info-sign" 
+               title="Added on {{ timestamp }}"></a>
+        {% endif %}
+    </div>
+    {{ value | safe }}
+</div>

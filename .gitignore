@@ -1,4 +1,4 @@
- Byte-compiled / optimized / DLL files
+# Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
 *$py.class
@@ -41,3 +41,8 @@ config.py
 
 # exports
 *.xlsx
+
+# logs
+**/*.log
+
+setup.py

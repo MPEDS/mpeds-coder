@@ -1,0 +1,28 @@
+<div class="event-group" id="canonical-search-block">
+    {% for e in events %}
+    <div class="event-desc canonical-search" id="canonical-event_{{ e.id }}" 
+        data-event="{{ e.id }}"
+        data-key="{{ e.key }}">
+        <div class="row">
+            <div class="col-sm-9">
+                <b>key:</b> {{ e.key }}</br>
+                <b>event_id:</b> {{ e.id }}<br/>
+                <b>coder:</b> {{ e.coder_id }} <br/>
+                <b>last updated:</b> {{ e.last_updated }} 
+            </div>
+            <div class="col-sm-3">
+                <a href="#" class="canonical-makeactive">
+                    <b>Add to grid <span class="glyphicon glyphicon-export"></span></b>
+                </a>
+                <b class="canonical-isactive text-muted" style="display:none;">In the grid</b>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-12">
+                <b>desc:</b> {{ e.description | safe }}<br/>
+                <b>notes:</b> {{ e.notes | safe }}
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>

@@ -1,0 +1,153 @@
+{% set var_adds = ['start-date', 'end-date', 'location', 'form', 'issue', 'racial-issue', 'target'] -%}
+{% if canonical_event is none and (cand_events is none or cand_events.keys()|length == 0) %}
+<p class="info-block bg-info text-info">
+    Get started by selected or adding events.
+</p>
+{% else %}
+<div id="expanded-event-view-metadata" class="sticky-top">
+    <div class="row expanded-event-variable-group">
+        <div class="col-sm-1 expanded-event-variable-name">
+            metadata
+          <a href="#" id="hide-metadata" title="Hide metadata">
+              <span class="glyphicon glyphicon-chevron-up"></span>
+          </a>
+          <a href="#" id="show-metadata" style="display:none;" title="Show metadata">
+              <span class="glyphicon glyphicon-chevron-down"></span>
+          </a>
+        </div>
+        {% for event_id in cand_events.keys()|sort %}
+        <!-- Candidate Event Metadata -->
+        <div class="col-sm-2 expanded-event-variable-col candidate-event" 
+            id="candidate-event-metadata_{{ event_id }}"
+            data-event="{{ event_id }}"
+            data-article="{{ cand_events[event_id]['metadata']['article_id'] }}"
+            data-coder="{{ cand_events[event_id]['metadata']['coder_id'] }}">
+            <label>Event {{ event_id }}<br/> 
+                <div class="action-buttons">
+                    {% set article_id = cand_events[event_id]['metadata']['article_id'] -%}
+                    {% if article_id in links %}
+                        <a class="glyphicon glyphicon-link text-danger remove-link" 
+                        title="Remove link to canonical event"
+                        data-article="{{ article_id if article_id in links else '' }}"></a> 
+                    {% else %}
+                        <a class="glyphicon glyphicon-link add-link" title="Link to canonical event" ></a> 
+                    {% endif %}
+                    
+                    {% if event_id in flags.keys() and flags[event_id] == 'for-review' %}
+                        <a class="glyphicon glyphicon-flag remove-flag text-danger" title="Remove flag"></a> 
+                    {% else %}
+                        <a class="glyphicon glyphicon-flag add-flag" title="Flag for later"></a> 
+                    {% endif %}
+
+                    {% if event_id in flags.keys() and flags[event_id] == 'completed' %}
+                        <a class="glyphicon glyphicon-check remove-completed text-danger" title="Remove completed"></a> 
+                    {% else %}
+                        <a class="glyphicon glyphicon-check add-completed" title="Mark completed"></a> 
+                    {% endif %}    
+
+                    <a class="glyphicon glyphicon-remove-sign remove-candidate" title="Remove from grid"></a>
+                </div>                 
+            </label>
+            <div class="expanded-event-variable expanded-event-variable-metadata" 
+                id="expanded-event-metadata_{{ event_id }}">
+                <b>ttl:</b> {{ cand_events[event_id]['metadata']['title'] | safe }}<br/>
+                <b>pub:</b> {{ cand_events[event_id]['metadata']['publication'] | safe }}<br/>
+                <b>p_d:</b> {{ cand_events[event_id]['metadata']['pub_date'] }}<br/>
+                <b>aid:</b>
+                    <a href="{{ url_for('eventCreator', aid = cand_events[event_id]['metadata']['article_id']) }}"
+                       target="_blank">
+                        {{ cand_events[event_id]['metadata']['article_id'] }}
+                    </a><br/>
+                <b>cod:</b> {{ cand_events[event_id]['metadata']['coder_id'] }} <br/>
+            </div>
+        </div>
+        {% endfor %}
+        <!-- Canonical Event Metadata -->
+        <div class="col-sm-2 expanded-event-variable-col canonical-event canonical-event-metadata"
+             id="canonical-event-metadata_{{ canonical_event['id'] }}" 
+             data-key="{{ canonical_event['key'] }}">
+             {% if canonical_event %}
+                <label>Canonical Event<br/> 
+                    <div class="action-buttons">
+                        <a class="glyphicon glyphicon-pencil edit-canonical" href="#" title="Edit canonical metadata"></a> 
+                        <a class="glyphicon glyphicon-trash" href="#" title="Delete canonical event"></a>
+                        <a class="glyphicon glyphicon-remove-sign" href="#" title="Remove from grid"></a>
+                    </div>
+                </label>
+                {% for var in ['key', 'notes'] %}
+                <div class="expanded-event-variable canonical" id="expanded-event-canonical-{{ var }}">
+                    <b>{{ var|title }}: </b> {{ canonical_event[var]|safe }}<br />
+                </div>
+                {% endfor %}
+            {% else %}
+                <label>Canonical Event</label>
+                <div class="expanded-event-variable canonical">
+                    <i>Add or select a canonical event to start.</i>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+<div class="expanded-event-view">
+    {% for var in grid_vars %} 
+    <div class="row expanded-event-variable-group">
+        <div class="col-sm-1 expanded-event-variable-name" data-var="{{ var }}">{{ var }}<br/>
+            {% if var in var_adds %}
+                <a class="glyphicon glyphicon-plus add-dummy" title="Add new value for this field" href="#"></a>
+            {% elif var in ['article-desc', 'desc'] %}
+                <a href="#" id="collapse-{{ var }}" title="Minimize {{ var }}">
+                    <span class="glyphicon glyphicon-resize-small"></span>
+                </a>
+                <a href="#" id="expand-{{ var }}" title="Expand {{ var }}" style="display:none;">
+                    <span class="glyphicon glyphicon-resize-full"></span>
+                </a>
+            {% endif %}
+        </div>
+        <!-- Candidate Event Fields -->
+        {% for event_id in cand_events.keys()|sort %}
+            <div class="col-sm-2 expanded-event-variable-col">
+            {% if cand_events[event_id][var]|length > 0 %}
+            {% for value, cec_id, timestamp in cand_events[event_id][var] %}
+                <div class="expanded-event-variable {{ 'maximize' if var in ['article-desc', 'desc'] else ''}}" 
+                    data-var="{{ var }}">
+                    <div class="sticky-top data-buttons">
+                        {% if var == 'article-desc' %} <!-- no-op -->
+                        {% elif var == 'desc' %}
+                            <a class="glyphicon glyphicon-duplicate select-text" href="#" title="Select all text"></a>
+                        {% else %}
+                            <a class="glyphicon glyphicon-plus add-val" 
+                            title="Add to canonical event" 
+                            data-key="{{ cec_id }}"></a>
+                        {% endif %}            
+                        <!-- <a class="glyphicon glyphicon-info-sign"
+                           title="Edited on {{ timestamp }}"></a> -->
+                    </div>
+                    <div class="expanded-event-value">{{ value | safe }}</div>
+                </div>
+            {% endfor %}
+            {% else %}
+                <div class="expanded-event-variable text-muted none">(None)</div>
+            {% endif %}
+            </div>
+        {% endfor %}
+        <!-- Canonical Event Fields -->
+        <div class="col-sm-2 expanded-event-variable-col canonical-event" id="canonical-event_{{ var }}">
+            {% if canonical_event %}
+                {% if canonical_event[var]|length > 0 %}
+                    {% for cel_id, value, timestamp, _, is_dummy in canonical_event[var] %}
+                        {% include 'canonical-cell.html' %}
+                    {% endfor %}
+                {% elif var == 'article-desc' %}
+                    <div class="expanded-event-variable text-muted canonical none">N/A</div>
+                {% elif var == 'desc' %}
+                    {% set value = canonical_event['description'] %}
+                    {% include 'canonical-cell.html' %}
+                {% else %}
+                        <div class="expanded-event-variable text-muted canonical none">(None)</div>
+                {% endif %}
+            {% endif %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}

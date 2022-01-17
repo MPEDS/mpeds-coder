@@ -1,0 +1,92 @@
+<div class="modal-header">
+  <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+  <h4 class="modal-title" id="l_my_modal">Add {{ variable|capitalize }}</h4>
+</div>
+<div class="modal-body">
+  <div class="col-sm-12">
+    <div id="modal-flash" class="alert" role="alert" style="display:none;"></div>
+  </div>
+  <form id="modal-form"> 
+    <div class="form-group col-sm-12">
+      {% if variable == 'canonical' %}
+        <div class="form-row">
+          <label for="canonical-event-key">Key</label>
+          <input class="form-control form-control-sm" 
+                  name="canonical-event-key"
+                  id="canonical-event-key"
+                  type="text"
+                  value="{{ ce.key if ce.key != None else '' }}"
+                  placeholder = "Canonical Event Key..."/>
+        </div>
+        <div class="form-row">
+          <label for="canonical-event-desc">Description</label>
+          <textarea class="form-control" 
+            name="canonical-event-desc" 
+            id="canonical-event-desc"
+            placeholder = "Description...">{{ ce.description if ce.description != None else '' }}</textarea>
+        </div>
+        <div class="form-row">
+          <label for="canonical-event-notes">Notes</label>
+          <textarea class="form-control" 
+            name="canonical-event-notes"
+            id="canonical-event-notes" 
+            placeholder = "Notes (optional)">{{ ce.notes if ce.notes != None else '' }}</textarea>
+        </div>
+      {% else %} <!-- Dummy variables-->
+        <div class="form-row">
+          <label for="article-id">Article ID</label>
+          <select class="form-control form-control-sm" name="article-id">
+            <option value="">Select article</option>
+            {% for article_id in article_ids %}
+              <option value="{{ article_id }}">{{ article_id }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        {% if variable == 'start-date' or variable == 'end-date' %}
+          <div class="form-row">
+            <div class="input-group date">
+              <label for="date-value">Date</label>
+              <input class="form-control" 
+                    type="text" 
+                    id="date-value"
+                    name="value" 
+                    value="" 
+                    placeholder="Click calendar for date..." />
+              <span class="input-group-addon">
+                <span class="glyphicon glyphicon-calendar"></span>
+              </span>
+            </div>
+          </div>
+        {% elif variable in ['form', 'issue', 'racial-issue', 'target'] %}
+        <div class="form-row">
+          <div class="input-group">
+            <label for="select-value">{{ variable | title }}</label>
+            <select class="form-control form-control-sm" id="select-value" name="value">
+              <option value="">---</option>
+              {% for var in preset_vars[variable]|sort %}
+                <option value="{{ var }}">{{ var }}</option>              
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+        {% else %} 
+        <div class="form-row">
+          <label for="variable-value">Value</label>
+          <textarea class="form-control"
+            name="value"
+            id="variable-value"
+            placeholder = "Enter text for {{ variable }}..."></textarea>
+        </div>
+        {% endif %}
+      {% endif %}
+      <input name="canonical-id" type="hidden" value="{{ ce.id }}" />
+    </div>
+  </form>
+</div>
+<div class="modal-footer">
+  <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+  <button type="button" 
+    class="btn btn-primary" 
+    name="modal-submit" 
+    id="modal-submit">Save</button>
+</div>

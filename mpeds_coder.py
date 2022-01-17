@@ -9,22 +9,19 @@
 """
 
 ## base
-import csv
 import json
 import math
 import os
 import re
-import smtplib
 import string
 import sys
 import urllib
 import datetime as dt
-import time
-from math import ceil
-from random import sample
 from random import choice
 import yaml
 from collections import OrderedDict
+
+import pprint
 
 if (sys.version_info < (3, 0)):
     import urllib2
@@ -38,10 +35,10 @@ import numpy as np
 ## lxml, time
 from lxml import etree
 from pytz import timezone
-import pytz
 
 ## flask
-from flask import Flask, request, session, g, redirect, url_for, abort, make_response, render_template, flash, jsonify, Response, stream_with_context
+from flask import Flask, request, session, g, redirect, url_for, abort, make_response,\
+    render_template, flash, jsonify
 from flask_login import LoginManager, login_user, logout_user, current_user, login_required
 
 ## jinja
@@ -51,18 +48,16 @@ import jinja2
 import assign_lib
 
 ## db
-from sqlalchemy.exc import OperationalError
-from sqlalchemy import func, desc, distinct, or_, text
+from sqlalchemy import func, desc, distinct, and_, or_, text
 from sqlalchemy.sql import select
-from sqlalchemy.schema import Table
-from sqlite3 import dbapi2 as sqlite3
 
 ## app-specific
 from database import db_session
 
-from models import ArticleMetadata, ArticleQueue, CoderArticleAnnotation, \
-CodeFirstPass, CodeSecondPass, CodeEventCreator, \
-Event, EventCreatorQueue, SecondPassQueue, User
+from models import ArticleMetadata, ArticleQueue, CanonicalEvent, CanonicalEventLink, \
+    CoderArticleAnnotation, CodeFirstPass, CodeSecondPass, CodeEventCreator, \
+    Event, EventCreatorQueue, EventFlag, EventMetadata, \
+    RecentEvent, RecentCanonicalEvent, SecondPassQueue, User
 
 ##### Enable OrderedDict with PyYAML
 ##### Copy-pasta from https://stackoverflow.com/a/21912744 on 2019-12-12
@@ -128,6 +123,12 @@ elif os.path.isfile(app.config['WD'] + '/text-selects.csv'):
             key += '-text'
             event_creator_vars.append( (key, var) )
 
+## load adj grid order
+adj_grid_order = []
+if os.path.isfile(app.config['WD'] + '/adj-grid-order.yaml'):
+    adj_grid_order = yaml.load(open(app.config['WD'] + '/adj-grid-order.yaml', 'r'), 
+        Loader = yaml.Loader)
+
 ## load preset variables
 preset_vars = yaml.load(open(app.config['WD'] + '/presets.yaml', 'r'))
 v1 = [(x, str.title(x).replace('-', ' ')) for x in sorted(preset_vars.keys())]
@@ -157,7 +158,6 @@ else:
 
 ## mark the single-valued items
 event_creator_single_value = app.config['SINGLE_VALUE_VARS']
-
 event_creator_single_value.extend([[x[0] for x in v] for k, v in yes_no_vars.iteritems()])
 
 ## metadata for Solr
@@ -335,7 +335,7 @@ def prepText(article):
 def validate( x ):
     """ replace newlines, returns, and tabs with blank space """
     if x:
-        if type(x) == unicode:
+        if type(x) == str.unicode:
             x = string.replace(x, "\n", " ")
             x = string.replace(x, "\r", " ")
             x = string.replace(x, "\t", " ")
@@ -582,132 +582,811 @@ def eventCreator(aid):
 
     return render_template("event-creator.html", aid = aid, text = html.decode('utf-8'))
 
+#####
+##### Adjudication
+#####
 
-class Pagination(object):
-    """
-    Extracted from flask-sqlalchemy
-    Internal helper class returned by :meth:`BaseQuery.paginate`.  You
-    can also construct it from any other SQLAlchemy query object if you are
-    working with other libraries.  Additionally it is possible to pass `None`
-    as query object in which case the :meth:`prev` and :meth:`next` will
-    no longer work.
-    """
+@app.route('/adj', methods = ['GET'])
+@login_required
+def adj():
+    """Initial rendering for adjudication page."""
+    if current_user.authlevel < 2: 
+        return redirect(url_for('index'))
 
-    def __init__(self, query, page, per_page, total, items):
-        #: the unlimited query object that was used to create this
-        #: pagination object.
-        self.query = query
-        #: the current page number (1 indexed)
-        self.page = page
-        #: the number of items to be displayed on a page.
-        self.per_page = per_page
-        #: the total number of items matching the query
-        self.total = total
-        #: the items for the current page
-        self.items = items
+    ## Get most recent candidate events.
+    recent_events = [x[0] for x in db_session.query(EventMetadata, RecentEvent).\
+        join(EventMetadata, EventMetadata.event_id == RecentEvent.event_id).\
+        order_by(desc(RecentEvent.last_accessed)).limit(5).all()]
 
-    @property
-    def pages(self):
-        """The total number of pages"""
-        if self.per_page == 0:
-            pages = 0
+    ## Get most recent canonical events.
+    ## TODO: Add in user by name.
+    recent_canonical_events = db_session.query(CanonicalEvent).\
+        join(RecentCanonicalEvent, CanonicalEvent.id == RecentCanonicalEvent.canonical_id).\
+        order_by(desc(RecentCanonicalEvent.last_accessed)).limit(5).all()
+
+    ## TODO: Base this off EventMetadata for now. Eventually, we want to get rid of this.
+    filter_fields = EventMetadata.__table__.columns.keys()
+    filter_fields.remove('id')
+    filter_fields.append('flag')
+
+    return render_template("adj.html", 
+        search_events = [],
+        filter_fields = filter_fields,
+        cand_events   = {},
+        grid_vars     = adj_grid_order,
+        links         = [],
+        flags         = [],
+        recent_events = recent_events,
+        recent_canonical_events = recent_canonical_events,
+        canonical_event = None)
+
+
+@app.route('/load_adj_grid', methods = ['GET'])
+@login_required
+def load_adj_grid():
+    """Loads the grid for the expanded event view."""
+    ce_ids = request.args.get('cand_events')
+    if ce_ids == 'null':
+        ce_ids = None
+
+    canonical_event_key = request.args.get('canonical_event_key')
+    if canonical_event_key == 'null':
+        canonical_event_key = None
+
+    cand_event_ids = [int(x) for x in ce_ids.split(',')] if ce_ids else []
+    
+    cand_events = _load_candidate_events(cand_event_ids)
+    canonical_event = _load_canonical_event(key = canonical_event_key)
+    links = _load_links(canonical_event_key)
+    event_flags = _load_event_flags(cand_event_ids)
+
+    return render_template('adj-grid.html',
+        canonical_event = canonical_event,
+        cand_events = cand_events,
+        links = links,
+        flags = event_flags, 
+        grid_vars = adj_grid_order)
+
+#####
+## Search functions
+#####
+
+@app.route('/do_search', methods = ['POST'])
+@login_required
+def do_search():
+    """Takes the URL params and searches the candidate events for events
+    which meet the search criteria."""
+    search_str = request.form['adj_search_input']
+
+    ## get multiple filters and sorting
+    filters = []
+    sorts = []
+
+    ## cycle through all the filter and sort fields
+    for i in range(4):
+        filter_field = request.form['adj_filter_field_{}'.format(i)]
+        filter_value = request.form['adj_filter_value_{}'.format(i)]
+        filter_compare = request.form['adj_filter_compare_{}'.format(i)]
+
+        if filter_field and filter_value and filter_compare:
+            _model = EventMetadata if filter_field != 'flag' else EventFlag
+
+            ## Translate the filter compare to a SQLAlchemy expression.
+            if filter_compare == 'eq':
+                _filter = getattr(getattr(_model, filter_field), '__eq__')(filter_value)
+            elif filter_compare == 'ne':
+                _filter = getattr(getattr(_model, filter_field), '__ne__')(filter_value)
+            elif filter_compare == 'lt':
+                _filter = getattr(getattr(_model, filter_field), '__lt__')(filter_value)
+            elif filter_compare == 'le':
+                _filter = getattr(getattr(_model, filter_field), '__le__')(filter_value)
+            elif filter_compare == 'gt':
+                _filter = getattr(getattr(_model, filter_field), '__gt__')(filter_value)
+            elif filter_compare == 'ge':
+                _filter = getattr(getattr(_model, filter_field), '__ge__')(filter_value)
+            elif filter_compare == 'contains':
+                _filter = getattr(getattr(_model, filter_field), 'like')(u'%{}%'.format(filter_value))
+            elif filter_compare == 'startswith':
+                _filter = getattr(getattr(_model, filter_field), 'like')(u'{}%'.format(filter_value))
+            elif filter_compare == 'endswith':
+                _filter = getattr(getattr(_model, filter_field), 'like')(u'%{}'.format(filter_value))
+            else:
+                raise Exception('Invalid filter compare: {}'.format(filter_compare))
+ 
+            filters.append(_filter)
+
+        sort_field = request.form['adj_sort_field_{}'.format(i)]
+        sort_order = request.form['adj_sort_order_{}'.format(i)]
+
+        ## Sort by the specified field.
+        if sort_field and sort_order:
+            _model = EventMetadata if sort_field != 'flag' else EventFlag
+
+            _sort = getattr(getattr(_model, sort_field), sort_order)()
+            sorts.append(_sort)
+
+    ## AND all the filters together
+    sort_expr = and_(*sorts)
+    filter_expr = and_(*filters)
+
+    search_expr = None
+    if search_str:
+        ## Get all fields that are searchable.
+        search_fields = EventMetadata.__table__.columns.keys()
+        search_fields.remove('id')
+
+        ## Build the search expression. For now, it can only do an AND or OR search.
+        operator = and_
+        if ' AND ' in search_str:
+            search_terms = search_str.split(' AND ')
+            operator = and_
+        elif ' OR ' in search_str:
+            search_terms = search_str.split(' OR ')
+            operator = or_
         else:
-            pages = int(ceil(self.total / float(self.per_page)))
-        return pages
+            search_terms = [search_str]
 
-    def prev(self, error_out=False):
-        """Returns a :class:`Pagination` object for the previous page."""
-        assert self.query is not None, 'a query object is required ' \
-                                       'for this method to work'
-        return paginate(self.query, self.page - 1, self.per_page, error_out)
+        ## Build the search by creating an expression for each search term and search field.
+        search_expr = []
+        for term in search_terms:
+            term_expr = []
+            for field in search_fields:
+                term_expr.append(getattr(getattr(EventMetadata, field), 'like')(u'%{}%'.format(term)))
+            search_expr.append(or_(*term_expr))
+        search_expr = operator(*search_expr) 
 
-    @property
-    def prev_num(self):
-        """Number of the previous page."""
-        return self.page - 1
+    ## Filter out null start dates to account for disqualifying information.
+    date_filter = EventMetadata.start_date != None
 
-    @property
-    def has_prev(self):
-        """True if a previous page exists"""
-        return self.page > 1
-
-    def next(self, error_out=False):
-        """Returns a :class:`Pagination` object for the next page."""
-        assert self.query is not None, 'a query object is required ' \
-                                       'for this method to work'
-        return paginate(self.query, self.page + 1, self.per_page, error_out)
-
-    @property
-    def has_next(self):
-        """True if a next page exists."""
-        return self.page < self.pages
-
-    @property
-    def next_num(self):
-        """Number of the next page"""
-        return self.page + 1
-
-    def iter_pages(self, left_edge=2, left_current=2,
-                   right_current=5, right_edge=2):
-        """Iterates over the page numbers in the pagination.  The four
-        parameters control the thresholds how many numbers should be produced
-        from the sides.  Skipped page numbers are represented as `None`.
-        This is how you could render such a pagination in the templates:
-        .. sourcecode:: html+jinja
-            {% macro render_pagination(pagination, endpoint) %}
-              <div class=pagination>
-              {%- for page in pagination.iter_pages() %}
-                {% if page %}
-                  {% if page != pagination.page %}
-                    <a href="{{ url_for(endpoint, page=page) }}">{{ page }}</a>
-                  {% else %}
-                    <strong>{{ page }}</strong>
-                  {% endif %}
-                {% else %}
-                  <span class=ellipsis>…</span>
-                {% endif %}
-              {%- endfor %}
-              </div>
-            {% endmacro %}
-        """
-        last = 0
-        for num in range(1, self.pages + 1):
-            if num <= left_edge or \
-               (num > self.page - left_current - 1 and \
-                num < self.page + right_current) or \
-               num > self.pages - right_edge:
-                if last + 1 != num:
-                    yield None
-                yield num
-                last = num
-
-def paginate(query, page, per_page=20, error_out=True):
-    """
-    Modified from the flask-sqlalchemy to support paging for
-    the original version of the sqlalchemy that not use BaseQuery.
-    """
-    if page < 1 and error_out:
-        abort(404)
-
-    items = query.limit(per_page).offset((page - 1) * per_page).all()
-    if not items and page != 1 and error_out:
-        abort(404)
-
-    # No need to count if we're on the first page and there are fewer
-    # items than we expected.
-    if page == 1 and len(items) < per_page:
-        total = len(items)
+    ## Combine filters.
+    a_filter_expr = None
+    if filter_expr is not None and search_expr is not None:
+        a_filter_expr = and_(filter_expr, search_expr, date_filter)
+    elif filter_expr is not None:
+        a_filter_expr = and_(filter_expr, date_filter)
+    elif search_expr is not None:
+        a_filter_expr = and_(search_expr, date_filter)
     else:
-        total = query.order_by(None).count()
+        return make_response("Please enter a search term or a filter.", 400)
 
-    return Pagination(query, page, per_page, total, items)
+    ## Perform the search on a left join to get all the candidate events.
+    search_events = db_session.query(EventMetadata).\
+        join(EventFlag, EventMetadata.event_id == EventFlag.event_id, isouter = True).\
+        filter(a_filter_expr).\
+        order_by(sort_expr).all()
 
-def url_for_other_page(page):
-    args = request.view_args.copy()
-    args['page'] = page
-    return url_for(request.endpoint, **args)
+    ## print(a_filter_expr)
 
-app.jinja_env.globals['url_for_other_page'] = url_for_other_page
+    if len(search_events) > 1000:
+        return make_response("Too many results. Please refine your search.", 400)
+
+    ## get all flags for these events
+    flags = _load_event_flags([x.event_id for x in search_events])
+
+    response = make_response(
+        render_template('adj-search-block.html', 
+            events = search_events,
+            flags = flags)
+        )
+
+    url_params = {k: v for k, v in request.form.iteritems()}
+
+    ## make and return results. add in the number of results to update the button.
+    response.headers['Search-Results'] = len(search_events)
+    response.headers['Query'] = json.dumps(url_params)
+    return response
+
+
+@app.route('/search_canonical', methods = ['POST'])
+@login_required
+def search_canonical():
+    """Loads a set of canonical events which meet search criteria."""
+    canonical_search_term = request.form['canonical_search_term']
+
+    if canonical_search_term == '':
+        return make_response("Please enter a search term.", 400)
+
+    ## Construct search in all available fields
+    filter_expr = or_(
+        CanonicalEvent.key.like(u'%{}%'.format(canonical_search_term)),
+        CanonicalEvent.description.like(u'%{}%'.format(canonical_search_term)),
+        CanonicalEvent.notes.like(u'%{}%'.format(canonical_search_term))
+    )
+
+    ## search for the canonical event in key and notes
+    rs = db_session.query(CanonicalEvent).filter(filter_expr).all()
+
+    return render_template('adj-canonical-search-block.html', events = rs)
+
+
+@app.route('/adj_search/<function>', methods = ['POST'])
+@login_required
+def adj_search(function):
+    """Adds a search/filter/sort form row to the search pane.
+       Will only do this if the prior search/filter/sort form rows are full."""
+
+    if function == 'search':
+        search_str = request.form['adj-search-input']
+        if search_str is None or search_str == '':
+            return make_response('No search string provided', 400)
+    elif function == 'filter':
+        filter_field = request.form['adj-filter-field']
+        filter_compare = request.form['adj-filter-compare']
+        filter_value = request.form['adj-filter-value']
+
+        if filter_field is None or filter_compare is None or filter_value is None:
+            return make_response('No filter provided', 400)
+    elif function == 'sort':
+        sort_field = request.form['adj-sort-field']
+        sort_order = request.form['adj-sort-order']
+
+        if sort_field is None or sort_order is None:
+            return make_response('No sort field provided', 400)
+    else:
+        return make_response("Invalid search function", 400)
+
+    is_addition = True if request.form['is_addition'] == 'true' else False
+
+    return render_template('adj-{}.html'.format(function), is_addition = is_addition)
+
+
+#####
+## Grid functions
+#####
+@app.route('/add_canonical_link', methods = ['POST'])
+@login_required
+def add_canonical_link():
+    """Adds a link from a article to a canonical event 
+    when we don't want to add any data. """
+    canonical_event_id = int(request.form['canonical_event_id'])
+    article_id = int(request.form['article_id'])
+
+    ## check if this link exists already
+    res = db_session.query(CodeEventCreator, CanonicalEventLink)\
+        .join(CanonicalEventLink, CodeEventCreator.id == CanonicalEventLink.cec_id)\
+        .filter(
+            CodeEventCreator.variable == 'link', 
+            CodeEventCreator.article_id == article_id,
+            CanonicalEventLink.canonical_id == canonical_event_id
+        ).first()
+
+    ## if the CEC and CEL are not null, 
+    ## and CEL matches canonical event, then link this.
+    if res and res[0] and res[1]:
+        return make_response("Link already exists.", 400)
+
+    ## for the link, create a new CEC and link it back to the canonical event
+    ## we'll treat this as part of the dummy event
+    cec = _check_or_add_dummy_value(article_id, 'link', 'yes')
+    db_session.refresh(cec)
+
+    ## add the link
+    db_session.add(CanonicalEventLink(current_user.id, canonical_event_id, cec.id))
+    db_session.commit()
+
+    return make_response("Link added.", 200)    
+
+
+@app.route('/add_canonical_record', methods = ['POST'])
+@login_required
+def add_canonical_record():
+    """ Adds a candidate event datum to a canonical event. """
+    canonical_event_id = int(request.form['canonical_event_id'])
+    cec_id = int(request.form['cec_id'])
+
+    ## grab CEC from the database
+    record = db_session.query(CodeEventCreator)\
+        .filter(CodeEventCreator.id == cec_id).first()
+
+    ## if it's fake, toss it
+    if not record:
+        return make_response("No such CEC record.", 404)
+
+    ## if it exists, toss it
+    dupe_check = db_session.query(CanonicalEventLink)\
+        .filter(
+            CanonicalEventLink.cec_id == cec_id, 
+            CanonicalEventLink.canonical_id == canonical_event_id)\
+        .all()
+
+    if dupe_check:
+        return make_response("Record already exists.", 404)
+        
+    ## commit
+    db_session.add(CanonicalEventLink(current_user.id, canonical_event_id, cec_id))
+    db_session.commit()
+
+    ## retrieve cel for timestamp
+    cel = db_session.query(CanonicalEventLink)\
+        .filter(
+            CanonicalEventLink.coder_id == current_user.id,
+            CanonicalEventLink.canonical_id == canonical_event_id,
+            CanonicalEventLink.cec_id == cec_id
+    ).first()
+
+    value = record.value
+    if record.text is not None:
+        value = record.text
+    return render_template('canonical-cell.html', 
+        var = record.variable, 
+        value = value,
+        timestamp = cel.timestamp,
+        cel_id = cel.id) 
+
+
+@app.route('/add_event_flag', methods = ['POST'])
+@login_required
+def add_event_flag():
+    """Adds a flag to a candidate event."""
+    event_id = int(request.form['event_id'])
+    flag = request.form['flag']
+
+    db_session.add(EventFlag(current_user.id, event_id, flag))
+    db_session.commit()
+
+    return make_response("Flag created.", 200)
+
+
+@app.route('/del_canonical_event', methods = ['POST'])
+@login_required
+def del_canonical_event():
+    """ Deletes the canonical event and related CEC links from the database."""
+    id = int(request.form['id'])
+
+    cels = db_session.query(CanonicalEventLink)\
+        .filter(CanonicalEventLink.canonical_id == id).all()
+    rces = db_session.query(RecentCanonicalEvent)\
+        .filter(RecentCanonicalEvent.canonical_id == id).all()
+    ce = db_session.query(CanonicalEvent)\
+        .filter(CanonicalEvent.id == id).first()
+
+    ## remove these first to avoid FK error
+    for cel in cels:
+        db_session.delete(cel)
+    for rce in rces:
+        db_session.delete(rce)
+    db_session.commit()
+
+    ## delete the actual event
+    db_session.delete(ce)
+    db_session.commit()
+    
+    return make_response("Canonical event deleted.", 200)
+
+
+@app.route('/del_canonical_link', methods = ['POST'])
+@login_required
+def del_canonical_link():
+    """Removes 'link' from a canonical event. 
+       Remove it from the dummy event as well."""
+    article_id = int(request.form['article_id'])
+
+    ## get all the CECs for this article
+    cecs = db_session.query(CodeEventCreator)\
+        .filter(
+            CodeEventCreator.article_id == article_id,
+            CodeEventCreator.variable == 'link'
+        ).all()
+
+    for cec in cecs:
+        ## get the CELs for this CEC
+        cel = db_session.query(CanonicalEventLink).filter(CanonicalEventLink.cec_id == cec.id).first()
+        if cel:
+            db_session.delete(cel)
+
+    ## commit these deletes first to avoid foreign key error
+    db_session.commit()
+
+    ## then delete CECs
+    for cec in cecs:
+        db_session.delete(cec)
+    db_session.commit()
+
+    return make_response("Link removed.", 200)
+
+
+@app.route('/del_canonical_record', methods = ['POST'])
+@login_required
+def del_canonical_record():
+    """ Removes the link between a candidate event piece of data and a canonical event. """
+    cel_id = int(request.form['cel_id'])
+
+    ## grab it from the database
+    cel = db_session.query(CanonicalEventLink)\
+        .filter(CanonicalEventLink.id == cel_id).first()
+
+   ## if it's fake, toss it
+    if not cel:
+        return make_response("No such CEL record.", 404)
+        
+    ## delete and commit
+    db_session.delete(cel)
+    db_session.commit()
+ 
+    return make_response("Delete successful.", 200)
+
+
+@app.route('/del_event_flag', methods = ['POST'])
+@login_required
+def del_event_flag():
+    """Deletes a flag to a candidate event."""
+    event_id = int(request.form['event_id'])
+
+    efs = db_session.query(EventFlag).\
+        filter(
+            EventFlag.coder_id == current_user.id, 
+            EventFlag.event_id == event_id
+        ).all()
+
+    for ef in efs:
+        db_session.delete(ef)
+    db_session.commit()
+
+    return make_response("Flag deleted.", 200)
+
+
+@app.route('/modal_edit/<variable>/<mode>', methods = ['POST'])
+@login_required
+def modal_edit(variable, mode):
+    """ Handler for modal display and form submission. """
+    if variable == 'canonical':
+        ce_id = request.form['canonical-id'] 
+        key   = request.form['canonical-event-key']
+        desc  = request.form['canonical-event-desc']
+        notes = request.form['canonical-event-notes']
+            
+        if mode == 'add':
+            if not key:
+                return make_response("Please enter text for the key.", 400)
+
+            if key:
+                q = db_session.query(CanonicalEvent).filter(CanonicalEvent.key == key).all()
+                if len(q) > 0: 
+                    return make_response("Key already exists.", 400)                
+
+            ce = CanonicalEvent(coder_id = current_user.id, key = key, description = desc, notes = notes)
+        elif mode == 'edit':
+            ## update key + notes upon edit
+            ce = db_session.query(CanonicalEvent).filter(CanonicalEvent.id == ce_id).first()
+            ce.key = key
+            ce.description = desc
+            ce.notes = notes
+
+        db_session.add(ce)
+        db_session.commit()
+
+        ## Return new event and put the new ID in the header.
+        return make_response("Canonical event {}ed.".format(mode), 200)
+    else:
+        article_id = request.form['article-id']
+        value = request.form['value']
+        ce_id = request.form['canonical-id']
+
+        if not article_id:
+            return make_response("Please select an article ID.", 400)
+
+        article_id = int(article_id)
+        if mode == 'add':
+            ## check to see if this has a dummy value
+            ## if it does, link it. otherwise, this adds it
+            cec = _check_or_add_dummy_value(article_id, variable, value)
+
+            ## lastly, add the link to the canonical event
+            cel = CanonicalEventLink(current_user.id, ce_id, cec.id)
+            db_session.add(cel)
+            db_session.commit()
+
+            return make_response("{} added.".format(variable), 200)
+
+
+@app.route('/modal_view', methods = ['POST'])
+@login_required
+def modal_view():
+    """Returns the template for the modal, based on the variable."""
+    article_ids = []
+    variable = request.form['variable']
+
+    ## get the canonical event to get the ID later
+    ce = None
+    key = request.form.get('key')
+    if key:
+        ce = db_session.query(CanonicalEvent).\
+            filter(CanonicalEvent.key == key).first()
+
+    ## for non-canonical adds, get the article IDs associated with current candidate events
+    if variable != 'canonical':
+        candidate_events = request.form['candidate_event_ids'].split(',')
+        article_ids = [x.article_id for x in db_session.query(Event).filter(Event.id.in_(candidate_events)).all()]
+ 
+        ## get distinct values
+        article_ids = sorted(list(set(article_ids)))
+
+        return render_template('modal.html', 
+            variable = variable, 
+            ce = ce,
+            article_ids = article_ids,
+            preset_vars = preset_vars)
+    else:
+        return render_template('modal.html', variable = variable, ce = ce)
+            
+
+#####
+# Adjudication helper functions
+#####
+@app.route('/_check_or_add_dummy')
+@login_required
+def _check_or_add_dummy_value(article_id, variable, value):
+    """Check if selected article has any associated candidate event entries
+        Just get the first, since we'll associate that with all dummy events."""
+    cec = db_session.query(CodeEventCreator).\
+        filter(
+            CodeEventCreator.article_id == article_id,
+            CodeEventCreator.coder_id == current_user.id
+        ).first()
+
+    ## if they do, get the event ID
+    event_id = None
+    if cec:
+        event_id = cec.event_id
+    else:
+        ## otherwise, make a new event with this article ID
+        cand_event = Event(article_id)
+        db_session.add(cand_event)
+        db_session.flush()
+
+        ## refresh to get the event ID
+        db_session.refresh(cand_event)
+        event_id = cand_event.id
+
+    ## if it doesn't exist. Add the value.
+    cec = CodeEventCreator(article_id, event_id, variable, value, current_user.id)
+    db_session.add(cec)
+    db_session.flush()
+
+    ## refresh to get the CEC ID
+    db_session.refresh(cec)
+
+    return cec
+
+
+@app.route('/_load_candidate_events')
+@login_required
+def _load_candidate_events(cand_event_ids):
+    """Helper function to load candidate events from the database.
+    Returns a dict of candidate events, keyed by id."""
+    cand_events = {x: {} for x in cand_event_ids}
+
+    ## load in metadata
+    for metadata in db_session.query(EventMetadata).\
+        filter(EventMetadata.event_id.in_(cand_event_ids)).all():
+        cand_events[metadata.event_id]['metadata'] = {}
+
+        for field in app.config['ADJ_METADATA']:
+            cand_events[metadata.event_id]['metadata'][field] = metadata.__getattribute__(field)
+
+    for field in db_session.query(CodeEventCreator).\
+        filter(CodeEventCreator.event_id.in_(cand_event_ids)).all():
+
+        ## create a new list if it doesn't exist
+        if not cand_events[field.event_id].get(field.variable):
+            cand_events[field.event_id][field.variable] = []
+        
+        ## insert in record
+        if field.text is not None:
+            value = field.text
+        else:
+            value = field.value
+
+        cand_events[field.event_id][field.variable].append((value, field.id, field.timestamp))
+    
+    return cand_events
+
+
+@app.route('/_load_canonical_event')
+@login_required
+def _load_canonical_event(id = None, key = None):
+    """Loads the canonical event and related CEC links from the database.
+       To be displayed in the expanded event view grid."""
+    if not id and not key:
+        return None
+
+    canonical_event = {}
+    ces = None
+    _filter = None
+    if id:
+        canonical_event['id'] = id
+        _filter = CanonicalEvent.id == id
+    else:
+        canonical_event['key'] = key
+        _filter = CanonicalEvent.key == key
+
+    ce  = db_session.query(CanonicalEvent).filter(_filter).first()
+    ces = db_session.query(CanonicalEvent, CanonicalEventLink, CodeEventCreator, User).\
+        join(CanonicalEventLink, CanonicalEvent.id == CanonicalEventLink.canonical_id).\
+        join(CodeEventCreator, CanonicalEventLink.cec_id == CodeEventCreator.id).\
+        join(User, CodeEventCreator.coder_id == User.id).\
+        filter(_filter).all()
+
+    if not ce:
+        return None
+
+    ## load CE data
+    canonical_event['id'] = ce.id
+    canonical_event['key'] = ce.key
+    canonical_event['description'] = ce.description
+    canonical_event['notes'] = ce.notes
+
+    for _, cel, cec, user in ces:
+        ## create a new list if it doesn't exist
+        if not canonical_event.get(cec.variable):
+            canonical_event[cec.variable] = []
+
+        ## insert in record
+        value = None
+        if cec.text is not None:
+            value = cec.text
+        else:
+            value = cec.value
+
+        ## if this is a dummy value, username starts with adj
+        is_dummy = 1 if 'adj' in user.username else 0
+
+        canonical_event[cec.variable].append((cel.id, value, cel.timestamp, cec.event_id, is_dummy))
+
+    return canonical_event
+
+
+@app.route('/_load_event_flags')
+@login_required
+def _load_event_flags(events):
+    """Loads the event flags for candidate events."""
+    efs = db_session.query(EventFlag).\
+        filter(
+            EventFlag.event_id.in_(events)
+        ).all()
+    return {x.event_id: x.flag for x in efs}
+
+
+@app.route('/_load_links')
+@login_required
+def _load_links(canonical_event_key):
+    """Loads the links to the canonical event that do not have a record in the CEC table."""
+
+    cecs = db_session.query(CodeEventCreator).\
+        join(CanonicalEventLink, CodeEventCreator.id == CanonicalEventLink.cec_id).\
+        join(CanonicalEvent, CanonicalEventLink.canonical_id == CanonicalEvent.id).\
+        filter(CanonicalEvent.key == canonical_event_key, CodeEventCreator.variable == 'link').all()
+
+    links = list(set([cec.article_id for cec in cecs]))
+        
+    return links
+
+
+# class Pagination(object):
+#     """
+#     Extracted from flask-sqlalchemy
+#     Internal helper class returned by :meth:`BaseQuery.paginate`.  You
+#     can also construct it from any other SQLAlchemy query object if you are
+#     working with other libraries.  Additionally it is possible to pass `None`
+#     as query object in which case the :meth:`prev` and :meth:`next` will
+#     no longer work.
+#     """
+
+#     def __init__(self, query, page, per_page, total, items):
+#         #: the unlimited query object that was used to create this
+#         #: pagination object.
+#         self.query = query
+#         #: the current page number (1 indexed)
+#         self.page = page
+#         #: the number of items to be displayed on a page.
+#         self.per_page = per_page
+#         #: the total number of items matching the query
+#         self.total = total
+#         #: the items for the current page
+#         self.items = items
+
+#     @property
+#     def pages(self):
+#         """The total number of pages"""
+#         if self.per_page == 0:
+#             pages = 0
+#         else:
+#             pages = int(ceil(self.total / float(self.per_page)))
+#         return pages
+
+#     def prev(self, error_out=False):
+#         """Returns a :class:`Pagination` object for the previous page."""
+#         assert self.query is not None, 'a query object is required ' \
+#                                        'for this method to work'
+#         return paginate(self.query, self.page - 1, self.per_page, error_out)
+
+#     @property
+#     def prev_num(self):
+#         """Number of the previous page."""
+#         return self.page - 1
+
+#     @property
+#     def has_prev(self):
+#         """True if a previous page exists"""
+#         return self.page > 1
+
+#     def next(self, error_out=False):
+#         """Returns a :class:`Pagination` object for the next page."""
+#         assert self.query is not None, 'a query object is required ' \
+#                                        'for this method to work'
+#         return paginate(self.query, self.page + 1, self.per_page, error_out)
+
+#     @property
+#     def has_next(self):
+#         """True if a next page exists."""
+#         return self.page < self.pages
+
+#     @property
+#     def next_num(self):
+#         """Number of the next page"""
+#         return self.page + 1
+
+#     def iter_pages(self, left_edge=2, left_current=2,
+#                    right_current=5, right_edge=2):
+#         """Iterates over the page numbers in the pagination.  The four
+#         parameters control the thresholds how many numbers should be produced
+#         from the sides.  Skipped page numbers are represented as `None`.
+#         This is how you could render such a pagination in the templates:
+#         .. sourcecode:: html+jinja
+#             {% macro render_pagination(pagination, endpoint) %}
+#               <div class=pagination>
+#               {%- for page in pagination.iter_pages() %}
+#                 {% if page %}
+#                   {% if page != pagination.page %}
+#                     <a href="{{ url_for(endpoint, page=page) }}">{{ page }}</a>
+#                   {% else %}
+#                     <strong>{{ page }}</strong>
+#                   {% endif %}
+#                 {% else %}
+#                   <span class=ellipsis>…</span>
+#                 {% endif %}
+#               {%- endfor %}
+#               </div>
+#             {% endmacro %}
+#         """
+#         last = 0
+#         for num in range(1, self.pages + 1):
+#             if num <= left_edge or \
+#                (num > self.page - left_current - 1 and \
+#                 num < self.page + right_current) or \
+#                num > self.pages - right_edge:
+#                 if last + 1 != num:
+#                     yield None
+#                 yield num
+#                 last = num
+
+# def paginate(query, page, per_page=20, error_out=True):
+#     """
+#     Modified from the flask-sqlalchemy to support paging for
+#     the original version of the sqlalchemy that not use BaseQuery.
+#     """
+#     if page < 1 and error_out:
+#         abort(404)
+
+#     items = query.limit(per_page).offset((page - 1) * per_page).all()
+#     if not items and page != 1 and error_out:
+#         abort(404)
+
+#     # No need to count if we're on the first page and there are fewer
+#     # items than we expected.
+#     if page == 1 and len(items) < per_page:
+#         total = len(items)
+#     else:
+#         total = query.order_by(None).count()
+
+#     return Pagination(query, page, per_page, total, items)
+
+# def url_for_other_page(page):
+#     args = request.view_args.copy()
+#     args['page'] = page
+#     return url_for(request.endpoint, **args)
+
+# app.jinja_env.globals['url_for_other_page'] = url_for_other_page
 
 @app.route('/code2queue/<sort>/<sort_dir>')
 @app.route('/code2queue/<sort>/<sort_dir>/<int:page>')
@@ -791,7 +1470,7 @@ def _pubCount():
 
         I hate everything and am just going to do this in pandas
         get all the articles in the database.
-        TK: One day, convert this to a pure sqlalchemy solution.
+        TODO: One day, convert this to a pure sqlalchemy solution.
     """
 
     df_am = pd.DataFrame([(x.id, x.db_name, x.db_id)  for x in db_session.query(ArticleMetadata).all()],\
@@ -924,7 +1603,7 @@ def admin():
         coded[user]['completed'] = count
 
     ## get number of unassigned articles
-    ## TK: Eventually generate this count for publications
+    ## TODO: Eventually generate this count for publications
     unassigned = []
     #all_metadata = db_session.query(ArticleMetadata).all()
     #assigned_metadata = db_session.query(EventCreatorQueue).all()
@@ -1031,7 +1710,7 @@ def publications(db):
     if current_user.authlevel < 3:
         return redirect(url_for('index'))
 
-    ## TK: Write code to sort by selected attribute
+    ## TODO: Write code to sort by selected attribute
     
     query = """
     SELECT REPLACE(REPLACE(dem.publication, '-', ' '), '   ', ' - ') as publication, 
@@ -1383,7 +2062,6 @@ def addCode(pn):
     if var == 'comments' and pn == '2' and val == '':
         return jsonify(result={"status": 200})
 
-    # try:
     db_session.add(p)
     db_session.add_all(aqs)
     db_session.commit()
@@ -1394,9 +2072,6 @@ def addCode(pn):
 @login_required
 def delEvent():
     """ Delete an event. """
-    # if current_user.authlevel < 2:
-    #     return redirect(url_for('index'))
-
     eid = int(request.form['event'])
     pn  = request.form['pn'];
 
@@ -1965,7 +2640,7 @@ def addUser():
     db_session.add(User(username = username, password = password, authlevel = 1))
     db_session.commit()
 
-    ## TK: Send email to admin to have notice of new account
+    ## TODO: Send email to admin to have notice of new account
 
     return jsonify(result={"status": 200, "password": password})
 
